@@ -30,7 +30,8 @@ var coreWords = {
     }
 };
 function interprete(text) {
-    var tokens = tokenize(text);
+    var tokens = tokenize_old(text);
+    console.log(tokens);
     runTokens(tokens);
 
     console.log({
@@ -142,13 +143,89 @@ function runWords(words) {
     }
 }
 
-// function runWord(word){
 
-// }
+function tokenize(text) {
+    var tokens = [];
+    var contextStack = [];
 
-function tokenize(text) [
+    var availableContexts = [
+        {
+            symbol: '\'',
+            name: 'quote',
+            endsWith: '\'',
+            breakOnWhitespace: false
+        },
+        {
+            symbol: '"',
+            name: 'double quote',
+            endsWith: '"',
+            breakOnWhitespace: false
+        },
+        {
+            symbol: 'fn',
+            name: 'function start',
+            endsWith: ' ',
+            breakOnWhitespace: true
+        },
+        {
+            symbol: '//',
+            name: 'comment',
+            endsWith: '\n',
+            breakOnWhitespace: false
+        },
+        {
+            symbol: '{',
+            name: 'brace',
+            endsWith: '}',
+            breakOnWhitespace: false
+        }
+    ];
+    var tokenStart = 0;
+    var tokenEnd = 0;
+    for (var i = 0; i < text.length; i++) {
 
-]
+        var topContext = contextStack.length > 0 ? contextStack[contextStack.length - 1] : null;
+        if ((topContext == null || topContext.breakOnWhitespace)
+            && (text[i] == ' ' || text[i] == '\n' || text[i] == '\r')) {
+            tokenEnd = i - 1;
+            if (topContext != null) {
+                contextStack.pop();
+            }
+            tokens.push(text.substring(tokenStart, tokenEnd)); // exclude space
+            tokenStart = i + 1;
+        }
+
+        // Symbol end Match
+        else if (topContext != null &&
+            topContext.endsWith != null
+            && topContext.endsWith == text[i]
+        ) {
+            tokenEnd = i;
+            contextStack.pop();
+            tokens.push(text.substring(tokenStart, tokenEnd));
+            tokenStart = i;
+
+        }
+
+        for (var j = 0; j < availableContexts.length; j++) {
+            if (i <= tokenStart) continue;
+            // var left = text.substring(i, i + availableContexts[j].symbol.length);
+            // var right = availableContexts[j].symbol;
+            // Whitespace checks
+
+
+            // new Symbol match
+            if (text.length - i > availableContexts[j].symbol.length
+                && text.substring(tokenStart, tokenStart + availableContexts[j].symbol.length) == availableContexts[j].symbol) {
+                tokenEnd = i - 1;
+                contextStack.push(availableContexts[j]);
+                tokens.push(text.substring(tokenStart, tokenEnd));
+                tokenStart = i;
+            }
+        }
+    }
+    return tokens;
+}
 
 function tokenize_old(text) {
     var tokens = [];
