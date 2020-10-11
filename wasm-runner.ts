@@ -45,13 +45,15 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
     // wasmStructure.addFunction();
     wasmStructure.AddExportFunction("addTwo", [WasmType.i32, WasmType.i32], WasmType.i32, [
+        0, // Declcount
         Opcodes.get_local, 0,
         Opcodes.get_local, 1,
-        Opcodes.i32Add
+        Opcodes.i32Add,
+        Opcodes.end
     ]);
     var bytes = wasmStructure.getBytes();
     console.log("\n" + bytes.length + " bytes");
-    console.log("Bytes: " + bytes.join(", ") + "\n");
+    console.log("Bytes: \n" + bytes.join(", ") + "\n");
     // console.log(bytes);
     // var writeCallback = (err: string) => console.log(err);
     fs.writeFileSync('output.wasm', bytes);
