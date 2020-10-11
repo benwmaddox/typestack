@@ -107,10 +107,10 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.stringToUTF8 = function (text) {
         var results = [];
+        // TODO: I need better handlings of this.
         for (var i = 0; i < text.length; i++) {
             results.push(text.charCodeAt(i));
         }
-        // TODO: I need better handlings of this.
         return results;
         // return new TextEncoder().encode(text);
     };
@@ -122,13 +122,15 @@ var WasmStructure = /** @class */ (function () {
         for (var i = 0; i < nameUtf8.length; i++) {
             this.exports.push(nameUtf8[i]);
         }
-        // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
         this.exports.push(exportKind);
-        // export function index
+        // export index of this export kind
         this.exports.push(index);
         return this.exportId++;
     };
     WasmStructure.prototype.addCode = function (values) {
+        for (var i = 0; i < values.length; i++) {
+            this.code.push(values[i]);
+        }
         return this.codeId++;
     };
     WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
@@ -138,15 +140,45 @@ var WasmStructure = /** @class */ (function () {
         var codeId = this.addCode(functionBody);
     };
     WasmStructure.prototype.formatSectionForWasm = function (SectionID, bytes) {
+        var u32Length = bytes.length + 1; // this.toBytesInt32(bytes.length + 1)
         return bytes.length > 0 ? __spreadArrays([SectionID,
-            bytes.length], bytes) : [];
+            u32Length], bytes) : [];
     };
-    WasmStructure.prototype.formatSectionForWasmWithCount = function (SectionID, count, bytes) {
+    // formatSectionForWasmWithCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+    //     return bytes.length > 0 ?
+    //         [SectionID,
+    //             count,
+    //             ...bytes] : [];
+    // }
+    WasmStructure.prototype.toBytesInt32 = function (value) {
+        // var result = new Uint8Array([
+        //     (value & 0xff000000) >> 24,
+        //     (value & 0x00ff0000) >> 16,
+        //     (value & 0x0000ff00) >> 8,
+        //     (value & 0x000000ff)
+        // ]);
+        // return result.buffer;
+        return [
+            (value & 0xff000000) >> 24,
+            (value & 0x00ff0000) >> 16,
+            (value & 0x0000ff00) >> 8,
+            (value & 0x000000ff)
+        ];
+    };
+    WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
+        var u32Length = bytes.length + 1; //this.toBytesInt32(bytes.length + 1)
+        // var u32Length = new Uint32Array([bytes.length + 1]);
+        // var u8Length = Uint8Array.from(u32Length);
+        // for (var i = 0; i < u32Length.byteLength; i++) {
+        //     // console.log(u32Length.buffer[i])
+        // }
+        // console.log(u32Length.buffer);
         return bytes.length > 0 ? __spreadArrays([SectionID,
+            u32Length,
             count], bytes) : [];
     };
     WasmStructure.prototype.getBytes = function () {
-        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasm(this.section.code, this.code)));
+        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.code)));
         return results;
     };
     return WasmStructure;

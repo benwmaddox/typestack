@@ -93,10 +93,10 @@ export class WasmStructure {
 
     stringToUTF8(text: string): Array<number> {
         var results: Array<number> = [];
+        // TODO: I need better handlings of this.
         for (var i = 0; i < text.length; i++) {
             results.push(text.charCodeAt(i));
         }
-        // TODO: I need better handlings of this.
         return results;
         // return new TextEncoder().encode(text);
     }
@@ -110,10 +110,8 @@ export class WasmStructure {
         for (var i = 0; i < nameUtf8.length; i++) {
             this.exports.push(nameUtf8[i]);
         }
-        // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
         this.exports.push(exportKind);
-
-        // export function index
+        // export index of this export kind
         this.exports.push(index);
 
         return this.exportId++;
@@ -121,6 +119,11 @@ export class WasmStructure {
 
     codeId = 0;
     addCode(values: Array<number>): number {
+
+        for (var i = 0; i < values.length; i++) {
+            this.code.push(values[i]);
+        }
+
         return this.codeId++;
     }
 
@@ -139,14 +142,49 @@ export class WasmStructure {
     code: Array<number> = [];
     exports: Array<number> = [];
     formatSectionForWasm(SectionID: number, bytes: Array<number>): Array<number> {
+
+        var u32Length = bytes.length + 1;// this.toBytesInt32(bytes.length + 1)
+
         return bytes.length > 0 ?
             [SectionID,
-                bytes.length,
+                u32Length,
                 ...bytes] : [];
     }
-    formatSectionForWasmWithCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+    // formatSectionForWasmWithCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+    //     return bytes.length > 0 ?
+    //         [SectionID,
+    //             count,
+    //             ...bytes] : [];
+    // }
+    toBytesInt32(value: number) {
+        // var result = new Uint8Array([
+        //     (value & 0xff000000) >> 24,
+        //     (value & 0x00ff0000) >> 16,
+        //     (value & 0x0000ff00) >> 8,
+        //     (value & 0x000000ff)
+        // ]);
+
+
+        // return result.buffer;
+        return [
+            (value & 0xff000000) >> 24,
+            (value & 0x00ff0000) >> 16,
+            (value & 0x0000ff00) >> 8,
+            (value & 0x000000ff)
+        ];
+    }
+    formatSectionForWasmWithSizeAndCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+
+        var u32Length = bytes.length + 1;//this.toBytesInt32(bytes.length + 1)
+        // var u32Length = new Uint32Array([bytes.length + 1]);
+        // var u8Length = Uint8Array.from(u32Length);
+        // for (var i = 0; i < u32Length.byteLength; i++) {
+        //     // console.log(u32Length.buffer[i])
+        // }
+        // console.log(u32Length.buffer);
         return bytes.length > 0 ?
             [SectionID,
+                u32Length,
                 count,
                 ...bytes] : [];
     }
@@ -158,19 +196,19 @@ export class WasmStructure {
 
                 // TODO Custom
 
-                ...this.formatSectionForWasmWithCount(this.section.type, this.typeId, this.types),
-                ...this.formatSectionForWasmWithCount(this.section.function, this.functionIndex, this.functions),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions),
 
                 // TODO Table
                 // TODO Memory
                 // TODO Global
-                ...this.formatSectionForWasmWithCount(this.section.import, this.importId, this.imports),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports),
 
-                ...this.formatSectionForWasmWithCount(this.section.export, this.exportId, this.exports),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports),
                 // TODO Start
                 // TODO Elem
                 // TODO Code
-                ...this.formatSectionForWasm(this.section.code, this.code),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.code),
                 // TODO Data
 
             ]

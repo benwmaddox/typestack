@@ -9,7 +9,8 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     var wasmStructure = new WasmStructure();
     // wasmStructure.addEmitImport();
     // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
-
+    // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
+    // wasmStructure.addFunction();
     wasmStructure.AddExportFunction("addTwo", [WasmType.i32, WasmType.i32], WasmType.i32, [
         Opcodes.get_local, 0,
         Opcodes.get_local, 1,
