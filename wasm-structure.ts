@@ -2,10 +2,26 @@ export class WasmSection {
 
 }
 export enum WasmType {
-    i32,
-    i64,
-    f32,
-    f64
+    i32 = 0x7F,
+    i64 = 0x7E,
+    f32 = 0x7D,
+    f64 = 0x7C
+}
+export enum Opcodes {
+    call = 0x10,
+    get_local = 0x20,
+    const = 0x43,
+    end = 0x0b,
+    i32Add = 0x6a
+};
+
+// export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
+export enum ExportKind {
+    function = 0x00,
+    table = 0x01,
+    memory = 0x02,
+    global = 0x03
+
 }
 export class WasmStructure {
 
@@ -41,23 +57,97 @@ export class WasmStructure {
         }
     }
 
+    importId = 0;
     addImport(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): void {
         var data: Array<number> = [];
-
 
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
     }
 
+    // Return ID
+    typeId = 0;
+    addFunctionType(parameters: Array<WasmType>, result: WasmType | null): number {
+        var data: Array<number> = [0x60,
+            parameters.length,
+            ...parameters
+        ];
+        if (result != null) {
+            data.push(1);
+            data.push(result);
+        }
+
+        for (var i = 0; i < data.length; i++) {
+            this.types.push(data[i]);
+        }
+
+        return this.typeId++;
+    }
+
+    functionIndex = 0;
+    addFunction(): number {
+        this.functions.push(this.functionIndex);
+        return this.functionIndex++;
+    }
+
+    stringToUTF8(text: string): Array<number> {
+        var results: Array<number> = [];
+        for (var i = 0; i < text.length; i++) {
+            results.push(text.charCodeAt(i));
+        }
+        // TODO: I need better handlings of this.
+        return results;
+        // return new TextEncoder().encode(text);
+    }
+    exportId = 0;
+    addExport(exportName: string, exportKind: ExportKind, index: number): number {
+        var nameUtf8 = this.stringToUTF8(exportName);
+
+        // length of subsequent string
+        this.exports.push(nameUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < nameUtf8.length; i++) {
+            this.exports.push(nameUtf8[i]);
+        }
+        // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
+        this.exports.push(exportKind);
+
+        // export function index
+        this.exports.push(index);
+
+        return this.exportId++;
+    }
+
+    codeId = 0;
+    addCode(values: Array<number>): number {
+        return this.codeId++;
+    }
+
+    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): void {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var exportId = this.addExport(exportName, ExportKind.function, functionId);
+        var codeId = this.addCode(functionBody);
+
+    }
+
     customSection: Array<number> = [];
     types: Array<number> = [];
     imports: Array<number> = [];
     functions: Array<number> = [];
+    code: Array<number> = [];
+    exports: Array<number> = [];
     formatSectionForWasm(SectionID: number, bytes: Array<number>): Array<number> {
         return bytes.length > 0 ?
             [SectionID,
                 bytes.length,
+                ...bytes] : [];
+    }
+    formatSectionForWasmWithCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+        return bytes.length > 0 ?
+            [SectionID,
+                count,
                 ...bytes] : [];
     }
     getBytes(): Uint8Array {
@@ -68,17 +158,19 @@ export class WasmStructure {
 
                 // TODO Custom
 
-                ...this.formatSectionForWasm(this.section.type, this.types),
-                ...this.formatSectionForWasm(this.section.function, this.functions),
+                ...this.formatSectionForWasmWithCount(this.section.type, this.typeId, this.types),
+                ...this.formatSectionForWasmWithCount(this.section.function, this.functionIndex, this.functions),
 
                 // TODO Table
                 // TODO Memory
                 // TODO Global
-                ...this.formatSectionForWasm(this.section.import, this.imports),
-                // TODO Export
+                ...this.formatSectionForWasmWithCount(this.section.import, this.importId, this.imports),
+
+                ...this.formatSectionForWasmWithCount(this.section.export, this.exportId, this.exports),
                 // TODO Start
                 // TODO Elem
                 // TODO Code
+                ...this.formatSectionForWasm(this.section.code, this.code),
                 // TODO Data
 
             ]

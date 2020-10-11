@@ -7,7 +7,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WasmStructure = exports.WasmType = exports.WasmSection = void 0;
+exports.WasmStructure = exports.ExportKind = exports.Opcodes = exports.WasmType = exports.WasmSection = void 0;
 var WasmSection = /** @class */ (function () {
     function WasmSection() {
     }
@@ -16,11 +16,28 @@ var WasmSection = /** @class */ (function () {
 exports.WasmSection = WasmSection;
 var WasmType;
 (function (WasmType) {
-    WasmType[WasmType["i32"] = 0] = "i32";
-    WasmType[WasmType["i64"] = 1] = "i64";
-    WasmType[WasmType["f32"] = 2] = "f32";
-    WasmType[WasmType["f64"] = 3] = "f64";
+    WasmType[WasmType["i32"] = 127] = "i32";
+    WasmType[WasmType["i64"] = 126] = "i64";
+    WasmType[WasmType["f32"] = 125] = "f32";
+    WasmType[WasmType["f64"] = 124] = "f64";
 })(WasmType = exports.WasmType || (exports.WasmType = {}));
+var Opcodes;
+(function (Opcodes) {
+    Opcodes[Opcodes["call"] = 16] = "call";
+    Opcodes[Opcodes["get_local"] = 32] = "get_local";
+    Opcodes[Opcodes["const"] = 67] = "const";
+    Opcodes[Opcodes["end"] = 11] = "end";
+    Opcodes[Opcodes["i32Add"] = 106] = "i32Add";
+})(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
+;
+// export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
+var ExportKind;
+(function (ExportKind) {
+    ExportKind[ExportKind["function"] = 0] = "function";
+    ExportKind[ExportKind["table"] = 1] = "table";
+    ExportKind[ExportKind["memory"] = 2] = "memory";
+    ExportKind[ExportKind["global"] = 3] = "global";
+})(ExportKind = exports.ExportKind || (exports.ExportKind = {}));
 var WasmStructure = /** @class */ (function () {
     function WasmStructure() {
         this.wasmHeader = [0x00, 0x61, 0x73, 0x6d];
@@ -39,10 +56,18 @@ var WasmStructure = /** @class */ (function () {
             code: 0x0A,
             data: 0x0B
         };
+        this.importId = 0;
+        // Return ID
+        this.typeId = 0;
+        this.functionIndex = 0;
+        this.exportId = 0;
+        this.codeId = 0;
         this.customSection = [];
         this.types = [];
         this.imports = [];
         this.functions = [];
+        this.code = [];
+        this.exports = [];
     }
     WasmStructure.prototype.addEmitImport = function () {
         var emitTest = [
@@ -64,12 +89,64 @@ var WasmStructure = /** @class */ (function () {
             this.imports.push(data[i]);
         }
     };
+    WasmStructure.prototype.addFunctionType = function (parameters, result) {
+        var data = __spreadArrays([0x60,
+            parameters.length], parameters);
+        if (result != null) {
+            data.push(1);
+            data.push(result);
+        }
+        for (var i = 0; i < data.length; i++) {
+            this.types.push(data[i]);
+        }
+        return this.typeId++;
+    };
+    WasmStructure.prototype.addFunction = function () {
+        this.functions.push(this.functionIndex);
+        return this.functionIndex++;
+    };
+    WasmStructure.prototype.stringToUTF8 = function (text) {
+        var results = [];
+        for (var i = 0; i < text.length; i++) {
+            results.push(text.charCodeAt(i));
+        }
+        // TODO: I need better handlings of this.
+        return results;
+        // return new TextEncoder().encode(text);
+    };
+    WasmStructure.prototype.addExport = function (exportName, exportKind, index) {
+        var nameUtf8 = this.stringToUTF8(exportName);
+        // length of subsequent string
+        this.exports.push(nameUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < nameUtf8.length; i++) {
+            this.exports.push(nameUtf8[i]);
+        }
+        // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
+        this.exports.push(exportKind);
+        // export function index
+        this.exports.push(index);
+        return this.exportId++;
+    };
+    WasmStructure.prototype.addCode = function (values) {
+        return this.codeId++;
+    };
+    WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var exportId = this.addExport(exportName, ExportKind.function, functionId);
+        var codeId = this.addCode(functionBody);
+    };
     WasmStructure.prototype.formatSectionForWasm = function (SectionID, bytes) {
         return bytes.length > 0 ? __spreadArrays([SectionID,
             bytes.length], bytes) : [];
     };
+    WasmStructure.prototype.formatSectionForWasmWithCount = function (SectionID, count, bytes) {
+        return bytes.length > 0 ? __spreadArrays([SectionID,
+            count], bytes) : [];
+    };
     WasmStructure.prototype.getBytes = function () {
-        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasm(this.section.type, this.types), this.formatSectionForWasm(this.section.function, this.functions), this.formatSectionForWasm(this.section.import, this.imports)));
+        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasm(this.section.code, this.code)));
         return results;
     };
     return WasmStructure;

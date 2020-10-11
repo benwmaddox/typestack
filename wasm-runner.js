@@ -64,10 +64,16 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // console.log(__dirname)
     var wasmStructure = new wasm_structure_1.WasmStructure();
     // wasmStructure.addEmitImport();
-    wasmStructure.addImport("function", "log", "emit", [wasm_structure_1.WasmType.i32], null);
+    // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
+    wasmStructure.AddExportFunction("addTwo", [wasm_structure_1.WasmType.i32, wasm_structure_1.WasmType.i32], wasm_structure_1.WasmType.i32, [
+        wasm_structure_1.Opcodes.get_local, 0,
+        wasm_structure_1.Opcodes.get_local, 1,
+        wasm_structure_1.Opcodes.i32Add
+    ]);
     var bytes = wasmStructure.getBytes();
     console.log("\n" + bytes.length + " bytes");
     console.log("Bytes: " + bytes.join(", ") + "\n");
+    // console.log(bytes);
     // var writeCallback = (err: string) => console.log(err);
     fs.writeFileSync('output.wasm', bytes);
     runWasm(bytes);

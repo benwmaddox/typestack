@@ -1,4 +1,4 @@
-import { WasmStructure, WasmType } from './wasm-structure';
+import { WasmStructure, WasmType, Opcodes } from './wasm-structure';
 import * as fs from 'fs';
 
 // var fs = require('fs');
@@ -8,10 +8,17 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // console.log(__dirname)
     var wasmStructure = new WasmStructure();
     // wasmStructure.addEmitImport();
-    wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
+    // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
+
+    wasmStructure.AddExportFunction("addTwo", [WasmType.i32, WasmType.i32], WasmType.i32, [
+        Opcodes.get_local, 0,
+        Opcodes.get_local, 1,
+        Opcodes.i32Add
+    ]);
     var bytes = wasmStructure.getBytes();
     console.log("\n" + bytes.length + " bytes");
     console.log("Bytes: " + bytes.join(", ") + "\n");
+    // console.log(bytes);
     // var writeCallback = (err: string) => console.log(err);
     fs.writeFileSync('output.wasm', bytes);
     runWasm(bytes);
