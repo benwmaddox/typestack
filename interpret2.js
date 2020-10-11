@@ -3,13 +3,31 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // console.log('loaded')
     // console.log(data)
     // console.log(__dirname)
-    interprete(data);
+    var bytes = compile(data);
+    console.log(bytes);
+    runWasm(bytes);
 });
 
 
 var dataStack = [];
 var functionStack = [];
 var functionDefinitions = [];
+
+async function runWasm(bytes) {
+    var importObject = {
+        function: {
+            emit: function (value) {
+                console.log(value);
+            }
+        }
+    };
+    const instance = await WebAssembly.instantiate(bytes, importObject).then(results => {
+        console.log(results);
+        console.log(results.instance.exports);
+    })
+    // console.log(instance.exports.run());
+    // instance.
+}
 var coreWords = {
     "emit": function () {
         var value = dataStack.pop();
@@ -29,17 +47,111 @@ var coreWords = {
         dataStack.push(value1 % value2)
     }
 };
-function interprete(text) {
-    var tokens = tokenize_old(text);
-    console.log(tokens);
-    runTokens(tokens);
 
-    console.log({
-        tokens: tokens,
-        definitions: functionDefinitions,
-        data: dataStack,
-        functionStack: functionStack
-    });
+const wasmHeader = [0x00, 0x61, 0x73, 0x6d];
+const wasmVersion = [0x01, 0x00, 0x00, 0x00];
+const opcodes = {
+    call: 0x10,
+    get_local: 0x20,
+    const: 0x43,
+    end: 0x0b
+};
+//https://medium.com/@CoinExChain/wasm-introduction-part-1-binary-format-57895d851580
+
+//https://webassembly.github.io/wabt/demo/wat2wasm/
+/* (module
+  (import "function" "emit" (func $log (param i32)))
+  (func (export "run") 
+    
+    ))
+
+    */
+const section = {
+    type: 0x01,
+    import: 0x02,
+    function: 0x03,
+    table: 0x04,
+    memory: 0x05,
+    global: 0x06,
+    export: 0x07,
+    start: 0x08,
+    elem: 0x09,
+    code: 0x0A,
+    data: 0x0B
+}
+const valueType = {
+    i32: 0x7F,
+    i64: 0x7E,
+    f32: 0x7D,
+    f64: 0x7C
+}
+var typeId = 0;
+function encodeRunType() {
+    var numberOfParameters = 1; // any number
+    var nubmerOfResults = 0; // 0 or 1?
+    return [
+        typeId++,
+        numberOfParameters,
+        nubmerOfResults
+    ]
+}
+function compile(text) {
+    var tokens = tokenize(text);
+    console.log(tokens);
+
+    var runType = encodeRunType();
+    var types = [
+        // run signature
+        section.type,
+        0,
+        1, // number of types, figure this out
+        ...runType,
+    ];
+    types.push(types.length);// Add type FIXUP
+
+    var importBytes = [ // TODO
+        0x08,                                        // string length
+        0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
+        0x04,                                       // ; string length
+        0x65, 0x6d, 0x6974,                                //emit  ; import field name
+        0x00,                                       // ; import kind
+        0x00,                                       // ; import signature index
+        0x11                                       // ; FIXUP section size
+    ];
+    var imports = [
+        section.import,
+        0,
+        1, // number of imports
+        importBytes.length,
+        ...importBytes
+    ];
+    var functionBytes = [
+        // run 
+    ];
+    var functions = [
+        section.function,
+        functionBytes.length,
+        ...functionBytes
+    ];
+    var codeDefinitions = [
+
+    ];
+    var runIndex = 1; // find index of run function
+    var startSection = [
+        section.start,
+        1, // size of next value...
+        runIndex
+    ]
+
+    return Uint8Array.from([
+        ...wasmHeader,
+        ...wasmVersion,
+        // ...types,
+        ...imports,
+        ...functions,
+        ...codeDefinitions,
+        // ...startSection
+    ]);
 }
 
 function runTokens(tokens) {
@@ -75,6 +187,7 @@ function runTokens(tokens) {
         index++;
     }
 }
+
 function checkForUndefinedWords(words) {
     for (var i = 0; i < words.length; i++) {
 
@@ -145,89 +258,6 @@ function runWords(words) {
 
 
 function tokenize(text) {
-    var tokens = [];
-    var contextStack = [];
-
-    var availableContexts = [
-        {
-            symbol: '\'',
-            name: 'quote',
-            endsWith: '\'',
-            breakOnWhitespace: false
-        },
-        {
-            symbol: '"',
-            name: 'double quote',
-            endsWith: '"',
-            breakOnWhitespace: false
-        },
-        {
-            symbol: 'fn',
-            name: 'function start',
-            endsWith: ' ',
-            breakOnWhitespace: true
-        },
-        {
-            symbol: '//',
-            name: 'comment',
-            endsWith: '\n',
-            breakOnWhitespace: false
-        },
-        {
-            symbol: '{',
-            name: 'brace',
-            endsWith: '}',
-            breakOnWhitespace: false
-        }
-    ];
-    var tokenStart = 0;
-    var tokenEnd = 0;
-    for (var i = 0; i < text.length; i++) {
-
-        var topContext = contextStack.length > 0 ? contextStack[contextStack.length - 1] : null;
-        if ((topContext == null || topContext.breakOnWhitespace)
-            && (text[i] == ' ' || text[i] == '\n' || text[i] == '\r')) {
-            tokenEnd = i - 1;
-            if (topContext != null) {
-                contextStack.pop();
-            }
-            tokens.push(text.substring(tokenStart, tokenEnd)); // exclude space
-            tokenStart = i + 1;
-        }
-
-        // Symbol end Match
-        else if (topContext != null &&
-            topContext.endsWith != null
-            && topContext.endsWith == text[i]
-        ) {
-            tokenEnd = i;
-            contextStack.pop();
-            tokens.push(text.substring(tokenStart, tokenEnd));
-            tokenStart = i;
-
-        }
-
-        for (var j = 0; j < availableContexts.length; j++) {
-            if (i <= tokenStart) continue;
-            // var left = text.substring(i, i + availableContexts[j].symbol.length);
-            // var right = availableContexts[j].symbol;
-            // Whitespace checks
-
-
-            // new Symbol match
-            if (text.length - i > availableContexts[j].symbol.length
-                && text.substring(tokenStart, tokenStart + availableContexts[j].symbol.length) == availableContexts[j].symbol) {
-                tokenEnd = i - 1;
-                contextStack.push(availableContexts[j]);
-                tokens.push(text.substring(tokenStart, tokenEnd));
-                tokenStart = i;
-            }
-        }
-    }
-    return tokens;
-}
-
-function tokenize_old(text) {
     var tokens = [];
     var currentToken = "";
     var withinSingleQuote = false;
