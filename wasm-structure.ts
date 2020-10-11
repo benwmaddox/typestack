@@ -120,10 +120,9 @@ export class WasmStructure {
     codeId = 0;
     addCode(values: Array<number>): number {
         // this.code.push(0x00); // local decl count
+        this.codeSections.push(values.length); // each item gets the length defined
         for (var i = 0; i < values.length; i++) {
-            this.codeSections.push(values.length); // each item gets the length defined
             this.codeSections.push(values[i]);
-            this.codeSections.push(Opcodes.end);
         }
 
         return this.codeId++;
