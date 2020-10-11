@@ -66,7 +66,7 @@ var WasmStructure = /** @class */ (function () {
         this.types = [];
         this.imports = [];
         this.functions = [];
-        this.code = [];
+        this.codeSections = [];
         this.exports = [];
     }
     WasmStructure.prototype.addEmitImport = function () {
@@ -128,8 +128,11 @@ var WasmStructure = /** @class */ (function () {
         return this.exportId++;
     };
     WasmStructure.prototype.addCode = function (values) {
+        // this.code.push(0x00); // local decl count
         for (var i = 0; i < values.length; i++) {
-            this.code.push(values[i]);
+            this.codeSections.push(values.length); // each item gets the length defined
+            this.codeSections.push(values[i]);
+            this.codeSections.push(Opcodes.end);
         }
         return this.codeId++;
     };
@@ -165,6 +168,8 @@ var WasmStructure = /** @class */ (function () {
             (value & 0x000000ff)
         ];
     };
+    WasmStructure.prototype.formatCodeSection = function () {
+    };
     WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
         var u32Length = bytes.length + 1; //this.toBytesInt32(bytes.length + 1)
         // var u32Length = new Uint32Array([bytes.length + 1]);
@@ -178,7 +183,7 @@ var WasmStructure = /** @class */ (function () {
             count], bytes) : [];
     };
     WasmStructure.prototype.getBytes = function () {
-        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.code)));
+        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.codeSections)));
         return results;
     };
     return WasmStructure;

@@ -119,9 +119,11 @@ export class WasmStructure {
 
     codeId = 0;
     addCode(values: Array<number>): number {
-
+        // this.code.push(0x00); // local decl count
         for (var i = 0; i < values.length; i++) {
-            this.code.push(values[i]);
+            this.codeSections.push(values.length); // each item gets the length defined
+            this.codeSections.push(values[i]);
+            this.codeSections.push(Opcodes.end);
         }
 
         return this.codeId++;
@@ -139,7 +141,7 @@ export class WasmStructure {
     types: Array<number> = [];
     imports: Array<number> = [];
     functions: Array<number> = [];
-    code: Array<number> = [];
+    codeSections: Array<number> = [];
     exports: Array<number> = [];
     formatSectionForWasm(SectionID: number, bytes: Array<number>): Array<number> {
 
@@ -172,6 +174,9 @@ export class WasmStructure {
             (value & 0x0000ff00) >> 8,
             (value & 0x000000ff)
         ];
+    }
+    formatCodeSection() {
+
     }
     formatSectionForWasmWithSizeAndCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
 
@@ -208,7 +213,7 @@ export class WasmStructure {
                 // TODO Start
                 // TODO Elem
                 // TODO Code
-                ...this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.code),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.codeSections),
                 // TODO Data
 
             ]
