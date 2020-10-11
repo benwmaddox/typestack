@@ -63,13 +63,15 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // console.log(data)
     // console.log(__dirname)
     var wasmStructure = new wasm_structure_1.WasmStructure();
-    var bytes = wasmStructure.compile(data);
-    // console.log(bytes);
+    // wasmStructure.addEmitImport();
+    wasmStructure.addImport("function", "log", "emit", [wasm_structure_1.WasmType.i32], null);
+    var bytes = wasmStructure.getBytes();
+    console.log("\n" + bytes.length + " bytes");
+    console.log("Bytes: " + bytes.join(", ") + "\n");
+    // var writeCallback = (err: string) => console.log(err);
+    fs.writeFileSync('output.wasm', bytes);
     runWasm(bytes);
 });
-var dataStack = [];
-var functionStack = [];
-var functionDefinitions = [];
 function runWasm(bytes) {
     return __awaiter(this, void 0, void 0, function () {
         var importObject, instance;
@@ -78,7 +80,7 @@ function runWasm(bytes) {
                 case 0:
                     importObject = {
                         function: {
-                            emit: function (value) {
+                            log: function (value) {
                                 console.log(value);
                             }
                         }
