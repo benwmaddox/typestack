@@ -95,7 +95,7 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
     // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
     // wasmStructure.addFunction();
-    wasmStructure.AddExportFunction("addTwo", [wasm_structure_1.WasmType.i32, wasm_structure_1.WasmType.i32], wasm_structure_1.WasmType.i32, [
+    wasmStructure.AddExportFunction("add Two", [wasm_structure_1.WasmType.i32, wasm_structure_1.WasmType.i32], wasm_structure_1.WasmType.i32, [
         0,
         wasm_structure_1.Opcodes.get_local, 0,
         wasm_structure_1.Opcodes.get_local, 1,
@@ -127,7 +127,7 @@ function runWasm(bytes) {
                             console.log(results);
                             console.log(results.instance.exports);
                             var exports = results.instance.exports;
-                            console.log(exports.addTwo(3, 5));
+                            console.log(exports['add Two'](3, 5));
                         })
                         // console.log(instance.exports.run());
                         // instance.

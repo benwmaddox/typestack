@@ -44,8 +44,8 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
     // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
     // wasmStructure.addFunction();
-    wasmStructure.AddExportFunction("addTwo", [WasmType.i32, WasmType.i32], WasmType.i32, [
-        0, // Declcount
+    wasmStructure.AddExportFunction("add Two", [WasmType.i32, WasmType.i32], WasmType.i32, [
+        0, // Decl count
         Opcodes.get_local, 0,
         Opcodes.get_local, 1,
         Opcodes.i32Add,
@@ -74,7 +74,7 @@ async function runWasm(bytes: Uint8Array) {
         console.log(results);
         console.log(results.instance.exports);
         var exports: any = results.instance.exports;
-        console.log(exports.addTwo(3, 5));
+        console.log(exports['add Two'](3, 5));
     })
     // console.log(instance.exports.run());
     // instance.
