@@ -53,24 +53,27 @@ export class WasmStructure {
         data: 0x0B
     }
 
-    addEmitImport(): void {
-        var emitTest = [ // TODO
-            0x08,                                        // string length
-            0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
-            0x04,                                       // ; string length
-            0x65, 0x6d, 0x69, 0x74,                                //emit  ; import field name
-            0x00,                                       // ; import kind
-            0x00,                                       // ; import signature index
-            0x11                                       // ; FIXUP section size
-        ];
-        for (var i = 0; i < emitTest.length; i++) {
-            this.imports.push(emitTest[i]);
-        }
-    }
+    // addEmitImport(): void {
+    //     // Not working :( )
+    //     var emitTest = [ // TODO
+    //         0x08,                                        // string length
+    //         0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
+    //         0x04,                                       // ; string length
+    //         0x65, 0x6d, 0x69, 0x74,                                //emit  ; import field name
+    //         0x00,                                       // ; import kind
+    //         0x00,                                       // ; import signature index
+    //         0x11                                       // ; FIXUP section size
+    //     ];
+    //     for (var i = 0; i < emitTest.length; i++) {
+    //         this.imports.push(emitTest[i]);
+    //     }
+    // }
 
     importId = 0;
     addImport(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): number {
         var data: Array<number> = [];
+
+        // TODO: ...
 
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);

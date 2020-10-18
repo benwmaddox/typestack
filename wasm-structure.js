@@ -60,6 +60,21 @@ var WasmStructure = /** @class */ (function () {
             code: 0x0A,
             data: 0x0B
         };
+        // addEmitImport(): void {
+        //     // Not working :( )
+        //     var emitTest = [ // TODO
+        //         0x08,                                        // string length
+        //         0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
+        //         0x04,                                       // ; string length
+        //         0x65, 0x6d, 0x69, 0x74,                                //emit  ; import field name
+        //         0x00,                                       // ; import kind
+        //         0x00,                                       // ; import signature index
+        //         0x11                                       // ; FIXUP section size
+        //     ];
+        //     for (var i = 0; i < emitTest.length; i++) {
+        //         this.imports.push(emitTest[i]);
+        //     }
+        // }
         this.importId = 0;
         // Return ID
         this.typeId = 0;
@@ -73,22 +88,9 @@ var WasmStructure = /** @class */ (function () {
         this.codeSections = [];
         this.exports = [];
     }
-    WasmStructure.prototype.addEmitImport = function () {
-        var emitTest = [
-            0x08,
-            0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-            0x04,
-            0x65, 0x6d, 0x69, 0x74,
-            0x00,
-            0x00,
-            0x11 // ; FIXUP section size
-        ];
-        for (var i = 0; i < emitTest.length; i++) {
-            this.imports.push(emitTest[i]);
-        }
-    };
     WasmStructure.prototype.addImport = function (importModule, importField, internalName, parameters, result) {
         var data = [];
+        // TODO: ...
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }

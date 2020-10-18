@@ -80,7 +80,8 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
         }
     }, function (item) {
         console.log(item.instance.exports);
-        item.instance.exports['add two {i:int}'](1);
+        var result = item.instance.exports['add two {i:int}'](1);
+        console.log(result);
     });
 });
 function buildParameterList(input) {
@@ -113,21 +114,23 @@ function runIntoWasm(tokens) {
             }
             var definition = {
                 name: tokens[index + 1].substring(1, tokens[index + 1].length - 1),
-                types: tokens.slice(index + 2, functionEqualIndex),
+                // parameters: tokens.slice(index + 2, functionEqualIndex),
+                parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1) + " " + tokens.slice(index + 2, functionEqualIndex).join(" ")),
                 bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex)
             };
             // console.log(regex.exec(definition.name));
             // console.log(regex.exec("fn print {i:int} {y:float} {x:blahblah}"));
             // var parameters = definition.name
-            var parameters = buildParameterList(definition.name);
-            console.log(parameters);
+            definition.parameters = buildParameterList(definition.name + " " + tokens.slice(index + 2, functionEqualIndex).join(" "));
+            // var parameters = buildParameterList(definition.name);
+            console.log(definition);
             // var emitId = wasmStructure.addImport("console", "log", "emit",
             //     [WasmType.i32],
             //     null
             // )
             // wasmStructure.addEmitImport();
             console.log(definition);
-            var parameterOps = parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
+            var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
             var bodyOps = [
                 wasm_structure_1.Opcodes.i32Const, 2,
                 wasm_structure_1.Opcodes.get_local, 0,
