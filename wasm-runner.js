@@ -71,7 +71,73 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
     console.log(tokenized);
+    var bytes = runIntoWasm(tokenized);
+    runWasmWithCallback(bytes, {}, function (item) {
+        item.instance.exports['testing number prints'];
+    });
 });
+function buildParameterList(input) {
+    var index = 0;
+    var regex = new RegExp('{(.+?):(.+?)}');
+    var regexResult = regex.exec(input.substr(index));
+    var result = [];
+    while (regexResult !== null) {
+        result.push({
+            parameter: regexResult[1],
+            type: regexResult[2]
+        });
+        index += regexResult.index + regexResult[0].length;
+        regexResult = regex.exec(input.substr(index));
+    }
+    return result;
+}
+function runIntoWasm(tokens) {
+    var wasmStructure = new wasm_structure_1.WasmStructure();
+    var index = 0;
+    var definingFunction = false;
+    while (index < tokens.length) {
+        var token = tokens[index];
+        if (token == "fn") {
+            definingFunction = true;
+            var functionEqualIndex = tokens.indexOf("=", index);
+            var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+            if (functionEndIndex < 0) {
+                throw 'No ; ending for ' + tokens[index + 1];
+            }
+            var definition = {
+                name: tokens[index + 1],
+                types: tokens.slice(index + 2, functionEqualIndex),
+                bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex)
+            };
+            var regex = new RegExp('{(.+?):(.+?)}');
+            // console.log(regex.exec(definition.name));
+            // console.log(regex.exec("fn print {i:int} {y:float} {x:blahblah}"));
+            // var parameters = definition.name
+            var parameters = buildParameterList(definition.name);
+            console.log(parameters);
+            parameters = buildParameterList("fn print {i:int} {y:float} {x:blahblah}");
+            console.log(parameters);
+            // console.log(definition);
+            // wasmStructure.AddExportFunction(
+            //     definition.name,
+            //     [],
+            //     null,
+            // )
+            //functionDefinitions.push(definition);
+            //checkForUndefinedWords(definition.bodyText);            
+            // runWords(definition.bodyText);
+            index = functionEndIndex;
+        }
+        else if (token == ";") {
+            definingFunction = false;
+        }
+        else {
+            //runWords([tokens[index]])
+        }
+        index++;
+    }
+    return wasmStructure.getBytes();
+}
 function testAddTwo() {
     var wasmStructure = new wasm_structure_1.WasmStructure();
     wasmStructure.AddExportFunction("add Two", [wasm_structure_1.WasmType.i32, wasm_structure_1.WasmType.i32], wasm_structure_1.WasmType.i32, [
@@ -86,6 +152,19 @@ function testAddTwo() {
     // var writeCallback = (err: string) => console.log(err);
     fs.writeFileSync('output.wasm', bytes);
     runWasm(bytes);
+}
+function runWasmWithCallback(bytes, importObject, callback) {
+    return __awaiter(this, void 0, void 0, function () {
+        var instance;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, WebAssembly.instantiate(bytes, importObject).then(callback)];
+                case 1:
+                    instance = _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
 }
 function runWasm(bytes) {
     return __awaiter(this, void 0, void 0, function () {
