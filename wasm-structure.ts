@@ -108,7 +108,7 @@ export class WasmStructure {
 
     stringToUTF8(text: string): Array<number> {
         var results: Array<number> = [];
-        // TODO: I need better handlings of this.
+        // TODO: I need better handlings of this. 
         for (var i = 0; i < text.length; i++) {
             results.push(text.charCodeAt(i));
         }

@@ -116,14 +116,15 @@ function runIntoWasm(tokens) {
                 name: tokens[index + 1].substring(1, tokens[index + 1].length - 1),
                 // parameters: tokens.slice(index + 2, functionEqualIndex),
                 parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1) + " " + tokens.slice(index + 2, functionEqualIndex).join(" ")),
-                bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex)
+                bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),
+                result: { name: null, type: tokens[functionEqualIndex - 1] }
             };
             // console.log(regex.exec(definition.name));
             // console.log(regex.exec("fn print {i:int} {y:float} {x:blahblah}"));
             // var parameters = definition.name
-            definition.parameters = buildParameterList(definition.name + " " + tokens.slice(index + 2, functionEqualIndex).join(" "));
+            // definition.parameters = buildParameterList(definition.name + " " + tokens.slice(index + 2, functionEqualIndex).join(" "))            
             // var parameters = buildParameterList(definition.name);
-            console.log(definition);
+            // console.log(definition);
             // var emitId = wasmStructure.addImport("console", "log", "emit",
             //     [WasmType.i32],
             //     null

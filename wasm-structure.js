@@ -114,7 +114,7 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.stringToUTF8 = function (text) {
         var results = [];
-        // TODO: I need better handlings of this.
+        // TODO: I need better handlings of this. 
         for (var i = 0; i < text.length; i++) {
             results.push(text.charCodeAt(i));
         }
