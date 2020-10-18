@@ -138,7 +138,8 @@ var WasmStructure = /** @class */ (function () {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction();
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
-        var codeId = this.addCode(functionBody);
+        var declCount = 0;
+        var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
     };
     WasmStructure.prototype.formatSectionForWasm = function (SectionID, bytes) {
         var u32Length = bytes.length + 1; // this.toBytesInt32(bytes.length + 1)

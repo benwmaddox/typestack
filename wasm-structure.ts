@@ -130,7 +130,8 @@ export class WasmStructure {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction();
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
-        var codeId = this.addCode(functionBody);
+        var declCount = 0;
+        var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
 
     }
 
