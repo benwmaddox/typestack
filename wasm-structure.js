@@ -23,9 +23,13 @@ var WasmType;
 })(WasmType = exports.WasmType || (exports.WasmType = {}));
 var Opcodes;
 (function (Opcodes) {
+    //https://webassembly.github.io/spec/core/binary/instructions.html
     Opcodes[Opcodes["call"] = 16] = "call";
     Opcodes[Opcodes["get_local"] = 32] = "get_local";
-    Opcodes[Opcodes["const"] = 67] = "const";
+    Opcodes[Opcodes["i32Const"] = 65] = "i32Const";
+    Opcodes[Opcodes["i64Const"] = 66] = "i64Const";
+    Opcodes[Opcodes["f32Const"] = 67] = "f32Const";
+    Opcodes[Opcodes["f64Const"] = 68] = "f64Const";
     Opcodes[Opcodes["end"] = 11] = "end";
     Opcodes[Opcodes["i32Add"] = 106] = "i32Add";
 })(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
@@ -88,6 +92,7 @@ var WasmStructure = /** @class */ (function () {
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
+        return this.importId++;
     };
     WasmStructure.prototype.addFunctionType = function (parameters, result) {
         var data = __spreadArrays([0x60,
@@ -140,6 +145,12 @@ var WasmStructure = /** @class */ (function () {
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
         var declCount = 0;
         var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            exportId: exportId,
+            codeId: codeId
+        };
     };
     WasmStructure.prototype.formatSectionForWasm = function (SectionID, bytes) {
         var u32Length = bytes.length + 1; // this.toBytesInt32(bytes.length + 1)

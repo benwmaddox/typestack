@@ -1,3 +1,10 @@
+
+interface ExportFunctionIds {
+    typeId: number,
+    functionId: number,
+    exportId: number,
+    codeId: number
+}
 export class WasmSection {
 
 }
@@ -8,9 +15,13 @@ export enum WasmType {
     f64 = 0x7C
 }
 export enum Opcodes {
+    //https://webassembly.github.io/spec/core/binary/instructions.html
     call = 0x10,
     get_local = 0x20,
-    const = 0x43,
+    i32Const = 0x41,
+    i64Const = 0x42,
+    f32Const = 0x43,
+    f64Const = 0x44,
     end = 0x0b,
     i32Add = 0x6a
 };
@@ -58,12 +69,13 @@ export class WasmStructure {
     }
 
     importId = 0;
-    addImport(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): void {
+    addImport(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): number {
         var data: Array<number> = [];
 
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
+        return this.importId++;
     }
 
     // Return ID
@@ -125,13 +137,18 @@ export class WasmStructure {
         }
         return this.codeId++;
     }
-
-    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): void {
+    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction();
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
         var declCount = 0;
         var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            exportId: exportId,
+            codeId: codeId
+        }
 
     }
 

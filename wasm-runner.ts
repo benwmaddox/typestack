@@ -6,7 +6,7 @@ import * as fs from 'fs';
 
 
 // var fs = require('fs');
-fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data: string) {
+fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
     // console.log('loaded')
     // console.log(data)
     // console.log(__dirname)
@@ -21,8 +21,15 @@ fs.readFile(__dirname + '/sample2.t', 'utf8', function (err, data: string) {
     var tokenized = lexer.tokenize(data);
     console.log(tokenized);
     var bytes = runIntoWasm(tokenized);
-    runWasmWithCallback(bytes, {}, (item) => {
-        (<any>item.instance.exports)['testing number prints'];
+    fs.writeFileSync('output.wasm', bytes);
+    runWasmWithCallback(bytes, {
+        console: console,
+        function: {
+            log: console.log
+        }
+    }, (item) => {
+        console.log((<any>item.instance.exports));
+        (<any>item.instance.exports)['add two {i:int}'](1);
     });
 });
 function buildParameterList(input: string) {
@@ -58,26 +65,37 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                 throw 'No ; ending for ' + tokens[index + 1];
             }
             var definition = {
-                name: tokens[index + 1],
+                name: tokens[index + 1].substring(1, tokens[index + 1].length - 1),
                 types: tokens.slice(index + 2, functionEqualIndex),
                 bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex)
             }
-            var regex = new RegExp('{(.+?):(.+?)}');
             // console.log(regex.exec(definition.name));
             // console.log(regex.exec("fn print {i:int} {y:float} {x:blahblah}"));
             // var parameters = definition.name
             var parameters = buildParameterList(definition.name);
             console.log(parameters);
-            parameters = buildParameterList("fn print {i:int} {y:float} {x:blahblah}");
-            console.log(parameters);
-
-            // console.log(definition);
-            // wasmStructure.AddExportFunction(
-            //     definition.name,
-            //     [],
-            //     null,
-
+            // var emitId = wasmStructure.addImport("console", "log", "emit",
+            //     [WasmType.i32],
+            //     null
             // )
+            // wasmStructure.addEmitImport();
+
+            console.log(definition);
+            var parameterOps = parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
+            var bodyOps = [
+                Opcodes.i32Const, 2,
+                Opcodes.get_local, 0,
+                Opcodes.i32Add
+            ];
+            console.log(parameterOps);
+            console.log(bodyOps);
+            var exportIds = wasmStructure.AddExportFunction(
+                definition.name,
+                parameterOps,
+                WasmType.i32, // TODO
+                bodyOps
+            )
+
             //functionDefinitions.push(definition);
             //checkForUndefinedWords(definition.bodyText);            
 
