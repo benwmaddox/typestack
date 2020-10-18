@@ -141,6 +141,17 @@ var WasmStructure = /** @class */ (function () {
         }
         return this.codeId++;
     };
+    WasmStructure.prototype.AddFunctionDetails = function (parameters, result, functionBody) {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var declCount = 0;
+        var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            codeId: codeId
+        };
+    };
     WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction();

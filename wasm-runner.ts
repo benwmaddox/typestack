@@ -72,18 +72,6 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                 bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),
                 result: { name: null, type: tokens[functionEqualIndex - 1] }
             };
-            // console.log(regex.exec(definition.name));
-            // console.log(regex.exec("fn print {i:int} {y:float} {x:blahblah}"));
-            // var parameters = definition.name
-
-            // definition.parameters = buildParameterList(definition.name + " " + tokens.slice(index + 2, functionEqualIndex).join(" "))            
-            // var parameters = buildParameterList(definition.name);
-            // console.log(definition);
-            // var emitId = wasmStructure.addImport("console", "log", "emit",
-            //     [WasmType.i32],
-            //     null
-            // )
-            // wasmStructure.addEmitImport();
 
             console.log(definition);
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
@@ -94,17 +82,26 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
             ];
             console.log(parameterOps);
             console.log(bodyOps);
-            var exportIds = wasmStructure.AddExportFunction(
-                definition.name,
-                parameterOps,
-                WasmType.i32, // TODO
-                bodyOps
-            )
+            if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
+
+                var exportIds = wasmStructure.AddExportFunction(
+                    definition.name,
+                    parameterOps,
+                    WasmType.i32, // TODO
+                    bodyOps
+                )
+            }
+            else {
+                var functionIds = wasmStructure.AddFunctionDetails(
+                    parameterOps,
+                    WasmType.i32, // TODO
+                    bodyOps
+                )
+            }
 
             //functionDefinitions.push(definition);
             //checkForUndefinedWords(definition.bodyText);            
 
-            // runWords(definition.bodyText);
             index = functionEndIndex;
         }
         else if (token == ";") {

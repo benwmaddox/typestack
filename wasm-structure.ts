@@ -5,6 +5,11 @@ interface ExportFunctionIds {
     exportId: number,
     codeId: number
 }
+interface FunctionIds {
+    typeId: number,
+    functionId: number,
+    codeId: number
+}
 export class WasmSection {
 
 }
@@ -140,6 +145,19 @@ export class WasmStructure {
         }
         return this.codeId++;
     }
+
+    AddFunctionDetails(parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): FunctionIds {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var declCount = 0;
+        var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            codeId: codeId
+        }
+    }
+
     AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction();
@@ -152,7 +170,6 @@ export class WasmStructure {
             exportId: exportId,
             codeId: codeId
         }
-
     }
 
     customSection: Array<number> = [];
