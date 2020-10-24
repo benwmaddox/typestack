@@ -61,6 +61,9 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
         if (token == "fn") {
             definingFunction = true;
             var functionEqualIndex = tokens.indexOf("=", index);
+            if (functionEqualIndex < 0) {
+                throw 'No = for function ' + tokens[index + 1];
+            }
             var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
             if (functionEndIndex < 0) {
                 throw 'No ; ending for ' + tokens[index + 1];

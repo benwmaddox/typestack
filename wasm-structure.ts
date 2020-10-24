@@ -75,17 +75,35 @@ export class WasmStructure {
     // }
 
     importId = 0;
-    addImport(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): number {
-        var data: Array<number> = [];
+    addImportFunction(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): number {
+
 
         // TODO: ...
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var declCount = 0;
+        // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
 
+        var data: Array<number> = [];
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
         return this.importId++;
     }
 
+    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var exportId = this.addExport(exportName, ExportKind.function, functionId);
+        var declCount = 0;
+        var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            exportId: exportId,
+            codeId: codeId
+        }
+    }
     // Return ID
     typeId = 0;
     addFunctionType(parameters: Array<WasmType>, result: WasmType | null): number {
@@ -158,19 +176,6 @@ export class WasmStructure {
         }
     }
 
-    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
-        var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
-        var exportId = this.addExport(exportName, ExportKind.function, functionId);
-        var declCount = 0;
-        var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
-        return {
-            typeId: typeId,
-            functionId: functionId,
-            exportId: exportId,
-            codeId: codeId
-        }
-    }
 
     customSection: Array<number> = [];
     types: Array<number> = [];
