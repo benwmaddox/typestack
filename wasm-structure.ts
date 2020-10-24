@@ -1,11 +1,11 @@
 
-interface ExportFunctionIds {
+export interface ExportFunctionIds {
     typeId: number,
     functionId: number,
     exportId: number,
     codeId: number
 }
-interface FunctionIds {
+export interface FunctionIds {
     typeId: number,
     functionId: number,
     codeId: number

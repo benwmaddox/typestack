@@ -1,6 +1,8 @@
-import { WasmStructure, WasmType, Opcodes } from './wasm-structure';
+import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
 import * as fs from 'fs';
+import { isNumber } from 'util';
+import { openStdin } from 'process';
 
 
 
@@ -19,8 +21,9 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
 
     var lexer = new Lexer();
     var tokenized = lexer.tokenize(data);
-    console.log(tokenized);
+    // console.log(tokenized);
     var bytes = runIntoWasm(tokenized);
+    console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
         console: console,
@@ -29,15 +32,18 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
         }
     }, (item) => {
         console.log((<any>item.instance.exports));
-        var result = (<any>item.instance.exports)['add two {i:int}'](1);
+        // var result = (<any>item.instance.exports)['add two {i:int}'](1);
+        var result = (<any>item.instance.exports)['add two'](3);
         console.log(result);
     });
 });
-function buildParameterList(input: string) {
+
+type Parameter = { parameter: string, type: string };
+function buildParameterList(input: string): Array<Parameter> {
     var index = 0;
     var regex = new RegExp('{(.+?):(.+?)}');
     var regexResult = regex.exec(input.substr(index));
-    var result = [];
+    var result: Array<Parameter> = [];
     while (regexResult !== null) {
         result.push({
             parameter: regexResult[1],
@@ -50,8 +56,20 @@ function buildParameterList(input: string) {
     }
     return result;
 }
-function runIntoWasm(tokens: Array<string>): Uint8Array {
 
+// Not sure about structure since I may want to override functions later in the process
+type DictionaryItem = { name: string, IDs?: ExportFunctionIds | FunctionIds, OpsCodes?: Array<Opcodes> }
+var dictionary: Array<DictionaryItem> = [];
+
+
+function builtInWords(): Array<DictionaryItem> {
+    var results: Array<DictionaryItem> = [];
+    results.push({ name: '+', OpsCodes: [Opcodes.i32Add] })
+
+    return results;
+}
+function runIntoWasm(tokens: Array<string>): Uint8Array {
+    dictionary = builtInWords();
     var wasmStructure = new WasmStructure();
 
     var index = 0;
@@ -78,29 +96,39 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
 
             console.log(definition);
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
-            var bodyOps = [
-                Opcodes.i32Const, 2,
-                Opcodes.get_local, 0,
-                Opcodes.i32Add
-            ];
-            console.log(parameterOps);
-            console.log(bodyOps);
-            if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
+            var bodyOps = bodyTokensToOps(definition);
 
-                var exportIds = wasmStructure.AddExportFunction(
-                    definition.name,
-                    parameterOps,
-                    WasmType.i32, // TODO
-                    bodyOps
-                )
-            }
-            else {
-                var functionIds = wasmStructure.AddFunctionDetails(
-                    parameterOps,
-                    WasmType.i32, // TODO
-                    bodyOps
-                )
-            }
+            // var bodyOps = [
+            //     Opcodes.i32Const, 2,
+            //     Opcodes.get_local, 0,
+            //     Opcodes.i32Add
+            // ];
+            // console.log(parameterOps);
+            console.log(bodyOps);
+            // if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
+
+            var exportIds = wasmStructure.AddExportFunction(
+                definition.name,
+                parameterOps,
+                WasmType.i32, // TODO
+                bodyOps
+            )
+            dictionary.push({
+                name: definition.name,
+                IDs: exportIds
+            })
+            // }
+            // else {
+            //     var functionIds = wasmStructure.AddFunctionDetails(
+            //         parameterOps,
+            //         WasmType.i32, // TODO
+            //         bodyOps
+            //     )
+            //     dictionary.push({
+            //         name: definition.name,
+            //         IDs: functionIds
+            //     })
+            // }
 
             //functionDefinitions.push(definition);
             //checkForUndefinedWords(definition.bodyText);            
@@ -119,7 +147,61 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
 
     return wasmStructure.getBytes();
 }
+function bodyTokensToOps(definition: any): Array<number> {
+    var tokens: Array<string> = definition.bodyText
+    var parameters: Array<Parameter> = definition.parameters;
+    var result: Array<number> = [];
 
+    for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+        var matchingFunction = dictionary.filter(x => x.name == token);
+        if (matchingFunction.length != 0) {
+            var lastFunction = matchingFunction[matchingFunction.length - 1];
+            if (lastFunction.IDs != null) {
+                result.push(Opcodes.call);
+                result.push(lastFunction.IDs.functionId); // Last matching function
+                console.log('matchingFunction');
+                console.log(matchingFunction);
+            }
+            else if (lastFunction.OpsCodes != null) {
+                for (var j = 0; j < lastFunction.OpsCodes.length; j++) {
+                    result.push(lastFunction.OpsCodes[j]);
+                }
+            }
+            else {
+                throw 'function missing ID or opscodes';
+            }
+
+            continue;
+        }
+        var parsedInt = parseInt(token);
+        if (!isNaN(parsedInt)) {
+            console.log('int: ' + parsedInt);
+            result.push(Opcodes.i32Const);
+            result.push(parsedInt);
+            continue;
+        }
+        var matchingParameters = parameters.filter(x => x.parameter == token);
+        if (matchingParameters.length != 0) {
+            var lastParam = matchingParameters[matchingParameters.length - 1];
+            var paramIndex = parameters.indexOf(lastParam);
+            result.push(Opcodes.get_local);
+            result.push(paramIndex);
+
+            continue;
+        }
+
+        throw 'Could not find match for ' + token;
+
+
+    }
+
+    // Opcodes.i32Const, 2,
+    //     Opcodes.get_local, 0,
+    //     Opcodes.i32Add
+
+    return result;
+}
 function testAddTwo() {
     var wasmStructure = new WasmStructure();
     wasmStructure.AddExportFunction("add Two", [WasmType.i32, WasmType.i32], WasmType.i32, [

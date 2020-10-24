@@ -70,8 +70,9 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
     // testAddTwo();
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
-    console.log(tokenized);
+    // console.log(tokenized);
     var bytes = runIntoWasm(tokenized);
+    console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
         console: console,
@@ -80,7 +81,8 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
         }
     }, function (item) {
         console.log(item.instance.exports);
-        var result = item.instance.exports['add two {i:int}'](1);
+        // var result = (<any>item.instance.exports)['add two {i:int}'](1);
+        var result = item.instance.exports['add two'](3);
         console.log(result);
     });
 });
@@ -99,7 +101,14 @@ function buildParameterList(input) {
     }
     return result;
 }
+var dictionary = [];
+function builtInWords() {
+    var results = [];
+    results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32Add] });
+    return results;
+}
 function runIntoWasm(tokens) {
+    dictionary = builtInWords();
     var wasmStructure = new wasm_structure_1.WasmStructure();
     var index = 0;
     var definingFunction = false;
@@ -124,21 +133,33 @@ function runIntoWasm(tokens) {
             };
             console.log(definition);
             var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
-            var bodyOps = [
-                wasm_structure_1.Opcodes.i32Const, 2,
-                wasm_structure_1.Opcodes.get_local, 0,
-                wasm_structure_1.Opcodes.i32Add
-            ];
-            console.log(parameterOps);
+            var bodyOps = bodyTokensToOps(definition);
+            // var bodyOps = [
+            //     Opcodes.i32Const, 2,
+            //     Opcodes.get_local, 0,
+            //     Opcodes.i32Add
+            // ];
+            // console.log(parameterOps);
             console.log(bodyOps);
-            if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
-                var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
-                bodyOps);
-            }
-            else {
-                var functionIds = wasmStructure.AddFunctionDetails(parameterOps, wasm_structure_1.WasmType.i32, // TODO
-                bodyOps);
-            }
+            // if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
+            var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
+            bodyOps);
+            dictionary.push({
+                name: definition.name,
+                IDs: exportIds
+            });
+            // }
+            // else {
+            //     var functionIds = wasmStructure.AddFunctionDetails(
+            //         parameterOps,
+            //         WasmType.i32, // TODO
+            //         bodyOps
+            //     )
+            //     dictionary.push({
+            //         name: definition.name,
+            //         IDs: functionIds
+            //     })
+            // }
             //functionDefinitions.push(definition);
             //checkForUndefinedWords(definition.bodyText);            
             index = functionEndIndex;
@@ -152,6 +173,53 @@ function runIntoWasm(tokens) {
         index++;
     }
     return wasmStructure.getBytes();
+}
+function bodyTokensToOps(definition) {
+    var tokens = definition.bodyText;
+    var parameters = definition.parameters;
+    var result = [];
+    for (var i = 0; i < tokens.length; i++) {
+        var token = tokens[i];
+        var matchingFunction = dictionary.filter(function (x) { return x.name == token; });
+        if (matchingFunction.length != 0) {
+            var lastFunction = matchingFunction[matchingFunction.length - 1];
+            if (lastFunction.IDs != null) {
+                result.push(wasm_structure_1.Opcodes.call);
+                result.push(lastFunction.IDs.functionId); // Last matching function
+                console.log('matchingFunction');
+                console.log(matchingFunction);
+            }
+            else if (lastFunction.OpsCodes != null) {
+                for (var j = 0; j < lastFunction.OpsCodes.length; j++) {
+                    result.push(lastFunction.OpsCodes[j]);
+                }
+            }
+            else {
+                throw 'function missing ID or opscodes';
+            }
+            continue;
+        }
+        var parsedInt = parseInt(token);
+        if (!isNaN(parsedInt)) {
+            console.log('int: ' + parsedInt);
+            result.push(wasm_structure_1.Opcodes.i32Const);
+            result.push(parsedInt);
+            continue;
+        }
+        var matchingParameters = parameters.filter(function (x) { return x.parameter == token; });
+        if (matchingParameters.length != 0) {
+            var lastParam = matchingParameters[matchingParameters.length - 1];
+            var paramIndex = parameters.indexOf(lastParam);
+            result.push(wasm_structure_1.Opcodes.get_local);
+            result.push(paramIndex);
+            continue;
+        }
+        throw 'Could not find match for ' + token;
+    }
+    // Opcodes.i32Const, 2,
+    //     Opcodes.get_local, 0,
+    //     Opcodes.i32Add
+    return result;
 }
 function testAddTwo() {
     var wasmStructure = new wasm_structure_1.WasmStructure();

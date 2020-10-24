@@ -88,13 +88,30 @@ var WasmStructure = /** @class */ (function () {
         this.codeSections = [];
         this.exports = [];
     }
-    WasmStructure.prototype.addImport = function (importModule, importField, internalName, parameters, result) {
-        var data = [];
+    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, parameters, result) {
         // TODO: ...
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var declCount = 0;
+        // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
+        var data = [];
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
         return this.importId++;
+    };
+    WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
+        var typeId = this.addFunctionType(parameters, result);
+        var functionId = this.addFunction();
+        var exportId = this.addExport(exportName, ExportKind.function, functionId);
+        var declCount = 0;
+        var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
+        return {
+            typeId: typeId,
+            functionId: functionId,
+            exportId: exportId,
+            codeId: codeId
+        };
     };
     WasmStructure.prototype.addFunctionType = function (parameters, result) {
         var data = __spreadArrays([0x60,
@@ -149,19 +166,6 @@ var WasmStructure = /** @class */ (function () {
         return {
             typeId: typeId,
             functionId: functionId,
-            codeId: codeId
-        };
-    };
-    WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
-        var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
-        var exportId = this.addExport(exportName, ExportKind.function, functionId);
-        var declCount = 0;
-        var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
-        return {
-            typeId: typeId,
-            functionId: functionId,
-            exportId: exportId,
             codeId: codeId
         };
     };
