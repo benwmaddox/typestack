@@ -9,3 +9,5 @@ fn 'add two' {i:int} int = 2 i + ;
 //fn 'add one' {i:int} int = 1 i + ;
 // fn 'Add one to 1' int = 1 'add one' ;
 //fn 'add one twice' {i:int} int = i 'add one' 'add one' ;
+
+fn double {i:int} int = 2 i * ;

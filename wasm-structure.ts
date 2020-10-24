@@ -28,7 +28,8 @@ export enum Opcodes {
     f32Const = 0x43,
     f64Const = 0x44,
     end = 0x0b,
-    i32Add = 0x6a
+    i32Add = 0x6a,
+    i32Mul = 0x6c
 };
 
 // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
@@ -130,6 +131,9 @@ export class WasmStructure {
     }
 
     stringToUTF8(text: string): Array<number> {
+        if (!text) {
+            throw new Error('no text');
+        }
         var results: Array<number> = [];
         // TODO: I need better handlings of this. 
         for (var i = 0; i < text.length; i++) {

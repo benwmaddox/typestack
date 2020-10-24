@@ -34,6 +34,7 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
         console.log((<any>item.instance.exports));
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
         var result = (<any>item.instance.exports)['add two'](3);
+        var result = (<any>item.instance.exports)['double'](9);
         console.log(result);
     });
 });
@@ -64,7 +65,8 @@ var dictionary: Array<DictionaryItem> = [];
 
 function builtInWords(): Array<DictionaryItem> {
     var results: Array<DictionaryItem> = [];
-    results.push({ name: '+', OpsCodes: [Opcodes.i32Add] })
+    results.push({ name: '+', OpsCodes: [Opcodes.i32Add] });
+    results.push({ name: '*', OpsCodes: [Opcodes.i32Mul] });
 
     return results;
 }
@@ -86,8 +88,11 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
             if (functionEndIndex < 0) {
                 throw 'No ; ending for ' + tokens[index + 1];
             }
+
             var definition = {
-                name: tokens[index + 1].substring(1, tokens[index + 1].length - 1),
+                name: tokens[index + 1][0] == "'"
+                    ? tokens[index + 1].substring(1, tokens[index + 1].length - 1)
+                    : tokens[index + 1],
                 // parameters: tokens.slice(index + 2, functionEqualIndex),
                 parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1) + " " + tokens.slice(index + 2, functionEqualIndex).join(" ")),
                 bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),

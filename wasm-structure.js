@@ -32,6 +32,7 @@ var Opcodes;
     Opcodes[Opcodes["f64Const"] = 68] = "f64Const";
     Opcodes[Opcodes["end"] = 11] = "end";
     Opcodes[Opcodes["i32Add"] = 106] = "i32Add";
+    Opcodes[Opcodes["i32Mul"] = 108] = "i32Mul";
 })(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
 ;
 // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
@@ -130,6 +131,9 @@ var WasmStructure = /** @class */ (function () {
         return this.functionIndex++;
     };
     WasmStructure.prototype.stringToUTF8 = function (text) {
+        if (!text) {
+            throw new Error('no text');
+        }
         var results = [];
         // TODO: I need better handlings of this. 
         for (var i = 0; i < text.length; i++) {
