@@ -29,6 +29,7 @@ export enum Opcodes {
     f64Const = 0x44,
     end = 0x0b,
     i32Add = 0x6a,
+    i32Sub = 0x6b,
     i32Mul = 0x6c
 };
 

@@ -32,6 +32,7 @@ var Opcodes;
     Opcodes[Opcodes["f64Const"] = 68] = "f64Const";
     Opcodes[Opcodes["end"] = 11] = "end";
     Opcodes[Opcodes["i32Add"] = 106] = "i32Add";
+    Opcodes[Opcodes["i32Sub"] = 107] = "i32Sub";
     Opcodes[Opcodes["i32Mul"] = 108] = "i32Mul";
 })(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
 ;

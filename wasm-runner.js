@@ -72,10 +72,12 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
     }, function (item) {
         console.log(item.instance.exports);
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-        var result = item.instance.exports['add two'](3);
-        var result = item.instance.exports['double'](9);
-        var result = item.instance.exports['test']();
-        console.log(result);
+        console.log(item.instance.exports['add two'](3));
+        console.log(item.instance.exports['double'](9));
+        console.log(item.instance.exports['test']());
+        console.log(item.instance.exports['add one twice'](3));
+        console.log(item.instance.exports['add'](91, 9));
+        console.log(item.instance.exports['subtract'](10, 3));
     });
 });
 function buildParameterList(input) {
@@ -98,6 +100,7 @@ function builtInWords() {
     var results = [];
     results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32Add] });
     results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32Mul] });
+    results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32Sub] });
     return results;
 }
 function runIntoWasm(tokens) {
@@ -162,8 +165,6 @@ function bodyTokensToOps(definition) {
             if (lastFunction.IDs != null) {
                 result.push(wasm_structure_1.Opcodes.call);
                 result.push(lastFunction.IDs.functionId); // Last matching function
-                console.log('matchingFunction');
-                console.log(matchingFunction);
             }
             else if (lastFunction.OpsCodes != null) {
                 for (var j = 0; j < lastFunction.OpsCodes.length; j++) {
@@ -171,7 +172,7 @@ function bodyTokensToOps(definition) {
                 }
             }
             else {
-                throw 'function missing ID or opscodes';
+                throw 'Function missing ID or opscodes for ' + token;
             }
             continue;
         }

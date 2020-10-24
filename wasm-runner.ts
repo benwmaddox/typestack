@@ -19,10 +19,12 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
     }, (item) => {
         console.log((<any>item.instance.exports));
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-        var result = (<any>item.instance.exports)['add two'](3);
-        var result = (<any>item.instance.exports)['double'](9);
-        var result = (<any>item.instance.exports)['test']();
-        console.log(result);
+        console.log((<any>item.instance.exports)['add two'](3));
+        console.log((<any>item.instance.exports)['double'](9));
+        console.log((<any>item.instance.exports)['test']());
+        console.log((<any>item.instance.exports)['add one twice'](3));
+        console.log((<any>item.instance.exports)['add'](91, 9));
+        console.log((<any>item.instance.exports)['subtract'](10, 3));
     });
 });
 
@@ -54,6 +56,7 @@ function builtInWords(): Array<DictionaryItem> {
     var results: Array<DictionaryItem> = [];
     results.push({ name: '+', OpsCodes: [Opcodes.i32Add] });
     results.push({ name: '*', OpsCodes: [Opcodes.i32Mul] });
+    results.push({ name: '-', OpsCodes: [Opcodes.i32Sub] });
 
     return results;
 }
@@ -133,8 +136,6 @@ function bodyTokensToOps(definition: any): Array<number> {
             if (lastFunction.IDs != null) {
                 result.push(Opcodes.call);
                 result.push(lastFunction.IDs.functionId); // Last matching function
-                console.log('matchingFunction');
-                console.log(matchingFunction);
             }
             else if (lastFunction.OpsCodes != null) {
                 for (var j = 0; j < lastFunction.OpsCodes.length; j++) {
@@ -142,7 +143,7 @@ function bodyTokensToOps(definition: any): Array<number> {
                 }
             }
             else {
-                throw 'function missing ID or opscodes';
+                throw 'Function missing ID or opscodes for ' + token;
             }
 
             continue;
