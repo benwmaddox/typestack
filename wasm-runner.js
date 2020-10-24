@@ -72,13 +72,13 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
     }, function (item) {
         console.log(item.instance.exports);
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-        console.log(item.instance.exports['add two'](3));
-        console.log(item.instance.exports['double'](9));
+        // console.log((<any>item.instance.exports)['add two'](3));
+        // console.log((<any>item.instance.exports)['double'](9));
         console.log(item.instance.exports['test']());
-        console.log(item.instance.exports['add one twice'](3));
-        console.log(item.instance.exports['add'](91, 9));
-        console.log(item.instance.exports['subtract'](10, 3));
-        console.log(item.instance.exports['less than'](1, 3));
+        // console.log((<any>item.instance.exports)['add one twice'](3));
+        // console.log((<any>item.instance.exports)['add'](91, 9));
+        // console.log((<any>item.instance.exports)['subtract'](10, 3));
+        // console.log((<any>item.instance.exports)['less than'](1, 3));
     });
 });
 function buildParameterList(input) {
@@ -103,6 +103,9 @@ function builtInWords() {
     results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32Mul] });
     results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32Sub] });
     results.push({ name: '<', OpsCodes: [wasm_structure_1.Opcodes.i32LessThanSigned] });
+    results.push({ name: '==', OpsCodes: [wasm_structure_1.Opcodes.i32Equals] });
+    results.push({ name: '==0', OpsCodes: [wasm_structure_1.Opcodes.i32EqualsZero] });
+    results.push({ name: '&&', OpsCodes: [wasm_structure_1.Opcodes.i32And] });
     return results;
 }
 function runIntoWasm(tokens) {

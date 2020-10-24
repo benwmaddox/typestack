@@ -19,13 +19,13 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
     }, (item) => {
         console.log((<any>item.instance.exports));
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-        console.log((<any>item.instance.exports)['add two'](3));
-        console.log((<any>item.instance.exports)['double'](9));
+        // console.log((<any>item.instance.exports)['add two'](3));
+        // console.log((<any>item.instance.exports)['double'](9));
         console.log((<any>item.instance.exports)['test']());
-        console.log((<any>item.instance.exports)['add one twice'](3));
-        console.log((<any>item.instance.exports)['add'](91, 9));
-        console.log((<any>item.instance.exports)['subtract'](10, 3));
-        console.log((<any>item.instance.exports)['less than'](1, 3));
+        // console.log((<any>item.instance.exports)['add one twice'](3));
+        // console.log((<any>item.instance.exports)['add'](91, 9));
+        // console.log((<any>item.instance.exports)['subtract'](10, 3));
+        // console.log((<any>item.instance.exports)['less than'](1, 3));
     });
 });
 
@@ -59,6 +59,9 @@ function builtInWords(): Array<DictionaryItem> {
     results.push({ name: '*', OpsCodes: [Opcodes.i32Mul] });
     results.push({ name: '-', OpsCodes: [Opcodes.i32Sub] });
     results.push({ name: '<', OpsCodes: [Opcodes.i32LessThanSigned] });
+    results.push({ name: '==', OpsCodes: [Opcodes.i32Equals] });
+    results.push({ name: '==0', OpsCodes: [Opcodes.i32EqualsZero] });
+    results.push({ name: '&&', OpsCodes: [Opcodes.i32And] });
 
     return results;
 }

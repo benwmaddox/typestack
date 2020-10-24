@@ -37,6 +37,7 @@ var Opcodes;
     Opcodes[Opcodes["i32Add"] = 106] = "i32Add";
     Opcodes[Opcodes["i32Sub"] = 107] = "i32Sub";
     Opcodes[Opcodes["i32Mul"] = 108] = "i32Mul";
+    Opcodes[Opcodes["i32And"] = 113] = "i32And";
 })(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
 ;
 // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)

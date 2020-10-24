@@ -33,7 +33,9 @@ export enum Opcodes {
     end = 0x0b,
     i32Add = 0x6a,
     i32Sub = 0x6b,
-    i32Mul = 0x6c
+    i32Mul = 0x6c,
+
+    i32And = 0x71
 };
 
 // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
