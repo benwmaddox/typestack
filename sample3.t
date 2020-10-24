@@ -17,3 +17,5 @@ fn test int = 5 double 'add two' ;
 fn 'add' {a:int} {b:int} int = a b + ;
 
 fn subtract {a:int} {b:int} int = a b - ;
+
+fn 'less than' {a:int} {b:int} int = a b < ;

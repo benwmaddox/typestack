@@ -78,6 +78,7 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
         console.log(item.instance.exports['add one twice'](3));
         console.log(item.instance.exports['add'](91, 9));
         console.log(item.instance.exports['subtract'](10, 3));
+        console.log(item.instance.exports['less than'](1, 3));
     });
 });
 function buildParameterList(input) {
@@ -101,6 +102,7 @@ function builtInWords() {
     results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32Add] });
     results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32Mul] });
     results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32Sub] });
+    results.push({ name: '<', OpsCodes: [wasm_structure_1.Opcodes.i32LessThanSigned] });
     return results;
 }
 function runIntoWasm(tokens) {
