@@ -35,6 +35,7 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
         // var result = (<any>item.instance.exports)['add two {i:int}'](1);
         var result = (<any>item.instance.exports)['add two'](3);
         var result = (<any>item.instance.exports)['double'](9);
+        var result = (<any>item.instance.exports)['test']();
         console.log(result);
     });
 });
@@ -159,7 +160,9 @@ function bodyTokensToOps(definition: any): Array<number> {
 
     for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
-        var matchingFunction = dictionary.filter(x => x.name == token);
+        var matchingFunction = token[0] == "'"
+            ? dictionary.filter(x => "'" + x.name + "'" == token)
+            : dictionary.filter(x => x.name == token);
         if (matchingFunction.length != 0) {
             var lastFunction = matchingFunction[matchingFunction.length - 1];
             if (lastFunction.IDs != null) {

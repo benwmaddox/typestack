@@ -11,3 +11,5 @@ fn 'add two' {i:int} int = 2 i + ;
 //fn 'add one twice' {i:int} int = i 'add one' 'add one' ;
 
 fn double {i:int} int = 2 i * ;
+
+fn test int = 5 double 'add two' ;
