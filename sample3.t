@@ -1,4 +1,4 @@
-//fn 'add two {i:int}' int = 2 i + ;
+// fn 'add two {i:int}' int = 2 i + ;
 
 fn 'add two' {i:int} int = 2 i + ;
 
@@ -24,8 +24,9 @@ fn 'less than' {a:int} {b:int} int = a b < ;
 
 // fn test int = 10 double ;
 
-fn test int = 
+export fn test int = 
     5 double 'add two' 12 == 
     2 double 4 ==
-    && ;
+    5 3 subtract 2 ==
+    && && ;
  

@@ -9,7 +9,6 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
     var lexer = new Lexer();
     var tokenized = lexer.tokenize(data);
     var bytes = runIntoWasm(tokenized);
-    console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
         console: console,
@@ -98,19 +97,32 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
             var bodyOps = bodyTokensToOps(definition);
 
-            console.log(bodyOps);
+            // console.log(bodyOps);
 
+            if (index > 0 && tokens[index - 1] == "export") {
+                var exportIds = wasmStructure.AddExportFunction(
+                    definition.name,
+                    parameterOps,
+                    WasmType.i32, // TODO
+                    bodyOps
+                )
+                dictionary.push({
+                    name: definition.name,
+                    IDs: exportIds
+                })
+            }
+            else {
 
-            var exportIds = wasmStructure.AddExportFunction(
-                definition.name,
-                parameterOps,
-                WasmType.i32, // TODO
-                bodyOps
-            )
-            dictionary.push({
-                name: definition.name,
-                IDs: exportIds
-            })
+                var functionIds = wasmStructure.AddFunctionDetails(
+                    parameterOps,
+                    WasmType.i32, // TODO
+                    bodyOps
+                )
+                dictionary.push({
+                    name: definition.name,
+                    IDs: functionIds
+                })
+            }
 
             index = functionEndIndex;
         }
@@ -155,7 +167,6 @@ function bodyTokensToOps(definition: any): Array<number> {
         }
         var parsedInt = parseInt(token);
         if (!isNaN(parsedInt)) {
-            console.log('int: ' + parsedInt);
             result.push(Opcodes.i32Const);
             result.push(parsedInt);
             continue;

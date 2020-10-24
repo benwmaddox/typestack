@@ -62,7 +62,6 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
     var bytes = runIntoWasm(tokenized);
-    console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
         console: console,
@@ -137,13 +136,23 @@ function runIntoWasm(tokens) {
             console.log(definition);
             var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
             var bodyOps = bodyTokensToOps(definition);
-            console.log(bodyOps);
-            var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
-            bodyOps);
-            dictionary.push({
-                name: definition.name,
-                IDs: exportIds
-            });
+            // console.log(bodyOps);
+            if (index > 0 && tokens[index - 1] == "export") {
+                var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
+                bodyOps);
+                dictionary.push({
+                    name: definition.name,
+                    IDs: exportIds
+                });
+            }
+            else {
+                var functionIds = wasmStructure.AddFunctionDetails(parameterOps, wasm_structure_1.WasmType.i32, // TODO
+                bodyOps);
+                dictionary.push({
+                    name: definition.name,
+                    IDs: functionIds
+                });
+            }
             index = functionEndIndex;
         }
         else if (token == ";") {
@@ -183,7 +192,6 @@ function bodyTokensToOps(definition) {
         }
         var parsedInt = parseInt(token);
         if (!isNaN(parsedInt)) {
-            console.log('int: ' + parsedInt);
             result.push(wasm_structure_1.Opcodes.i32Const);
             result.push(parsedInt);
             continue;
