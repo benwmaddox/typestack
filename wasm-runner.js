@@ -58,19 +58,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
 var fs = __importStar(require("fs"));
-// var fs = require('fs');
 fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
-    // console.log('loaded')
-    // console.log(data)
-    // console.log(__dirname)
-    // wasmStructure.addEmitImport();
-    // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
-    // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
-    // wasmStructure.addFunction();
-    // testAddTwo();
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
-    // console.log(tokenized);
     var bytes = runIntoWasm(tokenized);
     console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
@@ -139,34 +129,13 @@ function runIntoWasm(tokens) {
             console.log(definition);
             var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
             var bodyOps = bodyTokensToOps(definition);
-            // var bodyOps = [
-            //     Opcodes.i32Const, 2,
-            //     Opcodes.get_local, 0,
-            //     Opcodes.i32Add
-            // ];
-            // console.log(parameterOps);
             console.log(bodyOps);
-            // if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
             var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
             bodyOps);
             dictionary.push({
                 name: definition.name,
                 IDs: exportIds
             });
-            // }
-            // else {
-            //     var functionIds = wasmStructure.AddFunctionDetails(
-            //         parameterOps,
-            //         WasmType.i32, // TODO
-            //         bodyOps
-            //     )
-            //     dictionary.push({
-            //         name: definition.name,
-            //         IDs: functionIds
-            //     })
-            // }
-            //functionDefinitions.push(definition);
-            //checkForUndefinedWords(definition.bodyText);            
             index = functionEndIndex;
         }
         else if (token == ";") {
@@ -223,25 +192,7 @@ function bodyTokensToOps(definition) {
         }
         throw 'Could not find match for ' + token;
     }
-    // Opcodes.i32Const, 2,
-    //     Opcodes.get_local, 0,
-    //     Opcodes.i32Add
     return result;
-}
-function testAddTwo() {
-    var wasmStructure = new wasm_structure_1.WasmStructure();
-    wasmStructure.AddExportFunction("add Two", [wasm_structure_1.WasmType.i32, wasm_structure_1.WasmType.i32], wasm_structure_1.WasmType.i32, [
-        wasm_structure_1.Opcodes.get_local, 0,
-        wasm_structure_1.Opcodes.get_local, 1,
-        wasm_structure_1.Opcodes.i32Add
-    ]);
-    var bytes = wasmStructure.getBytes();
-    console.log("\n" + bytes.length + " bytes");
-    console.log("Bytes: \n" + bytes.join(", ") + "\n");
-    // console.log(bytes);
-    // var writeCallback = (err: string) => console.log(err);
-    fs.writeFileSync('output.wasm', bytes);
-    runWasm(bytes);
 }
 function runWasmWithCallback(bytes, importObject, callback) {
     return __awaiter(this, void 0, void 0, function () {
@@ -249,35 +200,6 @@ function runWasmWithCallback(bytes, importObject, callback) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, WebAssembly.instantiate(bytes, importObject).then(callback)];
-                case 1:
-                    instance = _a.sent();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-function runWasm(bytes) {
-    return __awaiter(this, void 0, void 0, function () {
-        var importObject, instance;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    importObject = {
-                        function: {
-                            log: function (value) {
-                                console.log(value);
-                            }
-                        }
-                    };
-                    return [4 /*yield*/, WebAssembly.instantiate(bytes, importObject).then(function (results) {
-                            console.log(results);
-                            console.log(results.instance.exports);
-                            var exports = results.instance.exports;
-                            console.log(exports['add Two'](3, 5));
-                        })
-                        // console.log(instance.exports.run());
-                        // instance.
-                    ];
                 case 1:
                     instance = _a.sent();
                     return [2 /*return*/];

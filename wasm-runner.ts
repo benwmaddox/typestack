@@ -1,27 +1,13 @@
 import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
 import * as fs from 'fs';
-import { isNumber } from 'util';
-import { openStdin } from 'process';
 
 
-
-
-// var fs = require('fs');
 fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
-    // console.log('loaded')
-    // console.log(data)
-    // console.log(__dirname)
-    // wasmStructure.addEmitImport();
-    // wasmStructure.addImport("function", "log", "emit", [WasmType.i32], null);
-    // wasmStructure.addFunctionType([WasmType.f32, WasmType.f32], WasmType.f32);
-    // wasmStructure.addFunction();
-    // testAddTwo();
 
 
     var lexer = new Lexer();
     var tokenized = lexer.tokenize(data);
-    // console.log(tokenized);
     var bytes = runIntoWasm(tokenized);
     console.log('hitting this code');
     fs.writeFileSync('output.wasm', bytes);
@@ -104,14 +90,8 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
             var bodyOps = bodyTokensToOps(definition);
 
-            // var bodyOps = [
-            //     Opcodes.i32Const, 2,
-            //     Opcodes.get_local, 0,
-            //     Opcodes.i32Add
-            // ];
-            // console.log(parameterOps);
             console.log(bodyOps);
-            // if (definition.name == 'add two {i:int}') { // todo: Check if it should be exported
+
 
             var exportIds = wasmStructure.AddExportFunction(
                 definition.name,
@@ -123,21 +103,6 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                 name: definition.name,
                 IDs: exportIds
             })
-            // }
-            // else {
-            //     var functionIds = wasmStructure.AddFunctionDetails(
-            //         parameterOps,
-            //         WasmType.i32, // TODO
-            //         bodyOps
-            //     )
-            //     dictionary.push({
-            //         name: definition.name,
-            //         IDs: functionIds
-            //     })
-            // }
-
-            //functionDefinitions.push(definition);
-            //checkForUndefinedWords(definition.bodyText);            
 
             index = functionEndIndex;
         }
@@ -204,49 +169,12 @@ function bodyTokensToOps(definition: any): Array<number> {
 
     }
 
-    // Opcodes.i32Const, 2,
-    //     Opcodes.get_local, 0,
-    //     Opcodes.i32Add
 
     return result;
 }
-function testAddTwo() {
-    var wasmStructure = new WasmStructure();
-    wasmStructure.AddExportFunction("add Two", [WasmType.i32, WasmType.i32], WasmType.i32, [
 
-        Opcodes.get_local, 0,
-        Opcodes.get_local, 1,
-        Opcodes.i32Add
-    ]);
-    var bytes = wasmStructure.getBytes();
-    console.log("\n" + bytes.length + " bytes");
-    console.log("Bytes: \n" + bytes.join(", ") + "\n");
-    // console.log(bytes);
-    // var writeCallback = (err: string) => console.log(err);
-    fs.writeFileSync('output.wasm', bytes);
-
-    runWasm(bytes);
-}
 
 async function runWasmWithCallback(bytes: Uint8Array, importObject: any, callback: (result: WebAssembly.WebAssemblyInstantiatedSource) => void) {
     const instance = await WebAssembly.instantiate(bytes, importObject).then(callback);
 }
 
-
-async function runWasm(bytes: Uint8Array) {
-    var importObject = {
-        function: {
-            log: function (value: number) {
-                console.log(value);
-            }
-        }
-    };
-    const instance = await WebAssembly.instantiate(bytes, importObject).then(results => {
-        console.log(results);
-        console.log(results.instance.exports);
-        var exports: any = results.instance.exports;
-        console.log(exports['add Two'](3, 5));
-    })
-    // console.log(instance.exports.run());
-    // instance.
-}
