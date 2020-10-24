@@ -88,10 +88,21 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                     ? tokens[index + 1].substring(1, tokens[index + 1].length - 1)
                     : tokens[index + 1],
                 // parameters: tokens.slice(index + 2, functionEqualIndex),
-                parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1) + " " + tokens.slice(index + 2, functionEqualIndex).join(" ")),
+                parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1)),
                 bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),
                 result: { name: null, type: tokens[functionEqualIndex - 1] }
             };
+
+            var additionalParameters = tokens.slice(index + 2, functionEqualIndex - 1);
+            for (var i = 0; i < additionalParameters.length; i++) {
+                var item = additionalParameters[i];
+                if (item.indexOf(':') != -1) {
+                    definition.parameters.push({
+                        parameter: item.split(":")[0],
+                        type: item.split(":")[1]
+                    });
+                }
+            }
 
             console.log(definition);
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
