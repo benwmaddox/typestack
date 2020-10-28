@@ -1,13 +1,19 @@
 import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
+import { Parser } from './parser'
 import * as fs from 'fs';
 
+var module = 'sample3';
 
-fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
+fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 
 
     var lexer = new Lexer();
     var tokenized = lexer.tokenize(data);
+    var parser = new Parser();
+
+    var astModule = parser.ParseModule(module, tokenized);
+    console.log(JSON.stringify(astModule, undefined, "  "));
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
@@ -104,7 +110,7 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                 }
             }
 
-            console.log(definition);
+            // console.log(definition);
             var parameterOps = definition.parameters.map(x => x.type == "int" ? WasmType.i32 : WasmType.f64);
             var bodyOps = bodyTokensToOps(definition);
 

@@ -57,10 +57,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
+var parser_1 = require("./parser");
 var fs = __importStar(require("fs"));
-fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data) {
+var module = 'sample3';
+fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
+    var parser = new parser_1.Parser();
+    var astModule = parser.ParseModule(module, tokenized);
+    console.log(JSON.stringify(astModule, undefined, "  "));
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
     runWasmWithCallback(bytes, {
@@ -143,7 +148,7 @@ function runIntoWasm(tokens) {
                     });
                 }
             }
-            console.log(definition);
+            // console.log(definition);
             var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
             var bodyOps = bodyTokensToOps(definition);
             // console.log(bodyOps);
