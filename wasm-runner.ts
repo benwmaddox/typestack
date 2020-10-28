@@ -28,7 +28,7 @@ fs.readFile(__dirname + '/sample3.t', 'utf8', function (err, data: string) {
     });
 });
 
-type Parameter = { parameter: string, type: string };
+type Parameter = { name: string, type: string };
 function buildParameterList(input: string): Array<Parameter> {
     var index = 0;
     var regex = new RegExp('{(.+?):(.+?)}');
@@ -36,7 +36,7 @@ function buildParameterList(input: string): Array<Parameter> {
     var result: Array<Parameter> = [];
     while (regexResult !== null) {
         result.push({
-            parameter: regexResult[1],
+            name: regexResult[1],
             type: regexResult[2]
         })
 
@@ -89,7 +89,7 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                     : tokens[index + 1],
                 // parameters: tokens.slice(index + 2, functionEqualIndex),
                 parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1)),
-                bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),
+                body: tokens.slice(functionEqualIndex + 1, functionEndIndex),
                 result: { name: null, type: tokens[functionEqualIndex - 1] }
             };
 
@@ -98,7 +98,7 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
                 var item = additionalParameters[i];
                 if (item.indexOf(':') != -1) {
                     definition.parameters.push({
-                        parameter: item.split(":")[0],
+                        name: item.split(":")[0],
                         type: item.split(":")[1]
                     });
                 }
@@ -149,18 +149,71 @@ function runIntoWasm(tokens: Array<string>): Uint8Array {
 
     return wasmStructure.getBytes();
 }
+function isInOrder(values: Array<Number>): boolean {
+    for (var i = 1; i < values.length; i++) {
+        if (values[i - 1] >= values[i]) return false;
+    }
+    return true;
+}
+function findInterpolatedMatches(token: string): Array<DictionaryItem> {
+
+    var matchingFunctions: Array<DictionaryItem> = [];
+    var tokenSplit = token.substring(1, token.length - 1).split(" ");
+    var interpolatedOptions = dictionary.filter(x => x.name.indexOf("{") != -1);
+    for (var i = 0; i < interpolatedOptions.length; i++) {
+        var wordWithoutQuotes = interpolatedOptions[i].name;//.substring(1, interpolatedOptions[i].name.length - 1);
+        var wordSplit = wordWithoutQuotes.split(" ").filter(x => x[0] != "{");
+
+        // if (wordSplit.length < tokenSplit.length) continue;
+        // console.log(wordSplit);
+        // console.log(tokenSplit);
+        var locationInToken = wordSplit.map(x => tokenSplit.indexOf(x));
+        if (locationInToken.every(x => x != -1)
+            && isInOrder(locationInToken)
+        ) {
+            matchingFunctions.push(interpolatedOptions[i]);
+            // console.log("found interpolated ")
+
+
+        }
+    }
+    return matchingFunctions;
+}
+
 function bodyTokensToOps(definition: any): Array<number> {
-    var tokens: Array<string> = definition.bodyText
+    var tokens: Array<string> = definition.body
     var parameters: Array<Parameter> = definition.parameters;
     var result: Array<number> = [];
 
     for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
-        var matchingFunction = token[0] == "'"
-            ? dictionary.filter(x => "'" + x.name + "'" == token)
-            : dictionary.filter(x => x.name == token);
-        if (matchingFunction.length != 0) {
-            var lastFunction = matchingFunction[matchingFunction.length - 1];
+        var matchingFunctions: Array<DictionaryItem>
+
+        if (token[0] == "'") {
+            matchingFunctions = dictionary.filter(x => "'" + x.name + "'" == token);
+
+            if (matchingFunctions.length == 0) {
+                // console.log('looking for ' + token);
+                matchingFunctions = findInterpolatedMatches(token);
+
+
+                // TODO : calculate parameters to use / Maybe recursion here?
+
+
+                // interpolated...
+                // var interpolatedMatchingFunction = token[0] == "'"
+                //     ? dictionary.filter(x => "'" + x.name + "'" == token)
+                //     : dictionary.filter(x => x.name == token);
+            }
+
+        }
+        else {
+            matchingFunctions = dictionary.filter(x => x.name == token);
+        }
+
+
+        if (matchingFunctions.length != 0) {
+            var lastFunction = matchingFunctions[matchingFunctions.length - 1];
             if (lastFunction.IDs != null) {
                 result.push(Opcodes.call);
                 result.push(lastFunction.IDs.functionId); // Last matching function
@@ -176,13 +229,16 @@ function bodyTokensToOps(definition: any): Array<number> {
 
             continue;
         }
+
+
+
         var parsedInt = parseInt(token);
         if (!isNaN(parsedInt)) {
             result.push(Opcodes.i32Const);
             result.push(parsedInt);
             continue;
         }
-        var matchingParameters = parameters.filter(x => x.parameter == token);
+        var matchingParameters = parameters.filter(x => x.name == token);
         if (matchingParameters.length != 0) {
             var lastParam = matchingParameters[matchingParameters.length - 1];
             var paramIndex = parameters.indexOf(lastParam);

@@ -87,7 +87,7 @@ function buildParameterList(input) {
     var result = [];
     while (regexResult !== null) {
         result.push({
-            parameter: regexResult[1],
+            name: regexResult[1],
             type: regexResult[2]
         });
         index += regexResult.index + regexResult[0].length;
@@ -130,7 +130,7 @@ function runIntoWasm(tokens) {
                     : tokens[index + 1],
                 // parameters: tokens.slice(index + 2, functionEqualIndex),
                 parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1)),
-                bodyText: tokens.slice(functionEqualIndex + 1, functionEndIndex),
+                body: tokens.slice(functionEqualIndex + 1, functionEndIndex),
                 result: { name: null, type: tokens[functionEqualIndex - 1] }
             };
             var additionalParameters = tokens.slice(index + 2, functionEqualIndex - 1);
@@ -138,7 +138,7 @@ function runIntoWasm(tokens) {
                 var item = additionalParameters[i];
                 if (item.indexOf(':') != -1) {
                     definition.parameters.push({
-                        parameter: item.split(":")[0],
+                        name: item.split(":")[0],
                         type: item.split(":")[1]
                     });
                 }
@@ -175,17 +175,56 @@ function runIntoWasm(tokens) {
     }
     return wasmStructure.getBytes();
 }
+function isInOrder(values) {
+    for (var i = 1; i < values.length; i++) {
+        if (values[i - 1] >= values[i])
+            return false;
+    }
+    return true;
+}
+function findInterpolatedMatches(token) {
+    var matchingFunctions = [];
+    var tokenSplit = token.substring(1, token.length - 1).split(" ");
+    var interpolatedOptions = dictionary.filter(function (x) { return x.name.indexOf("{") != -1; });
+    for (var i = 0; i < interpolatedOptions.length; i++) {
+        var wordWithoutQuotes = interpolatedOptions[i].name; //.substring(1, interpolatedOptions[i].name.length - 1);
+        var wordSplit = wordWithoutQuotes.split(" ").filter(function (x) { return x[0] != "{"; });
+        // if (wordSplit.length < tokenSplit.length) continue;
+        // console.log(wordSplit);
+        // console.log(tokenSplit);
+        var locationInToken = wordSplit.map(function (x) { return tokenSplit.indexOf(x); });
+        if (locationInToken.every(function (x) { return x != -1; })
+            && isInOrder(locationInToken)) {
+            matchingFunctions.push(interpolatedOptions[i]);
+            // console.log("found interpolated ")
+        }
+    }
+    return matchingFunctions;
+}
 function bodyTokensToOps(definition) {
-    var tokens = definition.bodyText;
+    var tokens = definition.body;
     var parameters = definition.parameters;
     var result = [];
     for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
-        var matchingFunction = token[0] == "'"
-            ? dictionary.filter(function (x) { return "'" + x.name + "'" == token; })
-            : dictionary.filter(function (x) { return x.name == token; });
-        if (matchingFunction.length != 0) {
-            var lastFunction = matchingFunction[matchingFunction.length - 1];
+        var matchingFunctions;
+        if (token[0] == "'") {
+            matchingFunctions = dictionary.filter(function (x) { return "'" + x.name + "'" == token; });
+            if (matchingFunctions.length == 0) {
+                // console.log('looking for ' + token);
+                matchingFunctions = findInterpolatedMatches(token);
+                // TODO : calculate parameters to use / Maybe recursion here?
+                // interpolated...
+                // var interpolatedMatchingFunction = token[0] == "'"
+                //     ? dictionary.filter(x => "'" + x.name + "'" == token)
+                //     : dictionary.filter(x => x.name == token);
+            }
+        }
+        else {
+            matchingFunctions = dictionary.filter(function (x) { return x.name == token; });
+        }
+        if (matchingFunctions.length != 0) {
+            var lastFunction = matchingFunctions[matchingFunctions.length - 1];
             if (lastFunction.IDs != null) {
                 result.push(wasm_structure_1.Opcodes.call);
                 result.push(lastFunction.IDs.functionId); // Last matching function
@@ -206,7 +245,7 @@ function bodyTokensToOps(definition) {
             result.push(parsedInt);
             continue;
         }
-        var matchingParameters = parameters.filter(function (x) { return x.parameter == token; });
+        var matchingParameters = parameters.filter(function (x) { return x.name == token; });
         if (matchingParameters.length != 0) {
             var lastParam = matchingParameters[matchingParameters.length - 1];
             var paramIndex = parameters.indexOf(lastParam);
