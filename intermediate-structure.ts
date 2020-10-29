@@ -23,7 +23,7 @@ export class ASTFunction {
     // ops: 
 }
 
-type ASTParameter = { name: string, type: string };
+export type ASTParameter = { name: string, type: string };
 enum ConstantType { "int", "long", "float", "double" }
 type FunctionType = { name: string, id: Number }
 type OpsType = { name: string } // operation type // TODO: type checking
@@ -32,3 +32,7 @@ type ASTAction =
     | [ConstantType, number]
     | [FunctionType]
     | [OpsType];
+
+// type ErrorMessage = { name: string, description: string };
+export type FunctionParser = (input: ASTFunction) => ASTFunction;// | ErrorMessage;
+export type ModuleParser = (input: ASTFunction) => ASTFunction;// | ErrorMessage;
