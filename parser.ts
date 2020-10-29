@@ -53,6 +53,7 @@ var extractName: FunctionParser = (item: ASTFunction) => {
 var extractResults: FunctionParser = (input: ASTFunction) => {
     var tokens = input.words;
     var index = 0;
+    var fnIndex = tokens.indexOf("fn", index);
 
     var functionEqualIndex = tokens.indexOf("=", index);
     if (functionEqualIndex < 0) {
@@ -62,7 +63,7 @@ var extractResults: FunctionParser = (input: ASTFunction) => {
     if (functionEndIndex < 0) {
         throw new Error('No ; ending for ' + tokens[index + 1]);
     }
-    var additionalParameters = tokens.slice(index + 2, functionEqualIndex);
+    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex);
     for (var i = 0; i < additionalParameters.length; i++) {
         var item = additionalParameters[i];
         if (item.indexOf(':') == -1) {
@@ -77,6 +78,7 @@ var extractResults: FunctionParser = (input: ASTFunction) => {
 var extractParameters: FunctionParser = (input: ASTFunction) => {
     var tokens = input.words;
     var index = 0;
+    var fnIndex = tokens.indexOf("fn", index);
 
     var functionEqualIndex = tokens.indexOf("=", index);
     if (functionEqualIndex < 0) {
@@ -86,9 +88,9 @@ var extractParameters: FunctionParser = (input: ASTFunction) => {
     if (functionEndIndex < 0) {
         throw new Error('No ; ending for ' + tokens[index + 1]);
     }
-    var parameters = buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1));
+    var parameters = buildParameterList(tokens[fnIndex + 1].substring(1, tokens[fnIndex + 1].length - 1));
 
-    var additionalParameters = tokens.slice(index + 2, functionEqualIndex - 1);
+    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex - 1);
     for (var i = 0; i < additionalParameters.length; i++) {
         var item = additionalParameters[i];
         if (item.indexOf(':') != -1) {
