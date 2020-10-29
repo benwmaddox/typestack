@@ -6,7 +6,7 @@ export class Lexer {
         var withinDoubleQuote = false;
         var withinComment = false;
         for (var i = 0; i < text.length; i++) {
-            if (text[i] == "'") {
+            if (text[i] == "'" && !withinComment) {
                 currentToken += text[i];
                 withinSingleQuote = !withinSingleQuote;
             }

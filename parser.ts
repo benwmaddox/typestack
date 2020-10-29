@@ -55,7 +55,7 @@ var extractParameters: FunctionParser = (input: ASTFunction) => {
     // var fnIndex = item.words.indexOf("fn");
     // var equalIndex = item.words.indexOf("=");    
     var index = 0;
-    return input;
+
     var functionEqualIndex = tokens.indexOf("=", index);
     if (functionEqualIndex < 0) {
         throw new Error('No = for function ' + tokens[index + 1]);
