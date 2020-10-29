@@ -20,6 +20,9 @@ export class ASTFunction {
     words: Array<string> = [];
 
     actions: Array<ASTAction> = [];
+
+
+    shouldExport: boolean = false;
     // ops: 
 }
 

@@ -5,7 +5,7 @@ var intermediate_structure_1 = require("./intermediate-structure");
 var Parser = /** @class */ (function () {
     function Parser() {
     }
-    Parser.prototype.ParseModule = function (name, tokens) {
+    Parser.prototype.parseModule = function (name, tokens) {
         var module = new intermediate_structure_1.ASTModule();
         module.name = name;
         module.imports = [];
@@ -14,7 +14,7 @@ var Parser = /** @class */ (function () {
         while (i < tokens.length) {
             if (tokens[i] == "fn" && i > previousFunctionEnd) {
                 var end = (tokens.lastIndexOf(";", i) + 1) || i;
-                var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
+                var func = this.parseFunction(tokens.slice(previousFunctionEnd, end));
                 previousFunctionEnd = (tokens.lastIndexOf(";", i) + 1) || i;
                 module.functions.push(func);
             }
@@ -22,16 +22,19 @@ var Parser = /** @class */ (function () {
         }
         ;
         var end = (tokens.lastIndexOf(";", i) + 1) || i;
-        var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
+        var func = this.parseFunction(tokens.slice(previousFunctionEnd, end));
         module.functions.push(func);
         return module;
     };
-    Parser.prototype.ParseFunction = function (tokens) {
+    Parser.prototype.parseFunction = function (tokens) {
         var func = new intermediate_structure_1.ASTFunction();
         func.words = tokens;
         func = extractName(func);
         func = extractParameters(func);
         func = extractResults(func);
+        // Change words:
+        // start with first, try to find matching scoped value, then user defined function, then user macro, then compiler action matching that word
+        // After each iteration, return Actions and unparsed words. Those will be picked up by next iteration
         // TODO: collect error messages 
         return func;
     };

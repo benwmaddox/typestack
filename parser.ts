@@ -2,7 +2,7 @@ import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTPar
 import { match } from 'assert';
 
 export class Parser {
-    ParseModule(name: string, tokens: Array<string>): ASTModule {
+    parseModule(name: string, tokens: Array<string>): ASTModule {
         var module = new ASTModule();
 
         module.name = name;
@@ -13,7 +13,7 @@ export class Parser {
         while (i < tokens.length) {
             if (tokens[i] == "fn" && i > previousFunctionEnd) {
                 var end = (tokens.lastIndexOf(";", i) + 1) || i;
-                var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
+                var func = this.parseFunction(tokens.slice(previousFunctionEnd, end));
                 previousFunctionEnd = (tokens.lastIndexOf(";", i) + 1) || i;
                 module.functions.push(func);
             }
@@ -21,19 +21,26 @@ export class Parser {
         };
 
         var end = (tokens.lastIndexOf(";", i) + 1) || i;
-        var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
+        var func = this.parseFunction(tokens.slice(previousFunctionEnd, end));
         module.functions.push(func);
 
         return module;
     }
 
-    ParseFunction(tokens: Array<string>): ASTFunction {
+    parseFunction(tokens: Array<string>): ASTFunction {
         var func = new ASTFunction();
         func.words = tokens;
 
         func = extractName(func);
         func = extractParameters(func);
         func = extractResults(func);
+
+        // Change words:
+
+        // start with first, try to find matching scoped value, then user defined function, then user macro, then compiler action matching that word
+        // After each iteration, return Actions and unparsed words. Those will be picked up by next iteration
+
+
         // TODO: collect error messages 
 
         return func;

@@ -25,6 +25,7 @@ var ASTFunction = /** @class */ (function () {
         this.results = [];
         this.words = [];
         this.actions = [];
+        this.shouldExport = false;
         // ops: 
     }
     return ASTFunction;

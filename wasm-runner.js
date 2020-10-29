@@ -58,32 +58,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
 var parser_1 = require("./parser");
+var emitter_1 = require("./emitter");
 var fs = __importStar(require("fs"));
 var module = 'sample3';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
     var parser = new parser_1.Parser();
-    var astModule = parser.ParseModule(module, tokenized);
+    var astModule = parser.parseModule(module, tokenized);
+    var emmitter = new emitter_1.Emitter();
+    var bytes2 = emmitter.getBytes(astModule);
     console.log(JSON.stringify(astModule, undefined, "  "));
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
-    runWasmWithCallback(bytes, {
+    runWasmWithCallback(bytes2, {
         console: console,
         function: {
             log: console.log
         }
     }, function (item) {
         console.log(item.instance.exports);
-        // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-        // console.log((<any>item.instance.exports)['add two'](3));
-        // console.log((<any>item.instance.exports)['double'](9));
-        console.log(item.instance.exports['test']());
-        // console.log((<any>item.instance.exports)['add one twice'](3));
-        // console.log((<any>item.instance.exports)['add'](91, 9));
-        // console.log((<any>item.instance.exports)['subtract'](10, 3));
-        // console.log((<any>item.instance.exports)['less than'](1, 3));
+        // console.log((<any>item.instance.exports)['test']());
     });
+    // runWasmWithCallback(bytes, {
+    //     console: console,
+    //     function: {
+    //         log: console.log
+    //     }
+    // }, (item) => {
+    //     console.log((<any>item.instance.exports));
+    //     // var result = (<any>item.instance.exports)['add two {i:int}'](1);
+    //     // console.log((<any>item.instance.exports)['add two'](3));
+    //     // console.log((<any>item.instance.exports)['double'](9));
+    //     console.log((<any>item.instance.exports)['test']());
+    //     // console.log((<any>item.instance.exports)['add one twice'](3));
+    //     // console.log((<any>item.instance.exports)['add'](91, 9));
+    //     // console.log((<any>item.instance.exports)['subtract'](10, 3));
+    //     // console.log((<any>item.instance.exports)['less than'](1, 3));
+    // });
 });
 function buildParameterList(input) {
     var index = 0;
