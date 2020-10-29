@@ -31,6 +31,7 @@ var Parser = /** @class */ (function () {
         func.words = tokens;
         func = extractName(func);
         func = extractParameters(func);
+        func = extractResults(func);
         // TODO: collect error messages 
         return func;
     };
@@ -45,10 +46,28 @@ var extractName = function (item) {
     }
     return item;
 };
+var extractResults = function (input) {
+    var tokens = input.words;
+    var index = 0;
+    var functionEqualIndex = tokens.indexOf("=", index);
+    if (functionEqualIndex < 0) {
+        throw new Error('No = for function ' + tokens[index + 1]);
+    }
+    var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+    if (functionEndIndex < 0) {
+        throw new Error('No ; ending for ' + tokens[index + 1]);
+    }
+    var additionalParameters = tokens.slice(index + 2, functionEqualIndex);
+    for (var i = 0; i < additionalParameters.length; i++) {
+        var item = additionalParameters[i];
+        if (item.indexOf(':') == -1) {
+            input.results.push({ type: item });
+        }
+    }
+    return input;
+};
 var extractParameters = function (input) {
     var tokens = input.words;
-    // var fnIndex = item.words.indexOf("fn");
-    // var equalIndex = item.words.indexOf("=");    
     var index = 0;
     var functionEqualIndex = tokens.indexOf("=", index);
     if (functionEqualIndex < 0) {

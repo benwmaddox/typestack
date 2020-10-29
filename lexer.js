@@ -15,7 +15,7 @@ var Lexer = /** @class */ (function () {
                 currentToken += text[i];
                 withinSingleQuote = !withinSingleQuote;
             }
-            else if (text[i] == "\"") {
+            else if (text[i] == "\"" && !withinComment) {
                 currentToken += text[i];
                 withinDoubleQuote = !withinDoubleQuote;
             }

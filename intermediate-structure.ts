@@ -16,7 +16,7 @@ export class ASTImport {
 export class ASTFunction {
     name: string | null = null;
     parameters: Array<ASTParameter> = [];
-    results: Array<number> = [];
+    results: Array<ASTResult> = [];
     words: Array<string> = [];
 
     actions: Array<ASTAction> = [];
@@ -24,6 +24,7 @@ export class ASTFunction {
 }
 
 export type ASTParameter = { name: string, type: string };
+export type ASTResult = { type: string };
 enum ConstantType { "int", "long", "float", "double" }
 type FunctionType = { name: string, id: Number }
 type OpsType = { name: string } // operation type // TODO: type checking
