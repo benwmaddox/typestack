@@ -8,17 +8,19 @@ export class Parser {
         module.imports = [];
 
         var i = 0;
-        var functionEnd = 0;
+        var previousFunctionEnd = 0;
         while (i < tokens.length) {
-            if (tokens[i] == "fn" && i > functionEnd) {
-                var func = this.ParseFunction(tokens.slice(functionEnd, i));
-                functionEnd = i;
+            if (tokens[i] == "fn" && i > previousFunctionEnd) {
+                var end = (tokens.lastIndexOf(";", i) + 1) || i;
+                var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
+                previousFunctionEnd = (tokens.lastIndexOf(";", i) + 1) || i;
                 module.functions.push(func);
             }
             i++;
         };
-        var func = this.ParseFunction(tokens.slice(functionEnd, i));
-        functionEnd = i;
+
+        var end = (tokens.lastIndexOf(";", i) + 1) || i;
+        var func = this.ParseFunction(tokens.slice(previousFunctionEnd, end));
         module.functions.push(func);
 
         return module;
