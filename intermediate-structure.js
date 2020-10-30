@@ -22,7 +22,7 @@ var ASTFunction = /** @class */ (function () {
     function ASTFunction() {
         this.name = null;
         this.parameters = [];
-        this.results = [];
+        this.result = null;
         this.words = [];
         this.actions = [];
         this.shouldExport = false;

@@ -16,7 +16,7 @@ export class ASTImport {
 export class ASTFunction {
     name: string | null = null;
     parameters: Array<ASTParameter> = [];
-    results: Array<ASTResult> = [];
+    result: ASTResult | null = null;
     words: Array<string> = [];
 
     actions: Array<ASTAction> = [];

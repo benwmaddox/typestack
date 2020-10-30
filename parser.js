@@ -65,7 +65,7 @@ var extractResults = function (input) {
     for (var i = 0; i < additionalParameters.length; i++) {
         var item = additionalParameters[i];
         if (item.indexOf(':') == -1) {
-            input.results.push({ type: item });
+            input.result = { type: item };
         }
     }
     return input;
