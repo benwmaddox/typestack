@@ -20,7 +20,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     // console.log(JSON.stringify(astModule, undefined, "  "));
 
     var contextParser = new ContextParser();
-    var contextParsed = contextParser.parse(BaseContext, tokenized);
+    var contextParsed = contextParser.parse(Object.create(BaseContext), tokenized, []);
     console.log(contextParsed);
 
     var bytes = runIntoWasm(tokenized);
