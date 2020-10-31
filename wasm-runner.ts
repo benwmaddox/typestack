@@ -1,7 +1,7 @@
 import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
 import { Parser } from './parser'
-import { ContextParser, BaseContext } from './context-parser'
+import { ContextParser, BaseContext, ParsedExpression } from './context-parser'
 import { Emitter } from './emitter'
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
@@ -20,8 +20,13 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     // console.log(JSON.stringify(astModule, undefined, "  "));
 
     var contextParser = new ContextParser();
-    var contextParsed = contextParser.parse(Object.create(BaseContext), tokenized, []);
-    console.log(contextParsed);
+    var expressions: Array<ParsedExpression> = [];
+    var context = Object.create(BaseContext);
+    var remainingWords = contextParser.parse(context, tokenized, expressions);
+    console.log(expressions);
+    console.log(context);
+    console.log(Object.getPrototypeOf(context));
+
 
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
@@ -287,4 +292,5 @@ function bodyTokensToOps(definition: any): Array<number> {
 async function runWasmWithCallback(bytes: Uint8Array, importObject: any, callback: (result: WebAssembly.WebAssemblyInstantiatedSource) => void) {
     const instance = await WebAssembly.instantiate(bytes, importObject).then(callback);
 }
+
 
