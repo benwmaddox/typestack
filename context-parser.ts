@@ -87,12 +87,15 @@ export var BaseContext: ContextDictionary = {
     'fn': {
         //newContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
+
             var parameters = extractParameters(words);
             // console.log("---extracting parameters")
             // console.log(parameters);
             // console.log("---new context")
-            var newContext = context;//<ContextDictionary>Object.create(context);
-            var functionName = words[0];
+            var newContext = context;//<ContextDictionary>Object.create(context);            
+            var fnIndex = words.indexOf("fn");
+            var functionName = words[fnIndex + 1];
+            console.log('fn index ' + fnIndex);
             var contextItem: ContextItem = {
                 types: [
                     {
@@ -104,30 +107,27 @@ export var BaseContext: ContextDictionary = {
                 ]
             };
             expressions.push({ desc: "Defining: " + functionName })
-
             newContext[functionName] = contextItem;
-
 
             var functionEqualIndex = words.indexOf("=");
             var functionEndIndex = words.indexOf(";", functionEqualIndex);
             console.log('starting words')
-            console.log(words)
-            console.log('after fn parse');
-            console.log(words.slice(functionEndIndex));
-            return { context: newContext, words: words.slice(functionEndIndex), expressions };
+            console.log(words.slice(0, functionEqualIndex))
+            // console.log('after fn parse');
+            // console.log(words.slice(functionEndIndex));
+            return { context: newContext, words: words.slice(functionEndIndex - 1), expressions };
+
         }
     },
     'var': {
         newContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
             return { context, words, expressions };
         }
     },
     ';': {
         popContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
             return { context, words, expressions };
         }
     }, // opCodes: [Opcodes.end],
@@ -196,7 +196,7 @@ export class ContextParser {
                     }
                 }
                 else if (match.parse) {
-                    var parseResults = match.parse(context, words.slice(1), expressions);
+                    var parseResults = match.parse(context, words, expressions);
                     // console.log(parseResults);
                     context = parseResults.context;
                     words = parseResults.words;
@@ -224,6 +224,7 @@ export class ContextParser {
 
             }
         }
+
         return this.parse(context, words.slice(1), expressions);
     }
 }

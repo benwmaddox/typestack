@@ -64,8 +64,10 @@ exports.BaseContext = {
             // console.log("---extracting parameters")
             // console.log(parameters);
             // console.log("---new context")
-            var newContext = context; //<ContextDictionary>Object.create(context);
-            var functionName = words[0];
+            var newContext = context; //<ContextDictionary>Object.create(context);            
+            var fnIndex = words.indexOf("fn");
+            var functionName = words[fnIndex + 1];
+            console.log('fn index ' + fnIndex);
             var contextItem = {
                 types: [
                     {
@@ -80,10 +82,10 @@ exports.BaseContext = {
             var functionEqualIndex = words.indexOf("=");
             var functionEndIndex = words.indexOf(";", functionEqualIndex);
             console.log('starting words');
-            console.log(words);
-            console.log('after fn parse');
-            console.log(words.slice(functionEndIndex));
-            return { context: newContext, words: words.slice(functionEndIndex), expressions: expressions };
+            console.log(words.slice(0, functionEqualIndex));
+            // console.log('after fn parse');
+            // console.log(words.slice(functionEndIndex));
+            return { context: newContext, words: words.slice(functionEndIndex - 1), expressions: expressions };
         }
     },
     'var': {
@@ -158,7 +160,7 @@ var ContextParser = /** @class */ (function () {
                     }
                 }
                 else if (match.parse) {
-                    var parseResults = match.parse(context, words.slice(1), expressions);
+                    var parseResults = match.parse(context, words, expressions);
                     // console.log(parseResults);
                     context = parseResults.context;
                     words = parseResults.words;
