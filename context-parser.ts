@@ -3,25 +3,35 @@ import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTPar
 import { match } from 'assert';
 
 export type ContextItem = {
+    newContext?: boolean,
+    popContext?: boolean,
+    types?: Array<ContextType>
+}
+export type ContextType = {
     inputTypes?: Array<string>,
     outputTypes?: Array<string>,
-    opCodes?: Array<Opcodes>,
-    newContext?: boolean,
-    popContext?: boolean
+    opCodes?: Array<Opcodes>
 }
 
 export var BaseContext: { [index: string]: ContextItem } = {
-    "export": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined },
-    "fn": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined, newContext: true },
-    "var": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined, newContext: true },
-    ";": { inputTypes: undefined, outputTypes: undefined, opCodes: [Opcodes.end], popContext: true },
-    '+': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32Add] },
-    '*': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32Mul] },
-    '-': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32Sub] },
-    '<': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32LessThanSigned] },
-    '==': { inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32Equals] },
-    '==0': { inputTypes: ['int'], outputTypes: ['bool'], opCodes: [Opcodes.i32EqualsZero] },
-    '&&': { inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32And] },
+    "export": {},
+    "fn": { newContext: true },
+    "var": { newContext: true },
+    ";": { popContext: true }, // opCodes: [Opcodes.end],
+    '+': {
+        types: [
+            { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32add] },
+            { inputTypes: ['long', 'long'], outputTypes: ['long'], opCodes: [Opcodes.i64add] },
+            { inputTypes: ['float', 'float'], outputTypes: ['float'], opCodes: [Opcodes.f32add] },
+            { inputTypes: ['double', 'double'], outputTypes: ['double'], opCodes: [Opcodes.f64add] },
+        ]
+    },
+    '*': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32mul] }] },
+    '-': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32sub] }] },
+    '<': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32le_s] }] },
+    '==': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32eq] }] },
+    '==0': { types: [{ inputTypes: ['int'], outputTypes: ['bool'], opCodes: [Opcodes.i32eqz] }] },
+    '&&': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32and] }] },
 
 };
 

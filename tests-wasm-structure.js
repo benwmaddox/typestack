@@ -10,7 +10,7 @@ function byteDifferences(a, b) {
         0,
         wasm_structure_1.Opcodes.get_local, 0,
         wasm_structure_1.Opcodes.get_local, 1,
-        wasm_structure_1.Opcodes.i32Add,
+        wasm_structure_1.Opcodes.i32add,
         wasm_structure_1.Opcodes.end
     ]);
     // Expected bytes as geneted by tool

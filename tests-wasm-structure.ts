@@ -12,7 +12,7 @@ function byteDifferences(a: Uint8Array, b: Uint8Array) {
         0, // Declcount
         Opcodes.get_local, 0,
         Opcodes.get_local, 1,
-        Opcodes.i32Add,
+        Opcodes.i32add,
         Opcodes.end
     ]);
     // Expected bytes as geneted by tool

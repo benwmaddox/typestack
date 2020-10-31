@@ -80,13 +80,13 @@ var dictionary: Array<DictionaryItem> = [];
 
 function builtInWords(): Array<DictionaryItem> {
     var results: Array<DictionaryItem> = [];
-    results.push({ name: '+', OpsCodes: [Opcodes.i32Add] });
-    results.push({ name: '*', OpsCodes: [Opcodes.i32Mul] });
-    results.push({ name: '-', OpsCodes: [Opcodes.i32Sub] });
-    results.push({ name: '<', OpsCodes: [Opcodes.i32LessThanSigned] });
-    results.push({ name: '==', OpsCodes: [Opcodes.i32Equals] });
-    results.push({ name: '==0', OpsCodes: [Opcodes.i32EqualsZero] });
-    results.push({ name: '&&', OpsCodes: [Opcodes.i32And] });
+    results.push({ name: '+', OpsCodes: [Opcodes.i32add] });
+    results.push({ name: '*', OpsCodes: [Opcodes.i32mul] });
+    results.push({ name: '-', OpsCodes: [Opcodes.i32sub] });
+    results.push({ name: '<', OpsCodes: [Opcodes.i32lt_s] });
+    results.push({ name: '==', OpsCodes: [Opcodes.i32eq] });
+    results.push({ name: '==0', OpsCodes: [Opcodes.i32eqz] });
+    results.push({ name: '&&', OpsCodes: [Opcodes.i32and] });
 
     return results;
 }

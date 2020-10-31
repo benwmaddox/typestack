@@ -117,13 +117,13 @@ function buildParameterList(input) {
 var dictionary = [];
 function builtInWords() {
     var results = [];
-    results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32Add] });
-    results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32Mul] });
-    results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32Sub] });
-    results.push({ name: '<', OpsCodes: [wasm_structure_1.Opcodes.i32LessThanSigned] });
-    results.push({ name: '==', OpsCodes: [wasm_structure_1.Opcodes.i32Equals] });
-    results.push({ name: '==0', OpsCodes: [wasm_structure_1.Opcodes.i32EqualsZero] });
-    results.push({ name: '&&', OpsCodes: [wasm_structure_1.Opcodes.i32And] });
+    results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32add] });
+    results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32mul] });
+    results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32sub] });
+    results.push({ name: '<', OpsCodes: [wasm_structure_1.Opcodes.i32lt_s] });
+    results.push({ name: '==', OpsCodes: [wasm_structure_1.Opcodes.i32eq] });
+    results.push({ name: '==0', OpsCodes: [wasm_structure_1.Opcodes.i32eqz] });
+    results.push({ name: '&&', OpsCodes: [wasm_structure_1.Opcodes.i32and] });
     return results;
 }
 function runIntoWasm(tokens) {

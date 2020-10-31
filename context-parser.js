@@ -3,17 +3,24 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContextParser = exports.BaseContext = void 0;
 var wasm_structure_1 = require("./wasm-structure");
 exports.BaseContext = {
-    "export": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined },
-    "fn": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined, newContext: true },
-    "var": { inputTypes: undefined, outputTypes: undefined, opCodes: undefined, newContext: true },
-    ";": { inputTypes: undefined, outputTypes: undefined, opCodes: [wasm_structure_1.Opcodes.end], popContext: true },
-    '+': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32Add] },
-    '*': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32Mul] },
-    '-': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32Sub] },
-    '<': { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32LessThanSigned] },
-    '==': { inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32Equals] },
-    '==0': { inputTypes: ['int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32EqualsZero] },
-    '&&': { inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32And] },
+    "export": {},
+    "fn": { newContext: true },
+    "var": { newContext: true },
+    ";": { popContext: true },
+    '+': {
+        types: [
+            { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32add] },
+            { inputTypes: ['long', 'long'], outputTypes: ['long'], opCodes: [wasm_structure_1.Opcodes.i64add] },
+            { inputTypes: ['float', 'float'], outputTypes: ['float'], opCodes: [wasm_structure_1.Opcodes.f32add] },
+            { inputTypes: ['double', 'double'], outputTypes: ['double'], opCodes: [wasm_structure_1.Opcodes.f64add] },
+        ]
+    },
+    '*': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
+    '-': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
+    '<': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32le_s] }] },
+    '==': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
+    '==0': { types: [{ inputTypes: ['int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
+    '&&': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
 };
 var ContextParser = /** @class */ (function () {
     function ContextParser() {
