@@ -72,8 +72,9 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var expressions = [];
     var context = Object.create(context_parser_1.BaseContext);
     var remainingWords = contextParser.parse(context, tokenized, expressions);
-    console.log(expressions);
-    console.log(context);
+    // console.log(expressions);
+    console.log(JSON.stringify(expressions, undefined, "  "));
+    console.log(JSON.stringify(context, undefined, "  "));
     console.log(Object.getPrototypeOf(context));
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);

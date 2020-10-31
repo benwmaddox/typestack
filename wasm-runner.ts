@@ -23,8 +23,9 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var expressions: Array<ParsedExpression> = [];
     var context = Object.create(BaseContext);
     var remainingWords = contextParser.parse(context, tokenized, expressions);
-    console.log(expressions);
-    console.log(context);
+    // console.log(expressions);
+    console.log(JSON.stringify(expressions, undefined, "  "));
+    console.log(JSON.stringify(context, undefined, "  "));
     console.log(Object.getPrototypeOf(context));
 
 

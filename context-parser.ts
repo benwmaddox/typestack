@@ -12,7 +12,9 @@ export type ContextItem = {
 export type ContextType = {
     input?: Array<string>,
     output?: Array<string>,
-    opCodes?: Array<Opcodes>
+    parameters?: Array<string>,
+    opCodes?: Array<Opcodes>,
+
 }
 
 
@@ -63,6 +65,30 @@ var extractParameters = (tokens: Array<string>) => {
     return parameters;
 }
 
+var extractResults = (tokens: Array<string>) => {
+    var index = 0;
+    var fnIndex = tokens.indexOf("fn", index);
+
+    var functionEqualIndex = tokens.indexOf("=", index);
+    if (functionEqualIndex < 0) {
+        throw new Error('No = for function ' + tokens[index + 1]);
+    }
+    var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+    if (functionEndIndex < 0) {
+        throw new Error('No ; ending for ' + tokens[index + 1]);
+    }
+    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex);
+    var results: Array<string> = [];
+    for (var i = 0; i < additionalParameters.length; i++) {
+        var item = additionalParameters[i];
+        if (item.indexOf(':') == -1) {
+            results.push(item)
+        }
+    }
+
+    return results;
+}
+
 
 export type ContextDictionary = { [index: string]: ContextItem };
 export var BaseContext: ContextDictionary = {
@@ -95,24 +121,25 @@ export var BaseContext: ContextDictionary = {
             var newContext = context;//<ContextDictionary>Object.create(context);            
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
-            console.log('fn index ' + fnIndex);
+            // console.log('fn index ' + fnIndex);
             var contextItem: ContextItem = {
                 types: [
                     {
-                        input: [],
-                        output: [],
+                        input: parameters.map(x => x.type),
+                        parameters: parameters.map(x => x.name),
+                        output: extractResults(words),
                         // opCodes
                     }
                     // TODO: define reference that can be modified and used elsewhere?
                 ]
             };
-            expressions.push({ desc: "Defining: " + functionName })
+
             newContext[functionName] = contextItem;
 
             var functionEqualIndex = words.indexOf("=");
             var functionEndIndex = words.indexOf(";", functionEqualIndex);
-            console.log('starting words')
-            console.log(words.slice(0, functionEqualIndex))
+            // console.log('starting words')
+            // console.log(words.slice(0, functionEqualIndex))
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
             return { context: newContext, words: words.slice(functionEndIndex - 1), expressions };
@@ -207,7 +234,7 @@ export class ContextParser {
                     expressions.push({ desc: "Did not understand: " + nextWord });
                 }
                 if (match.popContext === true) {
-                    expressions.push({ desc: "Removed context level " });
+                    // expressions.push({ desc: "Removed context level " });
                     // console.log('    Removing context level')
                     // context = Object.getPrototypeOf(context);
                 }

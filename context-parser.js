@@ -41,6 +41,27 @@ var extractParameters = function (tokens) {
     }
     return parameters;
 };
+var extractResults = function (tokens) {
+    var index = 0;
+    var fnIndex = tokens.indexOf("fn", index);
+    var functionEqualIndex = tokens.indexOf("=", index);
+    if (functionEqualIndex < 0) {
+        throw new Error('No = for function ' + tokens[index + 1]);
+    }
+    var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+    if (functionEndIndex < 0) {
+        throw new Error('No ; ending for ' + tokens[index + 1]);
+    }
+    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex);
+    var results = [];
+    for (var i = 0; i < additionalParameters.length; i++) {
+        var item = additionalParameters[i];
+        if (item.indexOf(':') == -1) {
+            results.push(item);
+        }
+    }
+    return results;
+};
 exports.BaseContext = {
     'export': {
         parse: function (context, words, expressions) {
@@ -67,22 +88,22 @@ exports.BaseContext = {
             var newContext = context; //<ContextDictionary>Object.create(context);            
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
-            console.log('fn index ' + fnIndex);
+            // console.log('fn index ' + fnIndex);
             var contextItem = {
                 types: [
                     {
-                        input: [],
-                        output: [],
+                        input: parameters.map(function (x) { return x.type; }),
+                        parameters: parameters.map(function (x) { return x.name; }),
+                        output: extractResults(words),
                     }
                     // TODO: define reference that can be modified and used elsewhere?
                 ]
             };
-            expressions.push({ desc: "Defining: " + functionName });
             newContext[functionName] = contextItem;
             var functionEqualIndex = words.indexOf("=");
             var functionEndIndex = words.indexOf(";", functionEqualIndex);
-            console.log('starting words');
-            console.log(words.slice(0, functionEqualIndex));
+            // console.log('starting words')
+            // console.log(words.slice(0, functionEqualIndex))
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
             return { context: newContext, words: words.slice(functionEndIndex - 1), expressions: expressions };
@@ -171,7 +192,7 @@ var ContextParser = /** @class */ (function () {
                     expressions.push({ desc: "Did not understand: " + nextWord });
                 }
                 if (match.popContext === true) {
-                    expressions.push({ desc: "Removed context level " });
+                    // expressions.push({ desc: "Removed context level " });
                     // console.log('    Removing context level')
                     // context = Object.getPrototypeOf(context);
                 }
