@@ -9,18 +9,18 @@ exports.BaseContext = {
     ';': { popContext: true },
     '+': {
         types: [
-            { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32add] },
-            { inputTypes: ['long', 'long'], outputTypes: ['long'], opCodes: [wasm_structure_1.Opcodes.i64add] },
-            { inputTypes: ['float', 'float'], outputTypes: ['float'], opCodes: [wasm_structure_1.Opcodes.f32add] },
-            { inputTypes: ['double', 'double'], outputTypes: ['double'], opCodes: [wasm_structure_1.Opcodes.f64add] },
+            { input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32add] },
+            { input: ['long', 'long'], output: ['long'], opCodes: [wasm_structure_1.Opcodes.i64add] },
+            { input: ['float', 'float'], output: ['float'], opCodes: [wasm_structure_1.Opcodes.f32add] },
+            { input: ['double', 'double'], output: ['double'], opCodes: [wasm_structure_1.Opcodes.f64add] },
         ]
     },
-    '*': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
-    '-': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
-    '<': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32le_s] }] },
-    '==': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
-    '==0': { types: [{ inputTypes: ['int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
-    '&&': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
+    '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
+    '-': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
+    '<': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32le_s] }] },
+    '==': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
+    '==0': { types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
+    '&&': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
 };
 var ContextParser = /** @class */ (function () {
     function ContextParser() {
@@ -38,11 +38,18 @@ var ContextParser = /** @class */ (function () {
         else {
             // Lookup through context
             if (context[nextWord]) {
+                var match = context[nextWord];
                 console.log(nextWord);
-                if (context[nextWord].types) {
+                if (match.types) {
                     // TODO: find actual matching type                
-                    var matchedType = context[nextWord].types[0];
+                    var matchedType = match.types[0];
                     console.log(matchedType);
+                }
+                if (match.newContext === true) {
+                    context = Object.create(context);
+                }
+                if (match.popContext === true) {
+                    context = Object.getPrototypeOf(context);
                 }
             }
             else {

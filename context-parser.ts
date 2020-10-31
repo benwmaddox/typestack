@@ -8,8 +8,8 @@ export type ContextItem = {
     types?: Array<ContextType>
 }
 export type ContextType = {
-    inputTypes?: Array<string>,
-    outputTypes?: Array<string>,
+    input?: Array<string>,
+    output?: Array<string>,
     opCodes?: Array<Opcodes>
 }
 
@@ -21,18 +21,18 @@ export var BaseContext: ContextDictionary = {
     ';': { popContext: true }, // opCodes: [Opcodes.end],
     '+': {
         types: [
-            { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32add] },
-            { inputTypes: ['long', 'long'], outputTypes: ['long'], opCodes: [Opcodes.i64add] },
-            { inputTypes: ['float', 'float'], outputTypes: ['float'], opCodes: [Opcodes.f32add] },
-            { inputTypes: ['double', 'double'], outputTypes: ['double'], opCodes: [Opcodes.f64add] },
+            { input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32add] },
+            { input: ['long', 'long'], output: ['long'], opCodes: [Opcodes.i64add] },
+            { input: ['float', 'float'], output: ['float'], opCodes: [Opcodes.f32add] },
+            { input: ['double', 'double'], output: ['double'], opCodes: [Opcodes.f64add] },
         ]
     },
-    '*': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32mul] }] },
-    '-': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32sub] }] },
-    '<': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32le_s] }] },
-    '==': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32eq] }] },
-    '==0': { types: [{ inputTypes: ['int'], outputTypes: ['bool'], opCodes: [Opcodes.i32eqz] }] },
-    '&&': { types: [{ inputTypes: ['int', 'int'], outputTypes: ['bool'], opCodes: [Opcodes.i32and] }] },
+    '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32mul] }] },
+    '-': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32sub] }] },
+    '<': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32le_s] }] },
+    '==': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32eq] }] },
+    '==0': { types: [{ input: ['int'], output: ['bool'], opCodes: [Opcodes.i32eqz] }] },
+    '&&': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32and] }] },
 
 };
 
@@ -50,11 +50,18 @@ export class ContextParser {
         else {
             // Lookup through context
             if (context[nextWord]) {
+                var match = context[nextWord];
                 console.log(nextWord);
-                if (context[nextWord].types) {
+                if (match.types) {
                     // TODO: find actual matching type                
-                    var matchedType: ContextType = context[nextWord].types![0];
+                    var matchedType: ContextType = match.types![0];
                     console.log(matchedType)
+                }
+                if (match.newContext === true) {
+                    context = Object.create(context);
+                }
+                if (match.popContext === true) {
+                    context = Object.getPrototypeOf(context);
                 }
             }
             else {
