@@ -57,29 +57,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
-var parser_1 = require("./parser");
-var emitter_1 = require("./emitter");
+var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
 var module = 'sample3';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
-    var parser = new parser_1.Parser();
-    var astModule = parser.parseModule(module, tokenized);
-    var emmitter = new emitter_1.Emitter();
-    var bytes2 = emmitter.getBytes(astModule);
-    console.log(JSON.stringify(astModule, undefined, "  "));
+    // var parser = new Parser();    
+    // var astModule = parser.parseModule(module, tokenized);
+    // var emmitter = new Emitter();
+    // var bytes2 = emmitter.getBytes(astModule);
+    // console.log(JSON.stringify(astModule, undefined, "  "));
+    var contextParser = new context_parser_1.ContextParser();
+    var contextParsed = contextParser.parse(context_parser_1.BaseContext, tokenized);
+    console.log(contextParsed);
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
-    runWasmWithCallback(bytes2, {
-        console: console,
-        function: {
-            log: console.log
-        }
-    }, function (item) {
-        console.log(item.instance.exports);
-        // console.log((<any>item.instance.exports)['test']());
-    });
+    // runWasmWithCallback(bytes2, {
+    //     console: console,
+    //     function: {
+    //         log: console.log
+    //     }
+    // }, (item) => {
+    //     console.log((<any>item.instance.exports));
+    //     // console.log((<any>item.instance.exports)['test']());
+    // });
     // runWasmWithCallback(bytes, {
     //     console: console,
     //     function: {

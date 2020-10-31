@@ -1,6 +1,7 @@
 import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
 import { Parser } from './parser'
+import { ContextParser, BaseContext } from './context-parser'
 import { Emitter } from './emitter'
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
@@ -12,23 +13,28 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 
     var lexer = new Lexer();
     var tokenized = lexer.tokenize(data);
-    var parser = new Parser();
-    var astModule = parser.parseModule(module, tokenized);
-    var emmitter = new Emitter();
-    var bytes2 = emmitter.getBytes(astModule);
-    console.log(JSON.stringify(astModule, undefined, "  "));
+    // var parser = new Parser();    
+    // var astModule = parser.parseModule(module, tokenized);
+    // var emmitter = new Emitter();
+    // var bytes2 = emmitter.getBytes(astModule);
+    // console.log(JSON.stringify(astModule, undefined, "  "));
+
+    var contextParser = new ContextParser();
+    var contextParsed = contextParser.parse(BaseContext, tokenized);
+    console.log(contextParsed);
+
     var bytes = runIntoWasm(tokenized);
     fs.writeFileSync('output.wasm', bytes);
 
-    runWasmWithCallback(bytes2, {
-        console: console,
-        function: {
-            log: console.log
-        }
-    }, (item) => {
-        console.log((<any>item.instance.exports));
-        // console.log((<any>item.instance.exports)['test']());
-    });
+    // runWasmWithCallback(bytes2, {
+    //     console: console,
+    //     function: {
+    //         log: console.log
+    //     }
+    // }, (item) => {
+    //     console.log((<any>item.instance.exports));
+    //     // console.log((<any>item.instance.exports)['test']());
+    // });
 
     // runWasmWithCallback(bytes, {
     //     console: console,

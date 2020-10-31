@@ -38,3 +38,8 @@ var ConstantType;
     ConstantType[ConstantType["float"] = 2] = "float";
     ConstantType[ConstantType["double"] = 3] = "double";
 })(ConstantType || (ConstantType = {}));
+// export class Context {
+//     children: Array<Context> = [];
+//     unparsedWords: Array<string> = [];
+//     ops: Int8Array | undefined = undefined;
+// }

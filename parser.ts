@@ -1,3 +1,4 @@
+
 import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTParameter } from './intermediate-structure';
 import { match } from 'assert';
 

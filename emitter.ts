@@ -1,4 +1,4 @@
-import { ASTModule, ASTParameter, ASTResult } from "./intermediate-structure";
+import { ASTModule, ASTParameter, ASTResult, ASTAction } from "./intermediate-structure";
 import { WasmStructure, WasmType } from "./wasm-structure";
 
 export class Emitter {
@@ -9,26 +9,34 @@ export class Emitter {
         var result = new Uint8Array();
 
         var wasmStructure = new WasmStructure();
-        ;
-        // wasmStructure.addFunction()
+
+
         for (var i = 0; i < module.functions.length; i++) {
             var func = module.functions[i];
             if (func.shouldExport && func.name) {
                 if (func.name) {
-                    var exportIDs = wasmStructure.AddExportFunction(func.name, this.convertASTParametersToWasm(func.parameters), this.convertASTResultToWasm(func.result) || WasmType.i32, []);
+                    var exportIDs = wasmStructure.AddExportFunction(func.name, this.convertASTParametersToWasm(func.parameters), this.convertASTResultToWasm(func.result) || WasmType.i32,
+                        this.buildFunctionBody(func.actions));
                 }
                 else {
                     throw new Error("Missing function name with export");
                 }
             }
             else {
-                var functionIDs = wasmStructure.AddFunctionDetails(this.convertASTParametersToWasm(func.parameters), this.convertASTResultToWasm(func.result) || WasmType.i32, []);
+                var functionIDs = wasmStructure.AddFunctionDetails(this.convertASTParametersToWasm(func.parameters), this.convertASTResultToWasm(func.result) || WasmType.i32,
+                    this.buildFunctionBody(func.actions));
             }
         }
 
-
-
         return wasmStructure.getBytes();
+    }
+
+    buildFunctionBody(actions: Array<ASTAction>): number[] {
+        var results: Array<number> = [];
+
+        // TODO ..............................................................................................................
+
+        return results;
     }
 
     convertASTParametersToWasm(input: Array<ASTParameter>): Array<WasmType> {

@@ -30,9 +30,9 @@ export type ASTParameter = { name: string, type: string };
 export type ASTResult = { type: string };
 enum ConstantType { "int", "long", "float", "double" }
 type FunctionType = { name: string, id: Number }
-type OpsType = { name: string } // operation type // TODO: type checking
+export type OpsType = { name: string } // operation type // TODO: type checking
 
-type ASTAction =
+export type ASTAction =
     | [ConstantType, number]
     | [FunctionType]
     | [OpsType];
@@ -40,3 +40,14 @@ type ASTAction =
 // type ErrorMessage = { name: string, description: string };
 export type FunctionParser = (input: ASTFunction) => ASTFunction;// | ErrorMessage;
 export type ModuleParser = (input: ASTFunction) => ASTFunction;// | ErrorMessage;
+
+
+
+// export class Context {
+//     children: Array<Context> = [];
+
+//     unparsedWords: Array<string> = [];
+
+
+//     ops: Int8Array | undefined = undefined;
+// }
