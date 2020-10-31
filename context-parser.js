@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContextParser = exports.BaseContext = void 0;
 var wasm_structure_1 = require("./wasm-structure");
 exports.BaseContext = {
-    "export": {},
-    "fn": { newContext: true },
-    "var": { newContext: true },
-    ";": { popContext: true },
+    'export': {},
+    'fn': { newContext: true },
+    'var': { newContext: true },
+    ';': { popContext: true },
     '+': {
         types: [
             { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [wasm_structure_1.Opcodes.i32add] },
@@ -39,7 +39,11 @@ var ContextParser = /** @class */ (function () {
             // Lookup through context
             if (context[nextWord]) {
                 console.log(nextWord);
-                console.log(context[nextWord]);
+                if (context[nextWord].types) {
+                    // TODO: find actual matching type                
+                    var matchedType = context[nextWord].types[0];
+                    console.log(matchedType);
+                }
             }
             else {
                 // number? 

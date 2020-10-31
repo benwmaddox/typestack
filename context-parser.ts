@@ -13,11 +13,12 @@ export type ContextType = {
     opCodes?: Array<Opcodes>
 }
 
-export var BaseContext: { [index: string]: ContextItem } = {
-    "export": {},
-    "fn": { newContext: true },
-    "var": { newContext: true },
-    ";": { popContext: true }, // opCodes: [Opcodes.end],
+export type ContextDictionary = { [index: string]: ContextItem };
+export var BaseContext: ContextDictionary = {
+    'export': {},
+    'fn': { newContext: true },
+    'var': { newContext: true },
+    ';': { popContext: true }, // opCodes: [Opcodes.end],
     '+': {
         types: [
             { inputTypes: ['int', 'int'], outputTypes: ['int'], opCodes: [Opcodes.i32add] },
@@ -36,7 +37,7 @@ export var BaseContext: { [index: string]: ContextItem } = {
 };
 
 export class ContextParser {
-    parse(context: any, words: Array<string>): any {
+    parse(context: ContextDictionary, words: Array<string>): any {
         if (words.length == 0) return null;
 
         var nextWord = words[0];
@@ -50,7 +51,11 @@ export class ContextParser {
             // Lookup through context
             if (context[nextWord]) {
                 console.log(nextWord);
-                console.log(context[nextWord]);
+                if (context[nextWord].types) {
+                    // TODO: find actual matching type                
+                    var matchedType: ContextType = context[nextWord].types![0];
+                    console.log(matchedType)
+                }
             }
             else {
                 // number? 
