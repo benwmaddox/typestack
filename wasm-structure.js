@@ -268,7 +268,7 @@ var WasmStructure = /** @class */ (function () {
     WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, parameters, result) {
         // TODO: ...
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var declCount = 0;
         // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
         var data = [];
@@ -279,7 +279,7 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
         var declCount = 0;
         var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
@@ -302,8 +302,8 @@ var WasmStructure = /** @class */ (function () {
         }
         return this.typeId++;
     };
-    WasmStructure.prototype.addFunction = function () {
-        this.functions.push(this.functionIndex);
+    WasmStructure.prototype.addFunction = function (typeIndex) {
+        this.functions.push(typeIndex);
         return this.functionIndex++;
     };
     WasmStructure.prototype.stringToUTF8 = function (text) {
@@ -340,7 +340,7 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.AddFunctionDetails = function (parameters, result, functionBody) {
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var declCount = 0;
         var codeId = this.addCode(__spreadArrays([declCount], functionBody, [Opcodes.end]));
         return {

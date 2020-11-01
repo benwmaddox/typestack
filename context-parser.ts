@@ -128,23 +128,6 @@ export var BaseContext: ContextDictionary = {
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
             // console.log('fn index ' + fnIndex);
-            var contextItem: ContextItem = {
-                types: [
-                    {
-                        input: parameters.map(x => x.type),
-                        parameters: parameters.map(x => x.name),
-                        output: extractResults(words)
-                    }
-                ],
-                functionReference: {
-                    name: functionName,
-                    typeID: undefined,
-                    functionID: undefined,
-                    exportID: undefined
-                }
-            };
-
-            context[functionName] = contextItem;
             var newContext = <ContextDictionary>Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
                 newContext[parameters[i].name] = {
@@ -159,7 +142,33 @@ export var BaseContext: ContextDictionary = {
                         }
                     ]
                 };
+
             }
+
+            var contextItem: ContextItem = {
+                types: [
+                    {
+                        input: parameters.map(x => x.type),
+                        parameters: parameters.map(x => x.name),
+                        output: extractResults(words),
+                        opCodes:
+                            // flatten opcodes
+                            Array.prototype.concat.apply([],
+                                parameters.map((x, i) =>
+                                    [Opcodes.get_local, i]))
+
+                    }
+                ],
+                functionReference: {
+                    name: functionName,
+                    typeID: undefined,
+                    functionID: undefined,
+                    exportID: undefined
+                }
+            };
+
+            context[functionName] = contextItem;
+
 
 
             var functionEqualIndex = words.indexOf("=");
@@ -169,7 +178,9 @@ export var BaseContext: ContextDictionary = {
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
             expressions.push({
-                desc: "Adding function: " + functionName
+                desc: "Adding function: " + functionName,
+                function: contextItem
+
             })
             return { context: newContext, words: words.slice(functionEqualIndex), expressions };
         }
@@ -186,7 +197,7 @@ export var BaseContext: ContextDictionary = {
 
             // If context is a function
             expressions.push({
-                ops: Opcodes.end,
+                op: Opcodes.end,
                 desc: 'End function ' //+ context.functionReference?.name
             })
 
@@ -213,7 +224,10 @@ export var BaseContext: ContextDictionary = {
 };
 
 export type ParsedExpression = {
-
+    op?: Opcodes | number | (() => number | undefined),
+    desc?: string,
+    reference?: FunctionReference,
+    function?: ContextItem
 };
 
 export class ContextParser {
@@ -222,17 +236,6 @@ export class ContextParser {
             return words;
         }
         var nextWord = words[0];
-        // if (nextWord.startsWith("'")) {
-        //     // console.log(nextWord)
-        //     expressions.push({
-        //         op: Opcodes.call, // May need indirect call. We'll see
-        //         desc: "call: " + nextWord,
-        //         reference: {}
-        //         // TODO: connect reference to something that will have IDs later
-        //         // TODO: interpolation
-        //     })
-
-        // }
         if (nextWord.startsWith("\"")) {
             // console.log(nextWord)
             // TODO string variable...

@@ -59,6 +59,7 @@ var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
 var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
+var context_emitter_1 = require("./context-emitter");
 var module = 'sample3';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
@@ -72,6 +73,8 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var expressions = [];
     var context = Object.create(context_parser_1.BaseContext);
     var remainingWords = contextParser.parse(context, tokenized, expressions);
+    var contextEmitter = new context_emitter_1.ContextEmitter();
+    var contextBytes = contextEmitter.getBytes(expressions);
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    
     // console.log(JSON.stringify(context, undefined, "  "));

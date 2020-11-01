@@ -91,22 +91,6 @@ exports.BaseContext = {
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
             // console.log('fn index ' + fnIndex);
-            var contextItem = {
-                types: [
-                    {
-                        input: parameters.map(function (x) { return x.type; }),
-                        parameters: parameters.map(function (x) { return x.name; }),
-                        output: extractResults(words)
-                    }
-                ],
-                functionReference: {
-                    name: functionName,
-                    typeID: undefined,
-                    functionID: undefined,
-                    exportID: undefined
-                }
-            };
-            context[functionName] = contextItem;
             var newContext = Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
                 newContext[parameters[i].name] = {
@@ -122,6 +106,27 @@ exports.BaseContext = {
                     ]
                 };
             }
+            var contextItem = {
+                types: [
+                    {
+                        input: parameters.map(function (x) { return x.type; }),
+                        parameters: parameters.map(function (x) { return x.name; }),
+                        output: extractResults(words),
+                        opCodes: 
+                        // flatten opcodes
+                        Array.prototype.concat.apply([], parameters.map(function (x, i) {
+                            return [wasm_structure_1.Opcodes.get_local, i];
+                        }))
+                    }
+                ],
+                functionReference: {
+                    name: functionName,
+                    typeID: undefined,
+                    functionID: undefined,
+                    exportID: undefined
+                }
+            };
+            context[functionName] = contextItem;
             var functionEqualIndex = words.indexOf("=");
             // var functionEndIndex = words.indexOf(";", functionEqualIndex);
             // console.log('starting words')
@@ -129,7 +134,8 @@ exports.BaseContext = {
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
             expressions.push({
-                desc: "Adding function: " + functionName
+                desc: "Adding function: " + functionName,
+                function: contextItem
             });
             return { context: newContext, words: words.slice(functionEqualIndex), expressions: expressions };
         }
@@ -145,7 +151,7 @@ exports.BaseContext = {
         parse: function (context, words, expressions) {
             // If context is a function
             expressions.push({
-                ops: wasm_structure_1.Opcodes.end,
+                op: wasm_structure_1.Opcodes.end,
                 desc: 'End function ' //+ context.functionReference?.name
             });
             // if context is.. a variable
@@ -175,16 +181,6 @@ var ContextParser = /** @class */ (function () {
             return words;
         }
         var nextWord = words[0];
-        // if (nextWord.startsWith("'")) {
-        //     // console.log(nextWord)
-        //     expressions.push({
-        //         op: Opcodes.call, // May need indirect call. We'll see
-        //         desc: "call: " + nextWord,
-        //         reference: {}
-        //         // TODO: connect reference to something that will have IDs later
-        //         // TODO: interpolation
-        //     })
-        // }
         if (nextWord.startsWith("\"")) {
             // console.log(nextWord)
             // TODO string variable...

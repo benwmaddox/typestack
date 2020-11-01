@@ -286,7 +286,7 @@ export class WasmStructure {
 
         // TODO: ...
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var declCount = 0;
         // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
 
@@ -299,7 +299,7 @@ export class WasmStructure {
 
     AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
         var declCount = 0;
         var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
@@ -330,8 +330,8 @@ export class WasmStructure {
     }
 
     functionIndex = 0;
-    addFunction(): number {
-        this.functions.push(this.functionIndex);
+    addFunction(typeIndex: number): number {
+        this.functions.push(typeIndex);
         return this.functionIndex++;
     }
 
@@ -375,7 +375,7 @@ export class WasmStructure {
 
     AddFunctionDetails(parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): FunctionIds {
         var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction();
+        var functionId = this.addFunction(typeId);
         var declCount = 0;
         var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
         return {

@@ -5,6 +5,7 @@ import { ContextParser, BaseContext, ParsedExpression } from './context-parser'
 import { Emitter } from './emitter'
 import * as fs from 'fs';
 import { EventEmitter } from 'events';
+import { ContextEmitter } from './context-emitter';
 
 var module = 'sample3';
 
@@ -23,6 +24,10 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var expressions: Array<ParsedExpression> = [];
     var context = Object.create(BaseContext);
     var remainingWords = contextParser.parse(context, tokenized, expressions);
+    var contextEmitter = new ContextEmitter();
+    var contextBytes = contextEmitter.getBytes(expressions);
+
+
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    
     // console.log(JSON.stringify(context, undefined, "  "));
