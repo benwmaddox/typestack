@@ -46,7 +46,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         }
     }, (item) => {
         console.log((<any>item.instance.exports));
-        // console.log((<any>item.instance.exports)['test']());
+        console.log((<any>item.instance.exports)['test']());
     });
 
     // runWasmWithCallback(bytes2, {

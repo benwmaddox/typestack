@@ -24,26 +24,30 @@ export class ContextEmitter {
                 var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
                 // TODO: reuse function types if possible
                 var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64], resultType);
+                functionReference.typeID = typeIndex;
                 var functionIndex = wasmStructure.addFunction(typeIndex);
+                functionReference.functionID = functionIndex;
 
                 if (true) { // TODO: Figure out best way to do this
                     var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex)
                     functionReference.exportID = exportIndex;
                 }
                 console.log(`Code for function ${name} goes from ${i} to ${functionEndIndex}`)
+                console.log(expressions
+                    .slice(i, functionEndIndex)
+                    .filter(x => x.op == Opcodes.call)
+                    .map(x => x.reference));
                 var code: Array<number> = expressions
                     .slice(i, functionEndIndex)
                     .filter(x => x.op != undefined)
-                    .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op)
+                    .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op);
+                console.log(code)
                 var declCount = 0;
                 var codeId = wasmStructure.addCode([declCount, ...code, Opcodes.end])
 
-                functionReference.typeID = typeIndex;
-                functionReference.functionID = functionIndex;
 
-                if (functionEndIndex > i) {
-                    i = functionEndIndex + 1;
-                }
+
+                i = functionEndIndex;
 
                 // wasmStructure.AddExportFunction(name,
                 //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],

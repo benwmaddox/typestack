@@ -258,7 +258,7 @@ export class ContextParser {
                     })
                     // TODO: interpolation
                     expressions.push({
-                        op: () => reference.functionID,
+                        op: function () { return reference.functionID },
                         desc: "Function ID"
                     })
                 }
