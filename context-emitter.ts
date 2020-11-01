@@ -14,7 +14,7 @@ export class ContextEmitter {
                 // console.log(expression.desc);
             }
             if (expression.function) {
-                var functionEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end);
+                var functionEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
                 var functionReference = expression.function.functionReference;
                 if (functionReference == null) {
                     throw Error("There should be a function reference here")
@@ -30,7 +30,7 @@ export class ContextEmitter {
                     var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex)
                     functionReference.exportID = exportIndex;
                 }
-
+                console.log(`Code for function ${name} goes from ${i} to ${functionEndIndex}`)
                 var code: Array<number> = expressions
                     .slice(i, functionEndIndex)
                     .filter(x => x.op != undefined)
@@ -40,6 +40,10 @@ export class ContextEmitter {
 
                 functionReference.typeID = typeIndex;
                 functionReference.functionID = functionIndex;
+
+                if (functionEndIndex > i) {
+                    i = functionEndIndex + 1;
+                }
 
                 // wasmStructure.AddExportFunction(name,
                 //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],

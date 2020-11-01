@@ -24,7 +24,7 @@ var ContextEmitter = /** @class */ (function () {
                 // console.log(expression.desc);
             }
             if (expression.function) {
-                var functionEndIndex = expressions.slice(i).findIndex(function (x) { return x.op == wasm_structure_1.Opcodes.end; });
+                var functionEndIndex = expressions.slice(i).findIndex(function (x) { return x.op == wasm_structure_1.Opcodes.end; }) + i;
                 var functionReference = expression.function.functionReference;
                 if (functionReference == null) {
                     throw Error("There should be a function reference here");
@@ -39,6 +39,7 @@ var ContextEmitter = /** @class */ (function () {
                     var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
                     functionReference.exportID = exportIndex;
                 }
+                console.log("Code for function " + name + " goes from " + i + " to " + functionEndIndex);
                 var code = expressions
                     .slice(i, functionEndIndex)
                     .filter(function (x) { return x.op != undefined; })
@@ -47,6 +48,9 @@ var ContextEmitter = /** @class */ (function () {
                 var codeId = wasmStructure.addCode(__spreadArrays([declCount], code, [wasm_structure_1.Opcodes.end]));
                 functionReference.typeID = typeIndex;
                 functionReference.functionID = functionIndex;
+                if (functionEndIndex > i) {
+                    i = functionEndIndex + 1;
+                }
                 // wasmStructure.AddExportFunction(name,
                 //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],
                 //     null,
