@@ -263,7 +263,7 @@ export class ContextParser {
                     })
                 }
                 // console.log(nextWord);
-                if (match.types) {
+                if (match.types && match.functionReference == undefined) {
                     // TODO: find actual matching type                
                     var matchedType: ContextType = match.types![0];
                     if (matchedType.opCodes) {

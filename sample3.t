@@ -24,11 +24,11 @@ export fn '{a:int} is less than {b:int} ?' int = a b < ;
 
 // fn test int = 10 double ;
 
-export fn test int = 
-    5 double 'add two' 12 == 
-    2 double 4 ==
-    5 3 subtract 2 ==    
-    && && ; 
+// export fn test int = 
+//     5 double 'add two' 12 == 
+//     2 double 4 ==
+//     5 3 subtract 2 ==    
+//     && && ; 
 // '3 is less than 5 ?' 1 ==
 // '5 is less than 5 ?' 0 ==
 // && && 
