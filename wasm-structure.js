@@ -255,6 +255,7 @@ var WasmStructure = /** @class */ (function () {
         this.importId = 0;
         // Return ID
         this.typeId = 0;
+        this.typeCache = {};
         this.functionIndex = 0;
         this.exportId = 0;
         this.codeId = 0;
@@ -297,6 +298,12 @@ var WasmStructure = /** @class */ (function () {
             data.push(1);
             data.push(result);
         }
+        var typeKey = JSON.stringify(data);
+        var cacheMatch = this.typeCache[typeKey];
+        if (cacheMatch != undefined) {
+            return cacheMatch;
+        }
+        this.typeCache[typeKey] = this.typeId;
         for (var i = 0; i < data.length; i++) {
             this.types.push(data[i]);
         }

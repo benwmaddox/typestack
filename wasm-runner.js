@@ -75,14 +75,24 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var contextEmitter = new context_emitter_1.ContextEmitter();
     var contextBytes = contextEmitter.getBytes(expressions);
+    console.log(JSON.stringify(contextBytes));
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    
     // console.log(JSON.stringify(context, undefined, "  "));
-    console.log(expressions);
-    console.log(context);
-    console.log(Object.getPrototypeOf(context));
-    var bytes = runIntoWasm(tokenized);
-    fs.writeFileSync('output.wasm', bytes);
+    // console.log(expressions);
+    // console.log(context);
+    // console.log(Object.getPrototypeOf(context));
+    // var bytes = runIntoWasm(tokenized);
+    fs.writeFileSync('output.wasm', contextBytes);
+    runWasmWithCallback(contextBytes, {
+        console: console,
+        function: {
+            log: console.log
+        }
+    }, function (item) {
+        console.log(item.instance.exports);
+        // console.log((<any>item.instance.exports)['test']());
+    });
     // runWasmWithCallback(bytes2, {
     //     console: console,
     //     function: {

@@ -11,40 +11,57 @@ export class ContextEmitter {
             var expression: ParsedExpression = expressions[i];
 
             if (expression.desc) {
-                console.log(expression.desc);
+                // console.log(expression.desc);
             }
             if (expression.function) {
-                // TODO: maybe op should be separate from value? 
-                var functionEndIndex = expressions.findIndex(x => x.op == Opcodes.end);
-                var name = expression.function.functionReference?.name || "ERROR STATE";
+                var functionEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end);
+                var functionReference = expression.function.functionReference;
+                if (functionReference == null) {
+                    throw Error("There should be a function reference here")
+                }
+                var name = functionReference.name || "ERROR STATE";
                 var type = expression.function.types ? expression.function.types[0] : {};
                 var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
+                // TODO: reuse function types if possible
                 var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64], resultType);
                 var functionIndex = wasmStructure.addFunction(typeIndex);
-                if (false) {
-                    wasmStructure.addExport(name, ExportKind.function, functionIndex)
+
+                if (true) { // TODO: Figure out best way to do this
+                    var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex)
+                    functionReference.exportID = exportIndex;
                 }
+
+                var code: Array<number> = expressions
+                    .slice(i, functionEndIndex)
+                    .filter(x => x.op != undefined)
+                    .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op)
+                var declCount = 0;
+                var codeId = wasmStructure.addCode([declCount, ...code, Opcodes.end])
+
+                functionReference.typeID = typeIndex;
+                functionReference.functionID = functionIndex;
 
                 // wasmStructure.AddExportFunction(name,
                 //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],
                 //     null,
                 //     expressions.slice(i, functionEndIndex)
                 // )
+            }
+            // TODO: maybe op should be separate from value? 
+            // if (expression.op == Opcodes.end) {
+            //     // wasmStructure.addCode()
+            // }
+            // else if (expression.op !== undefined) {
 
-            }
-            if (expression.op == Opcodes.end) {
-                // wasmStructure.addCode()
-            }
-            else if (expression.op !== undefined) {
+            // }
+            // if (expression.reference) {
 
-            }
-            if (expression.reference) {
-
-            }
+            // }
 
 
             i++;
         }
+        return wasmStructure.getBytes();
     }
     mapTypeToWasmType(input: string): WasmType {
         if (input == "int") return WasmType.i32;

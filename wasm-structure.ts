@@ -312,6 +312,7 @@ export class WasmStructure {
     }
     // Return ID
     typeId = 0;
+    typeCache: any = {};
     addFunctionType(parameters: Array<WasmType>, result: WasmType | null): number {
         var data: Array<number> = [0x60,
             parameters.length,
@@ -321,6 +322,14 @@ export class WasmStructure {
             data.push(1);
             data.push(result);
         }
+
+        var typeKey = JSON.stringify(data);
+        var cacheMatch = this.typeCache[typeKey];
+        if (cacheMatch != undefined) {
+            return cacheMatch;
+        }
+
+        this.typeCache[typeKey] = this.typeId;
 
         for (var i = 0; i < data.length; i++) {
             this.types.push(data[i]);
