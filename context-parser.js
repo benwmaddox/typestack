@@ -82,15 +82,13 @@ exports.BaseContext = {
         }
     },
     'fn': {
-        //newContext: true,
         parse: function (context, words, expressions) {
             var parameters = extractParameters(words);
-            // console.log("---extracting parameters")
-            // console.log(parameters);
-            // console.log("---new context")
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
-            // console.log('fn index ' + fnIndex);
+            if (functionName[0] == "'") {
+                functionName = functionName.substring(1, functionName.length - 1);
+            }
             var newContext = Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
                 newContext[parameters[i].name] = {
@@ -127,12 +125,21 @@ exports.BaseContext = {
                 }
             };
             context[functionName] = contextItem;
+            // interpolated: 
+            if (functionName.indexOf('{') != -1) {
+                var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
+                var partContext = context;
+                for (var i = 0; i < interpolated.length - 1; i++) {
+                    var part = interpolated[i];
+                    if (partContext[part] === undefined) {
+                        partContext[part] = {};
+                        partContext = partContext[part];
+                    }
+                }
+                partContext[interpolated[interpolated.length - 1]] = contextItem;
+                // console.log(functionNameInterpolated)
+            }
             var functionEqualIndex = words.indexOf("=");
-            // var functionEndIndex = words.indexOf(";", functionEqualIndex);
-            // console.log('starting words')
-            // console.log(words.slice(0, functionEqualIndex))
-            // console.log('after fn parse');
-            // console.log(words.slice(functionEndIndex));
             expressions.push({
                 desc: "Adding function: " + functionName,
                 function: contextItem
@@ -154,7 +161,7 @@ exports.BaseContext = {
                 op: wasm_structure_1.Opcodes.end,
                 desc: 'End function ' //+ context.functionReference?.name
             });
-            // if context is.. a variable
+            // TODO: if context is.. a variable
             return { context: Object.getPrototypeOf(context), words: words, expressions: expressions };
         }
     },
@@ -187,8 +194,19 @@ var ContextParser = /** @class */ (function () {
         }
         else {
             // Lookup through context
-            if (context[nextWord]) {
-                var match = context[nextWord];
+            var wordWithoutQuotes = nextWord[0] == "'" ? nextWord.substring(1, nextWord.length - 1) : nextWord;
+            var match = context[wordWithoutQuotes];
+            if (!match && nextWord[0] == "'") {
+                // try by interpolation if in single quotes
+                // Split up inner words
+                // allow multiple statement matches
+                // match on either word or {}
+                var interpolated = wordWithoutQuotes.replace(/{(.+?)}/g, '{}').split(' ');
+                var innerExpresions = [];
+                var innerWords = [[]];
+                // this.parse(context, )
+            }
+            if (match) {
                 if (match.newContext === true) {
                     expressions.push({ desc: "New context level " });
                     // console.log('    Adding context level')
@@ -198,10 +216,10 @@ var ContextParser = /** @class */ (function () {
                     var reference = match.functionReference;
                     expressions.push({
                         op: wasm_structure_1.Opcodes.call,
-                        desc: "call: " + nextWord,
+                        desc: "call: " + wordWithoutQuotes,
                         reference: reference
                     });
-                    // TODO: interpolation
+                    // TODO: interpolation variables
                     expressions.push({
                         op: function () { return reference.functionID; },
                         desc: "Function ID"
@@ -215,7 +233,7 @@ var ContextParser = /** @class */ (function () {
                         for (var i = 0; i < matchedType.opCodes.length; i++) {
                             expressions.push({
                                 op: matchedType.opCodes[i],
-                                desc: nextWord
+                                desc: wordWithoutQuotes
                             });
                         }
                     }
@@ -244,10 +262,10 @@ var ContextParser = /** @class */ (function () {
                     expressions.push({ op: parseInt(nextWord), desc: nextWord });
                 }
                 else {
-                    console.log('could not parse ' + nextWord);
+                    console.log('Could not parse ' + nextWord);
                 }
-                // number? 
-                // console.log(nextWord);
+                // TODO: other numbers
+                // TODO: other constants / types? 
             }
         }
         return this.parse(context, words.slice(1), expressions);

@@ -26,7 +26,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var contextEmitter = new ContextEmitter();
     var contextBytes = contextEmitter.getBytes(expressions);
-    console.log(JSON.stringify(contextBytes));
+    // console.log(JSON.stringify(contextBytes));
 
 
     // console.log(expressions);

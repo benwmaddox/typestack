@@ -32,7 +32,6 @@ var ContextEmitter = /** @class */ (function () {
                 var name = functionReference.name || "ERROR STATE";
                 var type = expression.function.types ? expression.function.types[0] : {};
                 var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
-                // TODO: reuse function types if possible
                 var typeIndex = wasmStructure.addFunctionType(((_b = type.input) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })) || [wasm_structure_1.WasmType.f64], resultType);
                 functionReference.typeID = typeIndex;
                 var functionIndex = wasmStructure.addFunction(typeIndex);
@@ -41,16 +40,11 @@ var ContextEmitter = /** @class */ (function () {
                     var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
                     functionReference.exportID = exportIndex;
                 }
-                console.log("Code for function " + name + " goes from " + i + " to " + functionEndIndex);
-                console.log(expressions
-                    .slice(i, functionEndIndex)
-                    .filter(function (x) { return x.op == wasm_structure_1.Opcodes.call; })
-                    .map(function (x) { return x.reference; }));
                 var code = expressions
                     .slice(i, functionEndIndex)
                     .filter(function (x) { return x.op != undefined; })
                     .map(function (x) { return typeof (x.op) == 'function' ? x.op() : x.op; });
-                console.log(code);
+                // console.log(code)
                 var declCount = 0;
                 var codeId = wasmStructure.addCode(__spreadArrays([declCount], code, [wasm_structure_1.Opcodes.end]));
                 i = functionEndIndex;
