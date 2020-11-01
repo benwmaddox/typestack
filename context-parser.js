@@ -65,16 +65,19 @@ var extractResults = function (tokens) {
 exports.BaseContext = {
     'export': {
         parse: function (context, words, expressions) {
+            expressions.push({ desc: "export" });
             return { context: context, words: words, expressions: expressions };
         }
     },
     'import': {
         parse: function (context, words, expressions) {
+            expressions.push({ desc: "import" });
             return { context: context, words: words, expressions: expressions };
         }
     },
     'use': {
         parse: function (context, words, expressions) {
+            expressions.push({ desc: "use" });
             return { context: context, words: words, expressions: expressions };
         }
     },
@@ -85,7 +88,6 @@ exports.BaseContext = {
             // console.log("---extracting parameters")
             // console.log(parameters);
             // console.log("---new context")
-            var newContext = context; //<ContextDictionary>Object.create(context);            
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
             // console.log('fn index ' + fnIndex);
@@ -99,12 +101,17 @@ exports.BaseContext = {
                     // TODO: define reference that can be modified and used elsewhere?
                 ],
                 functionReference: {
+                    name: functionName,
                     typeID: undefined,
                     functionID: undefined,
                     exportID: undefined
                 }
             };
-            newContext[functionName] = contextItem;
+            context[functionName] = contextItem;
+            var newContext = Object.create(context);
+            for (var i = 0; i < parameters.length; i++) {
+                newContext[parameters[i].name] = {};
+            }
             var functionEqualIndex = words.indexOf("=");
             // var functionEndIndex = words.indexOf(";", functionEqualIndex);
             // console.log('starting words')
@@ -129,10 +136,10 @@ exports.BaseContext = {
             // If context is a function
             expressions.push({
                 ops: wasm_structure_1.Opcodes.end,
-                desc: 'End function'
+                desc: 'End function ' //+ context.functionReference?.name
             });
             // if context is.. a variable
-            return { context: context, words: words, expressions: expressions };
+            return { context: Object.getPrototypeOf(context), words: words, expressions: expressions };
         }
     },
     '+': {
@@ -180,6 +187,19 @@ var ContextParser = /** @class */ (function () {
                     expressions.push({ desc: "New context level " });
                     // console.log('    Adding context level')
                     context = Object.create(context);
+                }
+                if (match.functionReference !== undefined) {
+                    var reference = match.functionReference;
+                    expressions.push({
+                        op: wasm_structure_1.Opcodes.call,
+                        desc: "call: " + nextWord,
+                        reference: reference
+                    });
+                    // TODO: interpolation
+                    expressions.push({
+                        op: function () { return reference.functionID; },
+                        desc: "Function ID"
+                    });
                 }
                 // console.log(nextWord);
                 if (match.types) {

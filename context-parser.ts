@@ -4,6 +4,7 @@ import { match } from 'assert';
 
 type MacroFunction = (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>) => { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> };
 export type FunctionReference = {
+    name: string,
     typeID: number | undefined,
     functionID: number | undefined,
     exportID: number | undefined
@@ -100,19 +101,19 @@ export type ContextDictionary = { [index: string]: ContextItem };
 export var BaseContext: ContextDictionary = {
     'export': {
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
+            expressions.push({ desc: "export" });
             return { context, words, expressions };
         }
     },
     'import': {
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
+            expressions.push({ desc: "import" });
             return { context, words, expressions };
         }
     },
     'use': {
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
+            expressions.push({ desc: "use" });
             return { context, words, expressions };
         }
     },
@@ -124,7 +125,6 @@ export var BaseContext: ContextDictionary = {
             // console.log("---extracting parameters")
             // console.log(parameters);
             // console.log("---new context")
-            var newContext = context;//<ContextDictionary>Object.create(context);            
             var fnIndex = words.indexOf("fn");
             var functionName = words[fnIndex + 1];
             // console.log('fn index ' + fnIndex);
@@ -139,13 +139,19 @@ export var BaseContext: ContextDictionary = {
                     // TODO: define reference that can be modified and used elsewhere?
                 ],
                 functionReference: {
+                    name: functionName,
                     typeID: undefined,
                     functionID: undefined,
                     exportID: undefined
                 }
             };
 
-            newContext[functionName] = contextItem;
+            context[functionName] = contextItem;
+            var newContext = <ContextDictionary>Object.create(context);
+            for (var i = 0; i < parameters.length; i++) {
+                newContext[parameters[i].name] = {};
+            }
+
 
             var functionEqualIndex = words.indexOf("=");
             // var functionEndIndex = words.indexOf(";", functionEqualIndex);
@@ -157,7 +163,6 @@ export var BaseContext: ContextDictionary = {
                 desc: "Adding function: " + functionName
             })
             return { context: newContext, words: words.slice(functionEqualIndex), expressions };
-
         }
     },
     'var': {
@@ -173,12 +178,12 @@ export var BaseContext: ContextDictionary = {
             // If context is a function
             expressions.push({
                 ops: Opcodes.end,
-                desc: 'End function'
+                desc: 'End function ' //+ context.functionReference?.name
             })
 
             // if context is.. a variable
 
-            return { context, words, expressions };
+            return { context: Object.getPrototypeOf(context), words, expressions };
         }
     }, // opCodes: [Opcodes.end],
     '+': {
@@ -231,6 +236,19 @@ export class ContextParser {
                     expressions.push({ desc: "New context level " });
                     // console.log('    Adding context level')
                     context = Object.create(context);
+                }
+                if (match.functionReference !== undefined) {
+                    var reference = match.functionReference;
+                    expressions.push({
+                        op: Opcodes.call, // May need indirect call. We'll see
+                        desc: "call: " + nextWord,
+                        reference: reference
+                    })
+                    // TODO: interpolation
+                    expressions.push({
+                        op: () => reference.functionID,
+                        desc: "Function ID"
+                    })
                 }
                 // console.log(nextWord);
                 if (match.types) {
