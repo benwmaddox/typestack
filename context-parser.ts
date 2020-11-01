@@ -3,11 +3,17 @@ import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTPar
 import { match } from 'assert';
 
 type MacroFunction = (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>) => { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> };
+export type FunctionReference = {
+    typeID: number | undefined,
+    functionID: number | undefined,
+    exportID: number | undefined
+}
 export type ContextItem = {
     newContext?: boolean,
     popContext?: boolean,
     types?: Array<ContextType>,
-    parse?: MacroFunction
+    parse?: MacroFunction,
+    functionReference?: FunctionReference
 }
 export type ContextType = {
     input?: Array<string>,
@@ -131,18 +137,26 @@ export var BaseContext: ContextDictionary = {
                         // opCodes
                     }
                     // TODO: define reference that can be modified and used elsewhere?
-                ]
+                ],
+                functionReference: {
+                    typeID: undefined,
+                    functionID: undefined,
+                    exportID: undefined
+                }
             };
 
             newContext[functionName] = contextItem;
 
             var functionEqualIndex = words.indexOf("=");
-            var functionEndIndex = words.indexOf(";", functionEqualIndex);
+            // var functionEndIndex = words.indexOf(";", functionEqualIndex);
             // console.log('starting words')
             // console.log(words.slice(0, functionEqualIndex))
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
-            return { context: newContext, words: words.slice(functionEndIndex - 1), expressions };
+            expressions.push({
+                desc: "Adding function: " + functionName
+            })
+            return { context: newContext, words: words.slice(functionEqualIndex), expressions };
 
         }
     },
@@ -155,6 +169,15 @@ export var BaseContext: ContextDictionary = {
     ';': {
         popContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
+
+            // If context is a function
+            expressions.push({
+                ops: Opcodes.end,
+                desc: 'End function'
+            })
+
+            // if context is.. a variable
+
             return { context, words, expressions };
         }
     }, // opCodes: [Opcodes.end],
@@ -185,18 +208,18 @@ export class ContextParser {
             return words;
         }
         var nextWord = words[0];
-        if (nextWord.startsWith("'")) {
-            // console.log(nextWord)
-            expressions.push({
-                op: Opcodes.call, // May need indirect call. We'll see
-                desc: "call: " + nextWord,
-                reference: {}
-                // TODO: connect reference to something that will have IDs later
-                // TODO: interpolation
-            })
+        // if (nextWord.startsWith("'")) {
+        //     // console.log(nextWord)
+        //     expressions.push({
+        //         op: Opcodes.call, // May need indirect call. We'll see
+        //         desc: "call: " + nextWord,
+        //         reference: {}
+        //         // TODO: connect reference to something that will have IDs later
+        //         // TODO: interpolation
+        //     })
 
-        }
-        else if (nextWord.startsWith("\"")) {
+        // }
+        if (nextWord.startsWith("\"")) {
             // console.log(nextWord)
             // TODO string variable...
         }
@@ -245,6 +268,9 @@ export class ContextParser {
                 if (!isNaN(parsedInt)) {
                     expressions.push({ op: Opcodes.i32Const, desc: "i32 const" });
                     expressions.push({ op: parseInt(nextWord), desc: nextWord });
+                }
+                else {
+                    console.log('could not parse ' + nextWord)
                 }
                 // number? 
                 // console.log(nextWord);

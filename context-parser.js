@@ -97,16 +97,24 @@ exports.BaseContext = {
                         output: extractResults(words),
                     }
                     // TODO: define reference that can be modified and used elsewhere?
-                ]
+                ],
+                functionReference: {
+                    typeID: undefined,
+                    functionID: undefined,
+                    exportID: undefined
+                }
             };
             newContext[functionName] = contextItem;
             var functionEqualIndex = words.indexOf("=");
-            var functionEndIndex = words.indexOf(";", functionEqualIndex);
+            // var functionEndIndex = words.indexOf(";", functionEqualIndex);
             // console.log('starting words')
             // console.log(words.slice(0, functionEqualIndex))
             // console.log('after fn parse');
             // console.log(words.slice(functionEndIndex));
-            return { context: newContext, words: words.slice(functionEndIndex - 1), expressions: expressions };
+            expressions.push({
+                desc: "Adding function: " + functionName
+            });
+            return { context: newContext, words: words.slice(functionEqualIndex), expressions: expressions };
         }
     },
     'var': {
@@ -118,6 +126,12 @@ exports.BaseContext = {
     ';': {
         popContext: true,
         parse: function (context, words, expressions) {
+            // If context is a function
+            expressions.push({
+                ops: wasm_structure_1.Opcodes.end,
+                desc: 'End function'
+            });
+            // if context is.. a variable
             return { context: context, words: words, expressions: expressions };
         }
     },
@@ -144,17 +158,17 @@ var ContextParser = /** @class */ (function () {
             return words;
         }
         var nextWord = words[0];
-        if (nextWord.startsWith("'")) {
-            // console.log(nextWord)
-            expressions.push({
-                op: wasm_structure_1.Opcodes.call,
-                desc: "call: " + nextWord,
-                reference: {}
-                // TODO: connect reference to something that will have IDs later
-                // TODO: interpolation
-            });
-        }
-        else if (nextWord.startsWith("\"")) {
+        // if (nextWord.startsWith("'")) {
+        //     // console.log(nextWord)
+        //     expressions.push({
+        //         op: Opcodes.call, // May need indirect call. We'll see
+        //         desc: "call: " + nextWord,
+        //         reference: {}
+        //         // TODO: connect reference to something that will have IDs later
+        //         // TODO: interpolation
+        //     })
+        // }
+        if (nextWord.startsWith("\"")) {
             // console.log(nextWord)
             // TODO string variable...
         }
@@ -202,6 +216,9 @@ var ContextParser = /** @class */ (function () {
                 if (!isNaN(parsedInt)) {
                     expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
                     expressions.push({ op: parseInt(nextWord), desc: nextWord });
+                }
+                else {
+                    console.log('could not parse ' + nextWord);
                 }
                 // number? 
                 // console.log(nextWord);
