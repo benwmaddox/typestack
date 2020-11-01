@@ -133,10 +133,8 @@ export var BaseContext: ContextDictionary = {
                     {
                         input: parameters.map(x => x.type),
                         parameters: parameters.map(x => x.name),
-                        output: extractResults(words),
-                        // opCodes
+                        output: extractResults(words)
                     }
-                    // TODO: define reference that can be modified and used elsewhere?
                 ],
                 functionReference: {
                     name: functionName,
@@ -149,7 +147,18 @@ export var BaseContext: ContextDictionary = {
             context[functionName] = contextItem;
             var newContext = <ContextDictionary>Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
-                newContext[parameters[i].name] = {};
+                newContext[parameters[i].name] = {
+                    types: [
+                        {
+                            input: undefined,
+                            output: [parameters[i].type],
+                            opCodes: [
+                                Opcodes.get_local,
+                                i
+                            ]
+                        }
+                    ]
+                };
             }
 
 

@@ -96,9 +96,8 @@ exports.BaseContext = {
                     {
                         input: parameters.map(function (x) { return x.type; }),
                         parameters: parameters.map(function (x) { return x.name; }),
-                        output: extractResults(words),
+                        output: extractResults(words)
                     }
-                    // TODO: define reference that can be modified and used elsewhere?
                 ],
                 functionReference: {
                     name: functionName,
@@ -110,7 +109,18 @@ exports.BaseContext = {
             context[functionName] = contextItem;
             var newContext = Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
-                newContext[parameters[i].name] = {};
+                newContext[parameters[i].name] = {
+                    types: [
+                        {
+                            input: undefined,
+                            output: [parameters[i].type],
+                            opCodes: [
+                                wasm_structure_1.Opcodes.get_local,
+                                i
+                            ]
+                        }
+                    ]
+                };
             }
             var functionEqualIndex = words.indexOf("=");
             // var functionEndIndex = words.indexOf(";", functionEqualIndex);
