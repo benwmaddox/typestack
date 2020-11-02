@@ -43,11 +43,11 @@ export type ModuleParser = (input: ASTFunction) => ASTFunction;// | ErrorMessage
 
 
 
-// export class Context {
-//     children: Array<Context> = [];
+export class Context {
+    children: Array<Context> = [];
 
-//     unparsedWords: Array<string> = [];
+    unparsedWords: Array<string> = [];
 
 
-//     ops: Int8Array | undefined = undefined;
-// }
+    ops: Int8Array | undefined = undefined;
+}

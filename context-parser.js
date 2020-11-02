@@ -2,6 +2,29 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContextParser = exports.BaseContext = void 0;
 var wasm_structure_1 = require("./wasm-structure");
+function isInOrder(values) {
+    for (var i = 1; i < values.length; i++) {
+        if (values[i - 1] >= values[i])
+            return false;
+    }
+    return true;
+}
+// function findInterpolatedMatches(context: any, token: string): Array<any> {
+//     var matchingFunctions: Array<any> = [];
+//     var tokenSplit = token.substring(1, token.length - 1).split(" ");
+//     var interpolatedOptions = context.filter(x => x.name.indexOf("{") != -1);
+//     for (var i = 0; i < interpolatedOptions.length; i++) {
+//         var wordWithoutQuotes = interpolatedOptions[i].name;//.substring(1, interpolatedOptions[i].name.length - 1);
+//         var wordSplit = wordWithoutQuotes.split(" ").filter(x => x[0] != "{");
+//         var locationInToken = wordSplit.map(x => tokenSplit.indexOf(x));
+//         if (locationInToken.every(x => x != -1)
+//             && isInOrder(locationInToken)
+//         ) {
+//             matchingFunctions.push(interpolatedOptions[i]);
+//         }
+//     }
+//     return matchingFunctions;
+// }
 function buildParameterList(input) {
     var index = 0;
     var regex = new RegExp('{(.+?):(.+?)}');
@@ -135,9 +158,12 @@ exports.BaseContext = {
                         partContext[part] = {};
                         partContext = partContext[part];
                     }
+                    else {
+                        partContext = partContext[part];
+                    }
                 }
                 partContext[interpolated[interpolated.length - 1]] = contextItem;
-                // console.log(functionNameInterpolated)
+                console.log(context["{}"]);
             }
             var functionEqualIndex = words.indexOf("=");
             expressions.push({
@@ -176,6 +202,7 @@ exports.BaseContext = {
     '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
     '-': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
     '<': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32lt_s] }] },
+    '>': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32gt_s] }] },
     '==': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
     '==0': { types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
     '&&': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
@@ -183,6 +210,35 @@ exports.BaseContext = {
 var ContextParser = /** @class */ (function () {
     function ContextParser() {
     }
+    ContextParser.prototype.findInterpolationOptions = function (context, word) {
+        // var results: Array<ContextItem> = [];
+        // Split up inner words
+        // allow multiple statement matches
+        // match on either word or {}
+        var interpolated = word.split(' ');
+        var isInInterpolatedSection = false;
+        // TODO: allow multiple values to be interpolated in future
+        var searchContext = context;
+        for (var i = 0; i < interpolated.length; i++) {
+            var split = interpolated[i];
+            // console.log(split);
+            // console.log(searchContext);
+            if (searchContext[split] != undefined) {
+                searchContext = split;
+                isInInterpolatedSection = false;
+            }
+            else if (searchContext["{}"] !== undefined) {
+                searchContext = searchContext["{}"];
+                isInInterpolatedSection = true;
+            }
+            // else if (isInInterpolatedSection) {
+            // }
+        }
+        if (searchContext != undefined) {
+            return [searchContext];
+        }
+        return [];
+    };
     ContextParser.prototype.parse = function (context, words, expressions) {
         if (words.length == 0) {
             return words;
@@ -196,15 +252,23 @@ var ContextParser = /** @class */ (function () {
             // Lookup through context
             var wordWithoutQuotes = nextWord[0] == "'" ? nextWord.substring(1, nextWord.length - 1) : nextWord;
             var match = context[wordWithoutQuotes];
-            if (!match && nextWord[0] == "'") {
+            if (match == undefined && nextWord[0] == "'") {
                 // try by interpolation if in single quotes
-                // Split up inner words
-                // allow multiple statement matches
-                // match on either word or {}
-                var interpolated = wordWithoutQuotes.replace(/{(.+?)}/g, '{}').split(' ');
-                var innerExpresions = [];
-                var innerWords = [[]];
-                // this.parse(context, )
+                var interpolationOptions = this.findInterpolationOptions(context, wordWithoutQuotes);
+                console.log(interpolationOptions);
+                if (interpolationOptions.length == 1) {
+                    match = interpolationOptions[0];
+                    var innerExpresions = [];
+                    // TODO: fill in inner words based on match above
+                    var innerWords = [];
+                    this.parse(context, innerWords, innerExpresions);
+                    // TODO: right syntax?
+                    expressions.push.apply(expressions, innerExpresions);
+                }
+                else if (interpolationOptions.length > 1) {
+                    throw Error("Too many possible matches for: " + wordWithoutQuotes
+                        + JSON.stringify(interpolationOptions));
+                }
             }
             if (match) {
                 if (match.newContext === true) {
@@ -219,7 +283,7 @@ var ContextParser = /** @class */ (function () {
                         desc: "call: " + wordWithoutQuotes,
                         reference: reference
                     });
-                    // TODO: interpolation variables
+                    // TODO: interpolation variables here
                     expressions.push({
                         op: function () { return reference.functionID; },
                         desc: "Function ID"

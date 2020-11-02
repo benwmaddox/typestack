@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ASTFunction = exports.ASTImport = exports.ASTModule = void 0;
+exports.Context = exports.ASTFunction = exports.ASTImport = exports.ASTModule = void 0;
 var ASTModule = /** @class */ (function () {
     function ASTModule() {
         this.name = null;
@@ -38,8 +38,12 @@ var ConstantType;
     ConstantType[ConstantType["float"] = 2] = "float";
     ConstantType[ConstantType["double"] = 3] = "double";
 })(ConstantType || (ConstantType = {}));
-// export class Context {
-//     children: Array<Context> = [];
-//     unparsedWords: Array<string> = [];
-//     ops: Int8Array | undefined = undefined;
-// }
+var Context = /** @class */ (function () {
+    function Context() {
+        this.children = [];
+        this.unparsedWords = [];
+        this.ops = undefined;
+    }
+    return Context;
+}());
+exports.Context = Context;
