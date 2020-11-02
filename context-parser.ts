@@ -242,7 +242,7 @@ export var BaseContext: ContextDictionary = {
             { input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32add] },
             { input: ['long', 'long'], output: ['long'], opCodes: [Opcodes.i64add] },
             { input: ['float', 'float'], output: ['float'], opCodes: [Opcodes.f32add] },
-            { input: ['double', 'double'], output: ['double'], opCodes: [Opcodes.f64add] },
+            { input: ['double', 'double'], output: ['double'], opCodes: [Opcodes.f64add] }
         ]
     },
     '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32mul] }] },
@@ -263,7 +263,7 @@ export type ParsedExpression = {
 };
 
 export class ContextParser {
-    findInterpolationOptions(context: ContextDictionary, word: string): Array<ContextItem> {
+    findInterpolationOptions(context: ContextDictionary, word: string): [ContextItem, Array<string>] | undefined {
         // var results: Array<ContextItem> = [];
 
 
@@ -274,27 +274,30 @@ export class ContextParser {
         var isInInterpolatedSection = false;
 
         // TODO: allow multiple values to be interpolated in future
+        var interpolatedResultWords: Array<string> = [];
         var searchContext: any = context;
         for (var i = 0; i < interpolated.length; i++) {
             var split = interpolated[i];
             // console.log(split);
             // console.log(searchContext);
-            if (searchContext[split] != undefined) {
-                searchContext = split;
+            if (searchContext[split] !== undefined) {
+                searchContext = searchContext[split];
                 isInInterpolatedSection = false;
             }
             else if (searchContext["{}"] !== undefined) {
                 searchContext = searchContext["{}"];
                 isInInterpolatedSection = true;
+                interpolatedResultWords.push(split);
             }
             // else if (isInInterpolatedSection) {
 
             // }
         }
         if (searchContext != undefined) {
-            return [searchContext];
+            // console.log(searchContext);
+            return [searchContext, interpolatedResultWords];
         }
-        return [];
+        return undefined;
     }
 
     parse(context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): Array<string> {
@@ -314,25 +317,27 @@ export class ContextParser {
                 // try by interpolation if in single quotes
                 var interpolationOptions = this.findInterpolationOptions(context, wordWithoutQuotes)
                 console.log(interpolationOptions);
-                if (interpolationOptions.length == 1) {
+                if (interpolationOptions !== undefined) {
                     match = interpolationOptions[0];
+                    var innerWords: Array<string> = interpolationOptions[1];
                     var innerExpresions: Array<ParsedExpression> = [];
 
                     // TODO: fill in inner words based on match above
-                    var innerWords: Array<string> = [];
+                    // var innerWords: Array<string> = [];
 
-
+                    // console.log(innerWords);
                     this.parse(context, innerWords, innerExpresions)
+                    // console.log(innerExpresions)
                     // TODO: right syntax?
+                    console.log(expressions.length);
                     expressions.push(...innerExpresions);
+                    console.log(expressions.length);
                 }
-                else if (interpolationOptions.length > 1) {
-                    throw Error("Too many possible matches for: " + wordWithoutQuotes
-                        + JSON.stringify(interpolationOptions)
-                    );
-                }
-
-
+                // else if (interpolationOptions.length > 2) {
+                //     throw Error("Too many possible matches for: " + wordWithoutQuotes
+                //         + JSON.stringify(interpolationOptions)
+                //     );
+                // }
             }
             if (match) {
                 if (match.newContext === true) {
@@ -347,7 +352,6 @@ export class ContextParser {
                         desc: "call: " + wordWithoutQuotes,
                         reference: reference
                     })
-                    // TODO: interpolation variables here
                     expressions.push({
                         op: function () { return reference.functionID },
                         desc: "Function ID"
