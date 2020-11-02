@@ -163,7 +163,6 @@ exports.BaseContext = {
                     }
                 }
                 partContext[interpolated[interpolated.length - 1]] = contextItem;
-                console.log(context["{}"]);
             }
             var functionEqualIndex = words.indexOf("=");
             expressions.push({
