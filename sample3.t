@@ -18,7 +18,7 @@ export fn '{a:int} is greater than {b:int} ?' int = a b > ;
 //  fn 'add one' i:int int = 1 i + ;
 //  fn 'add one twice' i:int int = i 'add one' 'add one' ;
   fn double i:int int = 2 i * ;
-    fn 'add' a:int b:int int = a b + ;
+    // fn 'add' a:int b:int int = a b + ;
  fn subtract a:int b:int int = a b - ;
 //  fn 'less than' a:int b:int int = a b < ;
 //  
