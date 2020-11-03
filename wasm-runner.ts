@@ -24,10 +24,13 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var expressions: Array<ParsedExpression> = [];
     var context = Object.create(BaseContext);
     var remainingWords = contextParser.parse(context, tokenized, expressions);
+
     var contextEmitter = new ContextEmitter();
+    console.log(JSON.stringify(expressions, undefined, "  "));
     var contextBytes = contextEmitter.getBytes(expressions);
     // console.log(JSON.stringify(contextBytes));
 
+    // console.log(JSON.stringify(context["INTERPOLATION"], undefined, "  "));
 
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    

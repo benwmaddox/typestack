@@ -190,8 +190,10 @@ export var BaseContext: ContextDictionary = {
             context[functionName] = contextItem;
             // interpolated: 
             if (functionName.indexOf('{') != -1) {
+                // console.log(functionName);
                 var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
-                var partContext: any = context;
+                context['INTERPOLATION'] = context['INTERPOLATION'] || {};
+                var partContext: any = context['INTERPOLATION'];
                 for (var i = 0; i < interpolated.length - 1; i++) {
                     var part = interpolated[i];
                     if (partContext[part] === undefined) {
@@ -202,7 +204,12 @@ export var BaseContext: ContextDictionary = {
                         partContext = partContext[part];
                     }
                 }
+
+                // console.log(partContext[]);
+                // console.log("Assigning to field " + interpolated[interpolated.length - 1]);
+                // console.log(partContext);
                 partContext[interpolated[interpolated.length - 1]] = contextItem;
+                // console.log(partContext);
             }
 
             var functionEqualIndex = words.indexOf("=");
@@ -274,7 +281,7 @@ export class ContextParser {
 
         // TODO: allow multiple values to be interpolated in future
         var interpolatedResultWords: Array<string> = [];
-        var searchContext: any = context;
+        var searchContext: any = context["INTERPOLATION"];
         for (var i = 0; i < interpolated.length; i++) {
             var split = interpolated[i];
             // console.log(split);
@@ -288,14 +295,20 @@ export class ContextParser {
                 isInInterpolatedSection = true;
                 interpolatedResultWords.push(split);
             }
+            else {
+                return undefined;
+            }
             // else if (isInInterpolatedSection) {
 
             // }
         }
-        if (searchContext != undefined) {
-            // console.log(searchContext);
+        if (searchContext !== undefined && searchContext.functionReference !== undefined) {
+            console.log("searchContext");
+            console.log(searchContext);
+            console.log(interpolatedResultWords);
             return [searchContext, interpolatedResultWords];
         }
+        console.log("No interpolation");
         return undefined;
     }
 
@@ -315,7 +328,7 @@ export class ContextParser {
             if (match == undefined && nextWord[0] == "'") {
                 // try by interpolation if in single quotes
                 var interpolationOptions = this.findInterpolationOptions(context, wordWithoutQuotes)
-                console.log(interpolationOptions);
+                // console.log(interpolationOptions);
                 if (interpolationOptions !== undefined) {
                     match = interpolationOptions[0];
                     var innerWords: Array<string> = interpolationOptions[1];
@@ -328,9 +341,9 @@ export class ContextParser {
                     this.parse(context, innerWords, innerExpresions)
                     // console.log(innerExpresions)
                     // TODO: right syntax?
-                    console.log(expressions.length);
+                    // console.log(expressions.length);
                     expressions.push(...innerExpresions);
-                    console.log(expressions.length);
+                    // console.log(expressions.length);
                 }
                 // else if (interpolationOptions.length > 2) {
                 //     throw Error("Too many possible matches for: " + wordWithoutQuotes
@@ -357,7 +370,7 @@ export class ContextParser {
                     })
                 }
                 // console.log(nextWord);
-                if (match.types && match.functionReference == undefined) {
+                else if (match.types && match.functionReference == undefined) {
                     // TODO: find actual matching type                
                     var matchedType: ContextType = match.types![0];
                     if (matchedType.opCodes) {
