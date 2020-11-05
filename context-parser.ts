@@ -205,11 +205,15 @@ export var BaseContext: ContextDictionary = {
                     }
                 }
 
-                // console.log(partContext[]);
-                // console.log("Assigning to field " + interpolated[interpolated.length - 1]);
-                // console.log(partContext);
+
+                console.log("Assigning to field " + partContext[interpolated[interpolated.length - 1]]);
+
+
+
+                // TODO: Can do incorrect assignments here :( 
+                // Should I just flatten it into an array and not worry about performance?
                 partContext[interpolated[interpolated.length - 1]] = contextItem;
-                // console.log(partContext);
+
             }
 
             var functionEqualIndex = words.indexOf("=");
