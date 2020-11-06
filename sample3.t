@@ -12,7 +12,7 @@ export fn '{a:int} is greater than {b:int} ?' int = a b > ;
 
 
   fn 'add two {i:int}' int = 2 i + ;
-   fn 'add two' i:int int = 2 i + ;
+   // fn 'add two' i:int int = 2 i + ;
   // fn 'add {x:int} to {y:int}' int = x y + ;
   // testing a comment
 //  fn 'add one' i:int int = 1 i + ;
@@ -20,7 +20,7 @@ export fn '{a:int} is greater than {b:int} ?' int = a b > ;
   fn double i:int int = 2 i * ;
 // fn 'add a' a:int b:int int = a b + ;
 // fn add a:int b:int int = a b + ;
-fn '{a:int} is less' int = 0 ;
+// fn '{a:int} is less' int = 0 ;
      
  fn subtract a:int b:int int = a b - ;
 //  fn 'less than' a:int b:int int = a b < ;

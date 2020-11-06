@@ -2,6 +2,7 @@ import { Opcodes } from './wasm-structure';
 import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTParameter } from './intermediate-structure';
 import { match } from 'assert';
 import { stringify } from 'querystring';
+import { FORMERR } from 'dns';
 
 type MacroFunction = (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>) => { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> };
 export type FunctionReference = {
@@ -11,6 +12,8 @@ export type FunctionReference = {
     exportID: number | undefined
 }
 export type ContextItem = {
+    token: string,
+    interpolationTokens?: Array<string>,
     newContext?: boolean,
     popContext?: boolean,
     types?: Array<ContextType>,
@@ -122,27 +125,31 @@ var extractResults = (tokens: Array<string>) => {
 }
 
 
-export type ContextDictionary = { [index: string]: ContextItem };
-export var BaseContext: ContextDictionary = {
-    'export': {
+export type ContextDictionary = Array<ContextItem>;
+export var BaseContext: ContextDictionary = [
+    {
+        token: 'export',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             expressions.push({ desc: "export" });
             return { context, words, expressions };
         }
     },
-    'import': {
+    {
+        token: 'import',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             expressions.push({ desc: "import" });
             return { context, words, expressions };
         }
     },
-    'use': {
+    {
+        token: 'use',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             expressions.push({ desc: "use" });
             return { context, words, expressions };
         }
     },
-    'fn': {
+    {
+        token: 'fn',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             var parameters = extractParameters(words);
             var fnIndex = words.indexOf("fn");
@@ -152,9 +159,11 @@ export var BaseContext: ContextDictionary = {
             }
             var newContext = <ContextDictionary>Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
-                newContext[parameters[i].name] = {
+                newContext.push({
+                    token: parameters[i].name,
                     types: [
                         {
+
                             input: undefined,
                             output: [parameters[i].type],
                             opCodes: [
@@ -163,10 +172,12 @@ export var BaseContext: ContextDictionary = {
                             ]
                         }
                     ]
-                };
+                });
             }
 
             var contextItem: ContextItem = {
+                token: functionName,
+                interpolationTokens: functionName.indexOf('{') == -1 ? undefined : functionName.replace(/{(.+?)}/g, '{}').split(' '),
                 types: [
                     {
                         input: parameters.map(x => x.type),
@@ -187,34 +198,28 @@ export var BaseContext: ContextDictionary = {
                 }
             };
 
-            context[functionName] = contextItem;
+            context.push(contextItem);
             // interpolated: 
-            if (functionName.indexOf('{') != -1) {
-                // console.log(functionName);
-                var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
-                context['INTERPOLATION'] = context['INTERPOLATION'] || {};
-                var partContext: any = context['INTERPOLATION'];
-                for (var i = 0; i < interpolated.length - 1; i++) {
-                    var part = interpolated[i];
-                    if (partContext[part] === undefined) {
-                        partContext[part] = {};
-                        partContext = partContext[part];
-                    }
-                    else {
-                        partContext = partContext[part];
-                    }
-                }
-
-
-                console.log("Assigning to field " + partContext[interpolated[interpolated.length - 1]]);
-
-
-
-                // TODO: Can do incorrect assignments here :( 
-                // Should I just flatten it into an array and not worry about performance?
-                partContext[interpolated[interpolated.length - 1]] = contextItem;
-
-            }
+            // if (functionName.indexOf('{') != -1) {
+            //     // console.log(functionName);
+            //     var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
+            //     context['INTERPOLATION'] = context['INTERPOLATION'] || {};
+            //     var partContext: any = context['INTERPOLATION'];
+            //     for (var i = 0; i < interpolated.length - 1; i++) {
+            //         var part = interpolated[i];
+            //         if (partContext[part] === undefined) {
+            //             partContext[part] = {};
+            //             partContext = partContext[part];
+            //         }
+            //         else {
+            //             partContext = partContext[part];
+            //         }
+            //     }
+            //     console.log("Assigning to field " + partContext[interpolated[interpolated.length - 1]]);
+            //     // TODO: Can do incorrect assignments here :( 
+            //     // Should I just flatten it into an array and not worry about performance?
+            //     partContext[interpolated[interpolated.length - 1]] = contextItem;
+            // }
 
             var functionEqualIndex = words.indexOf("=");
 
@@ -226,13 +231,15 @@ export var BaseContext: ContextDictionary = {
             return { context: newContext, words: words.slice(functionEqualIndex), expressions };
         }
     },
-    'var': {
+    {
+        token: 'var',
         newContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             return { context, words, expressions };
         }
     },
-    ';': {
+    {
+        token: ';',
         popContext: true,
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
 
@@ -247,7 +254,8 @@ export var BaseContext: ContextDictionary = {
             return { context: Object.getPrototypeOf(context), words, expressions };
         }
     }, // opCodes: [Opcodes.end],
-    '+': {
+    {
+        token: '+',
         types: [
             { input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32add] },
             { input: ['long', 'long'], output: ['long'], opCodes: [Opcodes.i64add] },
@@ -255,15 +263,14 @@ export var BaseContext: ContextDictionary = {
             { input: ['double', 'double'], output: ['double'], opCodes: [Opcodes.f64add] }
         ]
     },
-    '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32mul] }] },
-    '-': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32sub] }] },
-    '<': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32lt_s] }] },
-    '>': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32gt_s] }] },
-    '==': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32eq] }] },
-    '==0': { types: [{ input: ['int'], output: ['bool'], opCodes: [Opcodes.i32eqz] }] },
-    '&&': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32and] }] },
-
-};
+    { token: '*', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32mul] }] },
+    { token: '-', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32sub] }] },
+    { token: '<', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32lt_s] }] },
+    { token: '>', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [Opcodes.i32gt_s] }] },
+    { token: '==', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32eq] }] },
+    { token: '==0', types: [{ input: ['int'], output: ['bool'], opCodes: [Opcodes.i32eqz] }] },
+    { token: '&&', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32and] }] },
+];
 
 export type ParsedExpression = {
     op?: Opcodes | number | (() => number | undefined),
@@ -273,47 +280,122 @@ export type ParsedExpression = {
 };
 
 export class ContextParser {
-    findInterpolationOptions(context: ContextDictionary, word: string): [ContextItem, Array<string>] | undefined {
+    findInterpolationOptions(context: ContextDictionary, word: string): Array<[ContextItem, Array<string>]> {
         // var results: Array<ContextItem> = [];
 
 
         // Split up inner words
         // allow multiple statement matches
         // match on either word or {}
-        var interpolated = word.split(' ');
         var isInInterpolatedSection = false;
 
-        // TODO: allow multiple values to be interpolated in future
-        var interpolatedResultWords: Array<string> = [];
-        var searchContext: any = context["INTERPOLATION"];
-        for (var i = 0; i < interpolated.length; i++) {
-            var split = interpolated[i];
-            // console.log(split);
-            // console.log(searchContext);
-            if (searchContext[split] !== undefined) {
-                searchContext = searchContext[split];
-                isInInterpolatedSection = false;
+        var matches: Array<[ContextItem, Array<string>]> = [];
+
+        for (var i = context.length - 1; i > 0; i--) {
+            if (context[i].interpolationTokens === undefined) {
+                continue;
             }
-            else if (searchContext["{}"] !== undefined) {
-                searchContext = searchContext["{}"];
-                isInInterpolatedSection = true;
-                interpolatedResultWords.push(split);
+
+            var interpolated = word.split(' ');
+            // if (context[i].interpolationTokens!.length > interpolated.length) {
+            //     continue;
+            // }
+
+
+            var interpolatedResultWords: Array<string> = [];
+            var j = 0;
+            var isMatching = true;
+            while (j < context[i].interpolationTokens!.length && isMatching) {
+                var next = interpolated.splice(0, 1);
+                // console.log(next);
+                if (next.length === 0) {
+                    // console.log('too short')
+                    isMatching = false;
+                }
+                else if (context[i].interpolationTokens![j] == "{}") {
+                    // console.log('Matches on {}')
+                    interpolatedResultWords.push(next[0]);
+                    isInInterpolatedSection = true;
+                    j++;
+                }
+                else if (context[i].interpolationTokens![j] == next[0]) {
+                    // console.log('matches on word ' + next[0])
+                    isInInterpolatedSection = false;
+                    j++;
+                }
+                else if (isInInterpolatedSection) {
+                    // console.log('In interpolation section for word ' + next[0])
+                    interpolatedResultWords.push(next[0]);
+                }
+                else {
+                    // console.log('no match from ' + word + ' to ' + context[i].token)
+                    isMatching = false;
+                }
+
+                // j++;
+            }
+            if (j < context[i].interpolationTokens!.length - 1) {
+                // isMatching = false;
+            }
+            if (isMatching) {
+                matches.push([context[i], interpolatedResultWords]);
             }
             else {
-                return undefined;
+                // console.log('No match from ' + word + ' to ' + context[i].token)
             }
-            // else if (isInInterpolatedSection) {
 
+            // for (var j = 0; j < interpolated.length; j++) {
+
+            //     if (searchContext[split] !== undefined) {
+            //         searchContext = searchContext[split];
+            //         isInInterpolatedSection = false;
+            //     }
+            //     else if (searchContext["{}"] !== undefined) {
+            //         searchContext = searchContext["{}"];
+            //         isInInterpolatedSection = true;
+            //         interpolatedResultWords.push(split);
+            //     }
+            //     else {
+            //         return undefined;
+            //     }
+            //     // else if (isInInterpolatedSection) {
+
+            //     // }
             // }
         }
-        if (searchContext !== undefined && searchContext.functionReference !== undefined) {
-            console.log("searchContext");
-            console.log(searchContext);
-            console.log(interpolatedResultWords);
-            return [searchContext, interpolatedResultWords];
-        }
-        console.log("No interpolation");
-        return undefined;
+
+        // var searchContext: any = context["INTERPOLATION"];
+        // for (var i = 0; i < interpolated.length; i++) {
+        //     var split = interpolated[i];
+        //     // console.log(split);
+        //     // console.log(searchContext);
+        //     if (searchContext[split] !== undefined) {
+        //         searchContext = searchContext[split];
+        //         isInInterpolatedSection = false;
+        //     }
+        //     else if (searchContext["{}"] !== undefined) {
+        //         searchContext = searchContext["{}"];
+        //         isInInterpolatedSection = true;
+        //         interpolatedResultWords.push(split);
+        //     }
+        //     else {
+        //         return undefined;
+        //     }
+        //     // else if (isInInterpolatedSection) {
+
+        //     // }
+        // }
+        // if (searchContext !== undefined && searchContext.functionReference !== undefined) {
+        //     console.log("searchContext");
+        //     console.log(searchContext);
+        //     console.log(interpolatedResultWords);
+        //     return [searchContext, interpolatedResultWords];
+        // }
+        // console.log("No interpolation matches");
+        // return [];
+        console.log('matches');
+        console.log(matches);
+        return matches;
     }
 
     parse(context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): Array<string> {
@@ -328,32 +410,24 @@ export class ContextParser {
         else {
             // Lookup through context
             var wordWithoutQuotes = nextWord[0] == "'" ? nextWord.substring(1, nextWord.length - 1) : nextWord;
-            var match = context[wordWithoutQuotes];
+
+            //TODO: find last match:
+            var match = context.find(item => item.token == wordWithoutQuotes);// context[wordWithoutQuotes];
             if (match == undefined && nextWord[0] == "'") {
                 // try by interpolation if in single quotes
                 var interpolationOptions = this.findInterpolationOptions(context, wordWithoutQuotes)
                 // console.log(interpolationOptions);
-                if (interpolationOptions !== undefined) {
-                    match = interpolationOptions[0];
-                    var innerWords: Array<string> = interpolationOptions[1];
+                if (interpolationOptions.length == 1) {
+                    match = interpolationOptions[0][0];
+                    var innerWords: Array<string> = interpolationOptions[0][1];
                     var innerExpresions: Array<ParsedExpression> = [];
-
-                    // TODO: fill in inner words based on match above
-                    // var innerWords: Array<string> = [];
-
-                    // console.log(innerWords);
                     this.parse(context, innerWords, innerExpresions)
-                    // console.log(innerExpresions)
-                    // TODO: right syntax?
-                    // console.log(expressions.length);
                     expressions.push(...innerExpresions);
-                    // console.log(expressions.length);
                 }
-                // else if (interpolationOptions.length > 2) {
-                //     throw Error("Too many possible matches for: " + wordWithoutQuotes
-                //         + JSON.stringify(interpolationOptions)
-                //     );
-                // }
+                else if (interpolationOptions.length > 1) {
+                    throw Error("Too many possible matches for: " + wordWithoutQuotes
+                        + JSON.stringify(interpolationOptions));
+                }
             }
             if (match) {
                 if (match.newContext === true) {

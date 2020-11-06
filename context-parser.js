@@ -85,26 +85,30 @@ var extractResults = function (tokens) {
     }
     return results;
 };
-exports.BaseContext = {
-    'export': {
+exports.BaseContext = [
+    {
+        token: 'export',
         parse: function (context, words, expressions) {
             expressions.push({ desc: "export" });
             return { context: context, words: words, expressions: expressions };
         }
     },
-    'import': {
+    {
+        token: 'import',
         parse: function (context, words, expressions) {
             expressions.push({ desc: "import" });
             return { context: context, words: words, expressions: expressions };
         }
     },
-    'use': {
+    {
+        token: 'use',
         parse: function (context, words, expressions) {
             expressions.push({ desc: "use" });
             return { context: context, words: words, expressions: expressions };
         }
     },
-    'fn': {
+    {
+        token: 'fn',
         parse: function (context, words, expressions) {
             var parameters = extractParameters(words);
             var fnIndex = words.indexOf("fn");
@@ -114,7 +118,8 @@ exports.BaseContext = {
             }
             var newContext = Object.create(context);
             for (var i = 0; i < parameters.length; i++) {
-                newContext[parameters[i].name] = {
+                newContext.push({
+                    token: parameters[i].name,
                     types: [
                         {
                             input: undefined,
@@ -125,9 +130,11 @@ exports.BaseContext = {
                             ]
                         }
                     ]
-                };
+                });
             }
             var contextItem = {
+                token: functionName,
+                interpolationTokens: functionName.indexOf('{') == -1 ? undefined : functionName.replace(/{(.+?)}/g, '{}').split(' '),
                 types: [
                     {
                         input: parameters.map(function (x) { return x.type; }),
@@ -147,28 +154,28 @@ exports.BaseContext = {
                     exportID: undefined
                 }
             };
-            context[functionName] = contextItem;
+            context.push(contextItem);
             // interpolated: 
-            if (functionName.indexOf('{') != -1) {
-                // console.log(functionName);
-                var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
-                context['INTERPOLATION'] = context['INTERPOLATION'] || {};
-                var partContext = context['INTERPOLATION'];
-                for (var i = 0; i < interpolated.length - 1; i++) {
-                    var part = interpolated[i];
-                    if (partContext[part] === undefined) {
-                        partContext[part] = {};
-                        partContext = partContext[part];
-                    }
-                    else {
-                        partContext = partContext[part];
-                    }
-                }
-                console.log("Assigning to field " + partContext[interpolated[interpolated.length - 1]]);
-                // TODO: Can do incorrect assignments here :( 
-                // Should I just flatten it into an array and not worry about performance?
-                partContext[interpolated[interpolated.length - 1]] = contextItem;
-            }
+            // if (functionName.indexOf('{') != -1) {
+            //     // console.log(functionName);
+            //     var interpolated = functionName.replace(/{(.+?)}/g, '{}').split(' ');
+            //     context['INTERPOLATION'] = context['INTERPOLATION'] || {};
+            //     var partContext: any = context['INTERPOLATION'];
+            //     for (var i = 0; i < interpolated.length - 1; i++) {
+            //         var part = interpolated[i];
+            //         if (partContext[part] === undefined) {
+            //             partContext[part] = {};
+            //             partContext = partContext[part];
+            //         }
+            //         else {
+            //             partContext = partContext[part];
+            //         }
+            //     }
+            //     console.log("Assigning to field " + partContext[interpolated[interpolated.length - 1]]);
+            //     // TODO: Can do incorrect assignments here :( 
+            //     // Should I just flatten it into an array and not worry about performance?
+            //     partContext[interpolated[interpolated.length - 1]] = contextItem;
+            // }
             var functionEqualIndex = words.indexOf("=");
             expressions.push({
                 desc: "Adding function: " + functionName,
@@ -177,13 +184,15 @@ exports.BaseContext = {
             return { context: newContext, words: words.slice(functionEqualIndex), expressions: expressions };
         }
     },
-    'var': {
+    {
+        token: 'var',
         newContext: true,
         parse: function (context, words, expressions) {
             return { context: context, words: words, expressions: expressions };
         }
     },
-    ';': {
+    {
+        token: ';',
         popContext: true,
         parse: function (context, words, expressions) {
             // If context is a function
@@ -195,7 +204,8 @@ exports.BaseContext = {
             return { context: Object.getPrototypeOf(context), words: words, expressions: expressions };
         }
     },
-    '+': {
+    {
+        token: '+',
         types: [
             { input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32add] },
             { input: ['long', 'long'], output: ['long'], opCodes: [wasm_structure_1.Opcodes.i64add] },
@@ -203,14 +213,14 @@ exports.BaseContext = {
             { input: ['double', 'double'], output: ['double'], opCodes: [wasm_structure_1.Opcodes.f64add] }
         ]
     },
-    '*': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
-    '-': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
-    '<': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32lt_s] }] },
-    '>': { types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32gt_s] }] },
-    '==': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
-    '==0': { types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
-    '&&': { types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
-};
+    { token: '*', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32mul] }] },
+    { token: '-', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
+    { token: '<', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32lt_s] }] },
+    { token: '>', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32gt_s] }] },
+    { token: '==', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
+    { token: '==0', types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
+    { token: '&&', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
+];
 var ContextParser = /** @class */ (function () {
     function ContextParser() {
     }
@@ -219,38 +229,104 @@ var ContextParser = /** @class */ (function () {
         // Split up inner words
         // allow multiple statement matches
         // match on either word or {}
-        var interpolated = word.split(' ');
         var isInInterpolatedSection = false;
-        // TODO: allow multiple values to be interpolated in future
-        var interpolatedResultWords = [];
-        var searchContext = context["INTERPOLATION"];
-        for (var i = 0; i < interpolated.length; i++) {
-            var split = interpolated[i];
-            // console.log(split);
-            // console.log(searchContext);
-            if (searchContext[split] !== undefined) {
-                searchContext = searchContext[split];
-                isInInterpolatedSection = false;
+        var matches = [];
+        for (var i = context.length - 1; i > 0; i--) {
+            if (context[i].interpolationTokens === undefined) {
+                continue;
             }
-            else if (searchContext["{}"] !== undefined) {
-                searchContext = searchContext["{}"];
-                isInInterpolatedSection = true;
-                interpolatedResultWords.push(split);
+            var interpolated = word.split(' ');
+            // if (context[i].interpolationTokens!.length > interpolated.length) {
+            //     continue;
+            // }
+            var interpolatedResultWords = [];
+            var j = 0;
+            var isMatching = true;
+            while (j < context[i].interpolationTokens.length && isMatching) {
+                var next = interpolated.splice(0, 1);
+                // console.log(next);
+                if (next.length === 0) {
+                    // console.log('too short')
+                    isMatching = false;
+                }
+                else if (context[i].interpolationTokens[j] == "{}") {
+                    // console.log('Matches on {}')
+                    interpolatedResultWords.push(next[0]);
+                    isInInterpolatedSection = true;
+                    j++;
+                }
+                else if (context[i].interpolationTokens[j] == next[0]) {
+                    // console.log('matches on word ' + next[0])
+                    isInInterpolatedSection = false;
+                    j++;
+                }
+                else if (isInInterpolatedSection) {
+                    // console.log('In interpolation section for word ' + next[0])
+                    interpolatedResultWords.push(next[0]);
+                }
+                else {
+                    // console.log('no match from ' + word + ' to ' + context[i].token)
+                    isMatching = false;
+                }
+                // j++;
+            }
+            if (j < context[i].interpolationTokens.length - 1) {
+                // isMatching = false;
+            }
+            if (isMatching) {
+                matches.push([context[i], interpolatedResultWords]);
             }
             else {
-                return undefined;
+                // console.log('No match from ' + word + ' to ' + context[i].token)
             }
-            // else if (isInInterpolatedSection) {
+            // for (var j = 0; j < interpolated.length; j++) {
+            //     if (searchContext[split] !== undefined) {
+            //         searchContext = searchContext[split];
+            //         isInInterpolatedSection = false;
+            //     }
+            //     else if (searchContext["{}"] !== undefined) {
+            //         searchContext = searchContext["{}"];
+            //         isInInterpolatedSection = true;
+            //         interpolatedResultWords.push(split);
+            //     }
+            //     else {
+            //         return undefined;
+            //     }
+            //     // else if (isInInterpolatedSection) {
+            //     // }
             // }
         }
-        if (searchContext !== undefined && searchContext.functionReference !== undefined) {
-            console.log("searchContext");
-            console.log(searchContext);
-            console.log(interpolatedResultWords);
-            return [searchContext, interpolatedResultWords];
-        }
-        console.log("No interpolation");
-        return undefined;
+        // var searchContext: any = context["INTERPOLATION"];
+        // for (var i = 0; i < interpolated.length; i++) {
+        //     var split = interpolated[i];
+        //     // console.log(split);
+        //     // console.log(searchContext);
+        //     if (searchContext[split] !== undefined) {
+        //         searchContext = searchContext[split];
+        //         isInInterpolatedSection = false;
+        //     }
+        //     else if (searchContext["{}"] !== undefined) {
+        //         searchContext = searchContext["{}"];
+        //         isInInterpolatedSection = true;
+        //         interpolatedResultWords.push(split);
+        //     }
+        //     else {
+        //         return undefined;
+        //     }
+        //     // else if (isInInterpolatedSection) {
+        //     // }
+        // }
+        // if (searchContext !== undefined && searchContext.functionReference !== undefined) {
+        //     console.log("searchContext");
+        //     console.log(searchContext);
+        //     console.log(interpolatedResultWords);
+        //     return [searchContext, interpolatedResultWords];
+        // }
+        // console.log("No interpolation matches");
+        // return [];
+        console.log('matches');
+        console.log(matches);
+        return matches;
     };
     ContextParser.prototype.parse = function (context, words, expressions) {
         if (words.length == 0) {
@@ -264,30 +340,23 @@ var ContextParser = /** @class */ (function () {
         else {
             // Lookup through context
             var wordWithoutQuotes = nextWord[0] == "'" ? nextWord.substring(1, nextWord.length - 1) : nextWord;
-            var match = context[wordWithoutQuotes];
+            //TODO: find last match:
+            var match = context.find(function (item) { return item.token == wordWithoutQuotes; }); // context[wordWithoutQuotes];
             if (match == undefined && nextWord[0] == "'") {
                 // try by interpolation if in single quotes
                 var interpolationOptions = this.findInterpolationOptions(context, wordWithoutQuotes);
                 // console.log(interpolationOptions);
-                if (interpolationOptions !== undefined) {
-                    match = interpolationOptions[0];
-                    var innerWords = interpolationOptions[1];
+                if (interpolationOptions.length == 1) {
+                    match = interpolationOptions[0][0];
+                    var innerWords = interpolationOptions[0][1];
                     var innerExpresions = [];
-                    // TODO: fill in inner words based on match above
-                    // var innerWords: Array<string> = [];
-                    // console.log(innerWords);
                     this.parse(context, innerWords, innerExpresions);
-                    // console.log(innerExpresions)
-                    // TODO: right syntax?
-                    // console.log(expressions.length);
                     expressions.push.apply(expressions, innerExpresions);
-                    // console.log(expressions.length);
                 }
-                // else if (interpolationOptions.length > 2) {
-                //     throw Error("Too many possible matches for: " + wordWithoutQuotes
-                //         + JSON.stringify(interpolationOptions)
-                //     );
-                // }
+                else if (interpolationOptions.length > 1) {
+                    throw Error("Too many possible matches for: " + wordWithoutQuotes
+                        + JSON.stringify(interpolationOptions));
+                }
             }
             if (match) {
                 if (match.newContext === true) {
