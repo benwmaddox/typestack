@@ -270,8 +270,8 @@ var ContextParser = /** @class */ (function () {
                 }
                 // j++;
             }
-            if (j < context[i].interpolationTokens.length - 1) {
-                // isMatching = false;
+            if (j < context[i].interpolationTokens.length) {
+                isMatching = false;
             }
             if (isMatching) {
                 matches.push([context[i], interpolatedResultWords]);
@@ -324,8 +324,8 @@ var ContextParser = /** @class */ (function () {
         // }
         // console.log("No interpolation matches");
         // return [];
-        console.log('matches');
-        console.log(matches);
+        // console.log('matches');
+        // console.log(matches);
         return matches;
     };
     ContextParser.prototype.parse = function (context, words, expressions) {

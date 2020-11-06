@@ -334,8 +334,8 @@ export class ContextParser {
 
                 // j++;
             }
-            if (j < context[i].interpolationTokens!.length - 1) {
-                // isMatching = false;
+            if (j < context[i].interpolationTokens!.length) {
+                isMatching = false;
             }
             if (isMatching) {
                 matches.push([context[i], interpolatedResultWords]);
@@ -393,8 +393,8 @@ export class ContextParser {
         // }
         // console.log("No interpolation matches");
         // return [];
-        console.log('matches');
-        console.log(matches);
+        // console.log('matches');
+        // console.log(matches);
         return matches;
     }
 
