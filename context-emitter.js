@@ -36,9 +36,7 @@ var ContextEmitter = /** @class */ (function () {
                 functionReference.typeID = typeIndex;
                 var functionIndex = wasmStructure.addFunction(typeIndex);
                 functionReference.functionID = functionIndex;
-                if (true) { // TODO: Figure out best way to do this
-                    // console.log('exporting function index ' + functionIndex)
-                    // TODO: Something wrong about exports?
+                if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
                     var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
                     functionReference.exportID = exportIndex;
                 }

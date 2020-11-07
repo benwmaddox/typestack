@@ -94,6 +94,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     }, function (item) {
         console.log(item.instance.exports);
         console.log(item.instance.exports['test']());
+        console.log(item.instance.exports['blah']());
     });
 });
 function buildParameterList(input) {

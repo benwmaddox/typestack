@@ -1,42 +1,24 @@
+// import 'console' 'log' fn emit i:int ;
+
 export fn '{a:int} is less than {b:int} ?' int = a b < ;
 export fn '{a:int} is greater than {b:int} ?' int = a b > ;
 
+fn 'add two {i:int}' int = 2 i + ;
 
-//export fn test int = 
-//   '3 is less than 5 ?' 1 ==
-//   ;
-//   '5 is less than 5 ?' 0 ==
-//    && ;
-    
-    
+// testing a comment
+fn 'add one' i:int int = 1 i + ;
 
-
-  fn 'add two {i:int}' int = 2 i + ;
-   // fn 'add two' i:int int = 2 i + ;
-  // fn 'add {x:int} to {y:int}' int = x y + ;
-  // testing a comment
-  fn 'add one' i:int int = 1 i + ;
-//  fn 'add one twice' i:int int = i 'add one' 'add one' ;
-  fn double i:int int = 2 i * ;
-// fn 'add a' a:int b:int int = a b + ;
-
-// fn '{a:int} is less' int = 0 ;
-     
- fn subtract a:int b:int int = a b - ;
-//  fn 'less than' a:int b:int int = a b < ;
-//  
-//  // export fn '{a:int} is greater than {b:int} ?' int = a b > ;
-// //  export fn '{a:int} is less than {b:int} ?' int = a b < ;
-//  
-  export fn test int =   
+fn double i:int int = 2 i * ;    
+fn subtract a:int b:int int = a b - ;
+ 
+export fn test int =   
     '3 is less than 5 ?' 1 == 
     '5 is less than 5 ?' 0 == 
     2 double 4 ==          
-    500 300 subtract 200 ==              
+    500 350 subtract 150 ==              
     && && &&
     ;
 
-//   5 double 'add two' 12 == 
+fn 'addit' a:int int = 3 a + ;
 
-// fn 'addsss a' a:int b:int int = a b + ;
-   fn 'addit' a:int int = 3 a + ;
+export fn blah int = 500 400 subtract ;

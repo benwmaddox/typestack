@@ -120,6 +120,7 @@ export var BaseContext: ContextDictionary = [
         token: 'import',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             expressions.push({ desc: "import" });
+
             return { context, words, expressions };
         }
     },
