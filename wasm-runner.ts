@@ -1,11 +1,8 @@
 const { PerformanceObserver, performance } = require('perf_hooks');
 import { WasmStructure, WasmType, Opcodes, ExportFunctionIds, FunctionIds } from './wasm-structure';
 import { Lexer } from './lexer'
-import { Parser } from './parser'
 import { ContextParser, BaseContext, ParsedExpression } from './context-parser'
-import { Emitter } from './emitter'
 import * as fs from 'fs';
-import { EventEmitter } from 'events';
 import { ContextEmitter } from './context-emitter';
 
 var module = 'sample3';

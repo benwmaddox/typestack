@@ -274,7 +274,9 @@ export function toUnsignedLEB128(value: number): Array<number> {
     return bytesLEB;
 }
 export function toSignedLEB128(value: number): Array<number> {
-    //https://en.wikipedia.org/wiki/LEB128
+
+    // TODO:
+    //
     value |= 0;
     const result = [];
     while (true) {

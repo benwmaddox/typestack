@@ -243,7 +243,8 @@ function toUnsignedLEB128(value) {
 }
 exports.toUnsignedLEB128 = toUnsignedLEB128;
 function toSignedLEB128(value) {
-    //https://en.wikipedia.org/wiki/LEB128
+    // TODO:
+    //
     value |= 0;
     var result = [];
     while (true) {
