@@ -295,12 +295,11 @@ var WasmStructure = /** @class */ (function () {
         this.codeSections = [];
         this.exports = [];
     }
-    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, parameters, result) {
-        // TODO: ...
-        var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction(typeId);
+    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, functionId) {
+        console.log("Adding import: " + importModule + ", " + importField + ", " + internalName + ", " + functionId);
+        // var typeId = this.addFunctionType(parameters, result);
+        // var functionId = this.addFunction(typeId);
         var declCount = 0;
-        // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
         var data = [];
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);

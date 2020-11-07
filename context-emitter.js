@@ -14,7 +14,7 @@ var ContextEmitter = /** @class */ (function () {
     }
     ContextEmitter.prototype.getBytes = function (expressions) {
         var _this = this;
-        var _a, _b, _c;
+        var _a, _b;
         var wasmStructure = new wasm_structure_1.WasmStructure();
         var i = 0;
         // var currentFunctionId : number | null = null;
@@ -24,10 +24,11 @@ var ContextEmitter = /** @class */ (function () {
                 // console.log(expression.desc);
             }
             if (expression.desc == 'import') {
-                var importEndIndex = expressions.slice(i).findIndex(function (x) { return x.op == wasm_structure_1.Opcodes.end; }) + i;
-                var importType = expressions.slice(i, importEndIndex).map(function (x) { return x.desc; }).indexOf('fn') != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
-                var type = expression.function.types ? expression.function.types[0] : {};
-                var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
+                // var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
+                // var importType = expressions.slice(i, importEndIndex).map(x => x.desc).indexOf('fn') != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
+                // console.log('importing emitter')
+                // var type = expression.function.types ? expression.function.types[0] : {};
+                // var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
             }
             if (expression.function) {
                 var functionEndIndex = expressions.slice(i).findIndex(function (x) { return x.op == wasm_structure_1.Opcodes.end; }) + i;
@@ -37,14 +38,18 @@ var ContextEmitter = /** @class */ (function () {
                 }
                 var name = functionReference.name || "ERROR STATE";
                 var type = expression.function.types ? expression.function.types[0] : {};
-                var resultType = ((_b = type.output) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
-                var typeIndex = wasmStructure.addFunctionType(((_c = type.input) === null || _c === void 0 ? void 0 : _c.map(function (x) { return _this.mapTypeToWasmType(x); })) || [wasm_structure_1.WasmType.f64], resultType);
+                var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
+                var typeIndex = wasmStructure.addFunctionType(((_b = type.input) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })) || [wasm_structure_1.WasmType.f64], resultType);
                 functionReference.typeID = typeIndex;
                 var functionIndex = wasmStructure.addFunction(typeIndex);
                 functionReference.functionID = functionIndex;
                 if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
                     var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
                     functionReference.exportID = exportIndex;
+                }
+                if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
+                    var importIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, functionIndex);
+                    // functionReference.im = ImportIndex;
                 }
                 var code = expressions
                     .slice(i, functionEndIndex)

@@ -66,7 +66,6 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
     var tokenizedTime = performance.now();
-    console.log("Tokenize time: " + (tokenizedTime - startTime));
     // var parser = new Parser();    
     // var astModule = parser.parseModule(module, tokenized);
     // var emmitter = new Emitter();
@@ -78,13 +77,11 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    console.log("Parse time: " + (postParseTime - preParseTime));
+    console.log(JSON.stringify(expressions, undefined, "  "));
     var contextEmitter = new context_emitter_1.ContextEmitter();
-    // console.log(JSON.stringify(expressions, undefined, "  "));
     var preEmitTime = performance.now();
     var contextBytes = contextEmitter.getBytes(expressions);
     var postEmitTime = performance.now();
-    console.log("Emit time: " + (postEmitTime - preEmitTime));
     // console.log(JSON.stringify(contextBytes));
     // console.log(JSON.stringify(context["INTERPOLATION"], undefined, "  "));
     // console.log(expressions);
@@ -97,24 +94,36 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var preFileTime = performance.now();
     fs.writeFileSync('output.wasm', contextBytes);
     var postFileTime = performance.now();
-    console.log("File write time: " + (postFileTime - preFileTime));
+    var preInitWasmTime = performance.now();
     runWasmWithCallback(contextBytes, {
         console: console,
         function: {
             log: console.log
         }
     }, function (item) {
+        var postInitWasmTime = performance.now();
         // console.log((<any>item.instance.exports));
         var exports = item.instance.exports;
+        console.log(' ');
         // Running each exported fn. No parameters in test
         for (var e in exports) {
             var preFnRunTime = performance.now();
             console.log(e + ": " + (exports[e]()));
             var postFnRunTime = performance.now();
-            console.log("{e} run time: " + (postFnRunTime - preFnRunTime));
+            console.log(e + " run time: " + (postFnRunTime - preFnRunTime).toFixed(2) + " ms");
+            // var pre2ndFnRunTime = performance.now();
+            // console.log(e + ": " + (exports[e]()));
+            // var post2ndFnRunTime = performance.now();
+            // console.log(`${e} 2nd run time: ${post2ndFnRunTime - pre2ndFnRunTime}`)
         }
         var finalTime = performance.now();
-        console.log("Full run time: " + (finalTime - startTime) + " ms");
+        console.log(' ');
+        console.log("File write time: " + (postFileTime - preFileTime).toFixed(2) + " ms");
+        console.log("Tokenize time: " + (tokenizedTime - startTime).toFixed(2) + " ms");
+        console.log("Parse time: " + (postParseTime - preParseTime).toFixed(2) + " ms");
+        console.log("Emit time: " + (postEmitTime - preEmitTime).toFixed(2) + " ms");
+        console.log("Wasm init time: " + (postInitWasmTime - preInitWasmTime).toFixed(2) + " ms");
+        console.log("Full run time: " + (finalTime - startTime).toFixed(2) + " ms");
     });
 });
 function runWasmWithCallback(bytes, importObject, callback) {

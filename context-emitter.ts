@@ -15,11 +15,11 @@ export class ContextEmitter {
             }
             if (expression.desc == 'import') {
 
-                var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
-                var importType = expressions.slice(i, importEndIndex).map(x => x.desc).indexOf('fn') != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
-
-                var type = expression.function.types ? expression.function.types[0] : {};
-                var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
+                // var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
+                // var importType = expressions.slice(i, importEndIndex).map(x => x.desc).indexOf('fn') != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
+                // console.log('importing emitter')
+                // var type = expression.function.types ? expression.function.types[0] : {};
+                // var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
 
             }
             if (expression.function) {
@@ -37,8 +37,12 @@ export class ContextEmitter {
                 functionReference.functionID = functionIndex;
 
                 if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
-                    var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex)
+                    var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex);
                     functionReference.exportID = exportIndex;
+                }
+                if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
+                    var importIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, functionIndex);
+                    // functionReference.im = ImportIndex;
                 }
                 var code: Array<number> = expressions
                     .slice(i, functionEndIndex)

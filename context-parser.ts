@@ -58,16 +58,16 @@ var extractParameters = (tokens: Array<string>) => {
     var fnIndex = tokens.indexOf("fn", index);
 
     var functionEqualIndex = tokens.indexOf("=", index);
-    if (functionEqualIndex < 0) {
-        throw new Error('No = for function ' + tokens[index + 1]);
-    }
-    var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+    // if (functionEqualIndex < 0) {
+    // throw new Error('No = for function ' + tokens[index + 1]);
+    // }
+    var functionEndIndex = tokens.indexOf(";", functionEqualIndex != -1 ? functionEqualIndex : fnIndex);
     if (functionEndIndex < 0) {
         throw new Error('No ; ending for ' + tokens[index + 1]);
     }
     var parameters = buildParameterList(tokens[fnIndex + 1].substring(1, tokens[fnIndex + 1].length - 1));
 
-    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex - 1);
+    var additionalParameters = tokens.slice(fnIndex + 2, (functionEqualIndex != -1 ? functionEqualIndex : functionEndIndex) - 1);
     for (var i = 0; i < additionalParameters.length; i++) {
         var item = additionalParameters[i];
         if (item.indexOf(':') != -1) {
@@ -86,15 +86,15 @@ var extractResults = (tokens: Array<string>) => {
     var index = 0;
     var fnIndex = tokens.indexOf("fn", index);
 
-    var functionEqualIndex = tokens.indexOf("=", index);
-    if (functionEqualIndex < 0) {
-        throw new Error('No = for function ' + tokens[index + 1]);
-    }
-    var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
+    var functionEndIndex = tokens.indexOf(";");
     if (functionEndIndex < 0) {
         throw new Error('No ; ending for ' + tokens[index + 1]);
     }
-    var additionalParameters = tokens.slice(fnIndex + 2, functionEqualIndex);
+    var functionEqualIndex = tokens.slice(fnIndex, functionEndIndex).indexOf("=", index);
+    if (functionEqualIndex < 0) {
+        // throw new Error('No = for function ' + tokens[index + 1]);
+    }
+    var additionalParameters = tokens.slice(fnIndex + 2, (functionEqualIndex || functionEndIndex));
     var results: Array<string> = [];
     for (var i = 0; i < additionalParameters.length; i++) {
         var item = additionalParameters[i];
@@ -119,11 +119,50 @@ export var BaseContext: ContextDictionary = [
     {
         token: 'import',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
+
+
+            // TODO
+
+            var functionEndIndex = words.indexOf(";");
+            var fnIndex = words.slice(0, functionEndIndex).indexOf("fn");
+            // // var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
+            // var importType = fnIndex != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
+
+            // var functionName = words[fnIndex + 1];
+            // if (functionName[0] == "'") {
+            //     functionName = functionName.substring(1, functionName.length - 1)
+            // }
+
+            // var contextItem: ContextItem = {
+            //     token: functionName,
+            //     interpolationTokens: functionName.indexOf('{') == -1 ? undefined : functionName.replace(/{(.+?)}/g, '{}').split(' '),
+            //     types: [
+            //         {
+            //             input: parameters.map(x => x.type),
+            //             parameters: parameters.map(x => x.name),
+            //             output: extractResults(words),
+            //             opCodes:
+            //                 // flatten opcodes
+            //                 Array.prototype.concat.apply([],
+            //                     parameters.map((x, i) =>
+            //                         [Opcodes.get_local, i]))
+
+            //         }
+            //     ],
+            //     functionReference: {
+            //         name: functionName,
+            //         typeID: undefined,
+            //         functionID: undefined,
+            //         exportID: undefined
+            //     }
+            // };
+
+
             expressions.push({ desc: "import" });
+            expressions.push({ desc: words[1].substring(1, words[1].length - 1) });
+            expressions.push({ desc: words[2].substring(1, words[2].length - 1) });
 
-            // var fnIndex = words.indexOf("fn");
-
-            return { context, words, expressions };
+            return { context: context, words: words.slice(2), expressions };
         }
     },
     {
@@ -186,14 +225,16 @@ export var BaseContext: ContextDictionary = [
 
             context.push(contextItem);
 
-            var functionEqualIndex = words.indexOf("=");
+            var functionEndIndex = words.indexOf(";");
+            var functionEqualIndex = words.slice(0, functionEndIndex).indexOf("=");
+
 
             expressions.push({
                 desc: "Adding function: " + functionName,
                 function: contextItem
 
             })
-            return { context: newContext, words: words.slice(functionEqualIndex), expressions };
+            return { context: newContext, words: words.slice(functionEqualIndex || functionEndIndex), expressions };
         }
     },
     {

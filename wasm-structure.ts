@@ -316,14 +316,12 @@ export class WasmStructure {
     // }
 
     importId = 0;
-    addImportFunction(importModule: string, importField: string, internalName: string, parameters: Array<WasmType>, result: WasmType | null): number {
+    addImportFunction(importModule: string, importField: string, internalName: string, functionId: number): number {
 
-
-        // TODO: ...
-        var typeId = this.addFunctionType(parameters, result);
-        var functionId = this.addFunction(typeId);
+        console.log(`Adding import: ${importModule}, ${importField}, ${internalName}, ${functionId}`)
+        // var typeId = this.addFunctionType(parameters, result);
+        // var functionId = this.addFunction(typeId);
         var declCount = 0;
-        // var codeId = this.addCode([declCount, ...functionBody, Opcodes.end]);
 
         var data: Array<number> = [];
         for (var i = 0; i < data.length; i++) {

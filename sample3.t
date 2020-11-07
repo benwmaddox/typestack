@@ -1,4 +1,5 @@
-// import 'console' 'log' fn emit i:int ; 
+import 'console' 'log' fn emit i:int int = 1 ; 
+import 'function' 'log' fn emit2 i:int int = 1 ; 
 
 fn '{a:int} is less than {b:int} ?' int = a b < ;
 fn '{a:int} is greater than {b:int} ?' int = a b > ;
@@ -22,4 +23,5 @@ export fn test int =
 fn 'addit' a:int int = 3 a + ;
 
 export fn blah int = 10101 emit ;
+export fn blah2 int = 10101 emit2 ;
 
