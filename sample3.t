@@ -1,7 +1,7 @@
 // import 'console' 'log' fn emit i:int ;
 
-export fn '{a:int} is less than {b:int} ?' int = a b < ;
-export fn '{a:int} is greater than {b:int} ?' int = a b > ;
+fn '{a:int} is less than {b:int} ?' int = a b < ;
+fn '{a:int} is greater than {b:int} ?' int = a b > ;
 
 fn 'add two {i:int}' int = 2 i + ;
 
@@ -21,4 +21,4 @@ export fn test int =
 
 fn 'addit' a:int int = 3 a + ;
 
-export fn blah int = 500 400 subtract ;
+export fn blah int = 500 200 subtract ;

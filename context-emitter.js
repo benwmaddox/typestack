@@ -44,15 +44,9 @@ var ContextEmitter = /** @class */ (function () {
                     .slice(i, functionEndIndex)
                     .filter(function (x) { return x.op != undefined; })
                     .map(function (x) { return typeof (x.op) == 'function' ? x.op() : x.op; });
-                // console.log(code)
                 var declCount = 0;
                 var codeId = wasmStructure.addCode(__spreadArrays([declCount], code, [wasm_structure_1.Opcodes.end]));
                 i = functionEndIndex;
-                // wasmStructure.AddExportFunction(name,
-                //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],
-                //     null,
-                //     expressions.slice(i, functionEndIndex)
-                // )
             }
             // TODO: maybe op should be separate from value? 
             // if (expression.op == Opcodes.end) {

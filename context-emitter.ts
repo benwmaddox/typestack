@@ -35,17 +35,12 @@ export class ContextEmitter {
                     .slice(i, functionEndIndex)
                     .filter(x => x.op != undefined)
                     .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op);
-                // console.log(code)
+
                 var declCount = 0;
                 var codeId = wasmStructure.addCode([declCount, ...code, Opcodes.end])
 
                 i = functionEndIndex;
 
-                // wasmStructure.AddExportFunction(name,
-                //     type.parameters?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64],
-                //     null,
-                //     expressions.slice(i, functionEndIndex)
-                // )
             }
             // TODO: maybe op should be separate from value? 
             // if (expression.op == Opcodes.end) {

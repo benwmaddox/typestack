@@ -403,22 +403,7 @@ var WasmStructure = /** @class */ (function () {
     WasmStructure.prototype.formatCodeSection = function () {
     };
     WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
-        console.log('section ' + SectionID);
-        console.log('count ' + count);
-        var u32Length = bytes.length + 1;
-        console.log('u32 Length: ' + u32Length);
-        console.log(JSON.stringify(bytes));
-        // var initialConversion = Uint8Array.from([SectionID,
-        //     bytes.length + 1,
-        //     count,
-        //     ...bytes]);
-        // return initialConversion.byteLength;
-        // console.log(uint8ArrayBytes);
-        console.log(count + " to ");
-        console.log(toUnsignedLEB128(count));
         var results = bytes.length > 0 ? __spreadArrays([SectionID], toUnsignedLEB128(bytes.length + 1), toUnsignedLEB128(count), bytes) : [];
-        // console.log(JSON.stringify(Uint8Array.from(results).length));
-        // console.log(JSON.stringify(results.length));
         return results;
     };
     WasmStructure.prototype.getBytes = function () {

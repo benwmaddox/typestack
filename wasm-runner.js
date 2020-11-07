@@ -55,7 +55,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var wasm_structure_1 = require("./wasm-structure");
 var lexer_1 = require("./lexer");
 var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
@@ -92,177 +91,14 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
             log: console.log
         }
     }, function (item) {
-        console.log(item.instance.exports);
-        console.log(item.instance.exports['test']());
-        console.log(item.instance.exports['blah']());
+        // console.log((<any>item.instance.exports));
+        var exports = item.instance.exports;
+        // Running each exported fn. No parameters in test
+        for (var e in exports) {
+            console.log(e + ": " + (exports[e]()));
+        }
     });
 });
-function buildParameterList(input) {
-    var index = 0;
-    var regex = new RegExp('{(.+?):(.+?)}');
-    var regexResult = regex.exec(input.substr(index));
-    var result = [];
-    while (regexResult !== null) {
-        result.push({
-            name: regexResult[1],
-            type: regexResult[2]
-        });
-        index += regexResult.index + regexResult[0].length;
-        regexResult = regex.exec(input.substr(index));
-    }
-    return result;
-}
-var dictionary = [];
-function builtInWords() {
-    var results = [];
-    results.push({ name: '+', OpsCodes: [wasm_structure_1.Opcodes.i32add] });
-    results.push({ name: '*', OpsCodes: [wasm_structure_1.Opcodes.i32mul] });
-    results.push({ name: '-', OpsCodes: [wasm_structure_1.Opcodes.i32sub] });
-    results.push({ name: '<', OpsCodes: [wasm_structure_1.Opcodes.i32lt_s] });
-    results.push({ name: '==', OpsCodes: [wasm_structure_1.Opcodes.i32eq] });
-    results.push({ name: '==0', OpsCodes: [wasm_structure_1.Opcodes.i32eqz] });
-    results.push({ name: '&&', OpsCodes: [wasm_structure_1.Opcodes.i32and] });
-    return results;
-}
-function runIntoWasm(tokens) {
-    dictionary = builtInWords();
-    var wasmStructure = new wasm_structure_1.WasmStructure();
-    var index = 0;
-    var definingFunction = false;
-    while (index < tokens.length) {
-        var token = tokens[index];
-        if (token == "fn") {
-            definingFunction = true;
-            var functionEqualIndex = tokens.indexOf("=", index);
-            if (functionEqualIndex < 0) {
-                throw 'No = for function ' + tokens[index + 1];
-            }
-            var functionEndIndex = tokens.indexOf(";", functionEqualIndex);
-            if (functionEndIndex < 0) {
-                throw 'No ; ending for ' + tokens[index + 1];
-            }
-            var definition = {
-                name: tokens[index + 1][0] == "'"
-                    ? tokens[index + 1].substring(1, tokens[index + 1].length - 1)
-                    : tokens[index + 1],
-                // parameters: tokens.slice(index + 2, functionEqualIndex),
-                parameters: buildParameterList(tokens[index + 1].substring(1, tokens[index + 1].length - 1)),
-                body: tokens.slice(functionEqualIndex + 1, functionEndIndex),
-                result: { name: null, type: tokens[functionEqualIndex - 1] }
-            };
-            var additionalParameters = tokens.slice(index + 2, functionEqualIndex - 1);
-            for (var i = 0; i < additionalParameters.length; i++) {
-                var item = additionalParameters[i];
-                if (item.indexOf(':') != -1) {
-                    definition.parameters.push({
-                        name: item.split(":")[0],
-                        type: item.split(":")[1]
-                    });
-                }
-            }
-            var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
-            var bodyOps = bodyTokensToOps(definition);
-            if (index > 0 && tokens[index - 1] == "export") {
-                var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
-                bodyOps);
-                dictionary.push({
-                    name: definition.name,
-                    IDs: exportIds
-                });
-            }
-            else {
-                var functionIds = wasmStructure.AddFunctionDetails(parameterOps, wasm_structure_1.WasmType.i32, // TODO
-                bodyOps);
-                dictionary.push({
-                    name: definition.name,
-                    IDs: functionIds
-                });
-            }
-            index = functionEndIndex;
-        }
-        else if (token == ";") {
-            definingFunction = false;
-        }
-        else {
-            //runWords([tokens[index]])
-        }
-        index++;
-    }
-    return wasmStructure.getBytes();
-}
-function isInOrder(values) {
-    for (var i = 1; i < values.length; i++) {
-        if (values[i - 1] >= values[i])
-            return false;
-    }
-    return true;
-}
-function findInterpolatedMatches(token) {
-    var matchingFunctions = [];
-    var tokenSplit = token.substring(1, token.length - 1).split(" ");
-    var interpolatedOptions = dictionary.filter(function (x) { return x.name.indexOf("{") != -1; });
-    for (var i = 0; i < interpolatedOptions.length; i++) {
-        var wordWithoutQuotes = interpolatedOptions[i].name;
-        var wordSplit = wordWithoutQuotes.split(" ").filter(function (x) { return x[0] != "{"; });
-        var locationInToken = wordSplit.map(function (x) { return tokenSplit.indexOf(x); });
-        if (locationInToken.every(function (x) { return x != -1; })
-            && isInOrder(locationInToken)) {
-            matchingFunctions.push(interpolatedOptions[i]);
-        }
-    }
-    return matchingFunctions;
-}
-function bodyTokensToOps(definition) {
-    var tokens = definition.body;
-    var parameters = definition.parameters;
-    var result = [];
-    for (var i = 0; i < tokens.length; i++) {
-        var token = tokens[i];
-        var matchingFunctions;
-        if (token[0] == "'") {
-            matchingFunctions = dictionary.filter(function (x) { return "'" + x.name + "'" == token; });
-            if (matchingFunctions.length == 0) {
-                matchingFunctions = findInterpolatedMatches(token);
-                // TODO : calculate parameters to use / Maybe recursion here?
-            }
-        }
-        else {
-            matchingFunctions = dictionary.filter(function (x) { return x.name == token; });
-        }
-        if (matchingFunctions.length != 0) {
-            var lastFunction = matchingFunctions[matchingFunctions.length - 1];
-            if (lastFunction.IDs != null) {
-                result.push(wasm_structure_1.Opcodes.call);
-                result.push(lastFunction.IDs.functionId); // Last matching function
-            }
-            else if (lastFunction.OpsCodes != null) {
-                for (var j = 0; j < lastFunction.OpsCodes.length; j++) {
-                    result.push(lastFunction.OpsCodes[j]);
-                }
-            }
-            else {
-                throw 'Function missing ID or opscodes for ' + token;
-            }
-            continue;
-        }
-        var parsedInt = parseInt(token);
-        if (!isNaN(parsedInt)) {
-            result.push(wasm_structure_1.Opcodes.i32Const);
-            result.push(parsedInt);
-            continue;
-        }
-        var matchingParameters = parameters.filter(function (x) { return x.name == token; });
-        if (matchingParameters.length != 0) {
-            var lastParam = matchingParameters[matchingParameters.length - 1];
-            var paramIndex = parameters.indexOf(lastParam);
-            result.push(wasm_structure_1.Opcodes.get_local);
-            result.push(paramIndex);
-            continue;
-        }
-        throw 'Could not find match for ' + token;
-    }
-    return result;
-}
 function runWasmWithCallback(bytes, importObject, callback) {
     return __awaiter(this, void 0, void 0, function () {
         var instance;
