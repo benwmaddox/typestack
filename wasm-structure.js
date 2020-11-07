@@ -286,6 +286,7 @@ var WasmStructure = /** @class */ (function () {
         this.typeId = 0;
         this.typeCache = {};
         this.functionIndex = 0;
+        this.functionCount = 0;
         this.exportId = 0;
         this.codeId = 0;
         this.customSection = [];
@@ -295,16 +296,40 @@ var WasmStructure = /** @class */ (function () {
         this.codeSections = [];
         this.exports = [];
     }
-    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, functionId) {
-        console.log("Adding import: " + importModule + ", " + importField + ", " + internalName + ", " + functionId);
+    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, typeId) {
+        console.log("Adding import: " + importModule + ", " + importField + ", " + internalName + ", " + typeId);
         // var typeId = this.addFunctionType(parameters, result);
         // var functionId = this.addFunction(typeId);
         var declCount = 0;
         var data = [];
+        var importModuleUtf8 = this.stringToUTF8(importModule);
+        // length of subsequent string
+        data.push(importModuleUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importModuleUtf8.length; i++) {
+            data.push(importModuleUtf8[i]);
+        }
+        var importFieldUtf8 = this.stringToUTF8(importField);
+        // length of subsequent string
+        data.push(importFieldUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importFieldUtf8.length; i++) {
+            data.push(importFieldUtf8[i]);
+        }
+        // var importNameUtf8 = this.stringToUTF8(internalName);
+        // // length of subsequent string
+        // data.push(importNameUtf8.length);
+        // // string bytes from name
+        // for (var i = 0; i < importNameUtf8.length; i++) {
+        //     data.push(importNameUtf8[i]);
+        // }
+        data.push(0x00); // function type - could be something else
+        data.push(typeId);
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
-        return this.importId++;
+        this.importId++;
+        return this.functionIndex++;
     };
     WasmStructure.prototype.AddExportFunction = function (exportName, parameters, result, functionBody) {
         var typeId = this.addFunctionType(parameters, result);
@@ -339,6 +364,7 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.addFunction = function (typeIndex) {
         this.functions.push(typeIndex);
+        this.functionCount++;
         return this.functionIndex++;
     };
     WasmStructure.prototype.stringToUTF8 = function (text) {
@@ -406,7 +432,7 @@ var WasmStructure = /** @class */ (function () {
         return results;
     };
     WasmStructure.prototype.getBytes = function () {
-        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.codeSections)));
+        var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionCount, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.codeSections)));
         return results;
     };
     return WasmStructure;

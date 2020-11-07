@@ -41,22 +41,24 @@ var ContextEmitter = /** @class */ (function () {
                 var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
                 var typeIndex = wasmStructure.addFunctionType(((_b = type.input) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })) || [wasm_structure_1.WasmType.f64], resultType);
                 functionReference.typeID = typeIndex;
-                var functionIndex = wasmStructure.addFunction(typeIndex);
-                functionReference.functionID = functionIndex;
-                if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
-                    var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
-                    functionReference.exportID = exportIndex;
-                }
                 if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
-                    var importIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, functionIndex);
-                    // functionReference.im = ImportIndex;
+                    var functionIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, typeIndex);
+                    functionReference.functionID = functionIndex;
                 }
-                var code = expressions
-                    .slice(i, functionEndIndex)
-                    .filter(function (x) { return x.op != undefined; })
-                    .map(function (x) { return typeof (x.op) == 'function' ? x.op() : x.op; });
-                var declCount = 0;
-                var codeId = wasmStructure.addCode(__spreadArrays([declCount], code, [wasm_structure_1.Opcodes.end]));
+                else {
+                    var functionIndex = wasmStructure.addFunction(typeIndex);
+                    functionReference.functionID = functionIndex;
+                    if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
+                        var exportIndex = wasmStructure.addExport(name, wasm_structure_1.ExportKind.function, functionIndex);
+                        functionReference.exportID = exportIndex;
+                    }
+                    var code = expressions
+                        .slice(i, functionEndIndex)
+                        .filter(function (x) { return x.op != undefined; })
+                        .map(function (x) { return typeof (x.op) == 'function' ? x.op() : x.op; });
+                    var declCount = 0;
+                    var codeId = wasmStructure.addCode(__spreadArrays([declCount], code, [wasm_structure_1.Opcodes.end]));
+                }
                 i = functionEndIndex;
             }
             // TODO: maybe op should be separate from value? 

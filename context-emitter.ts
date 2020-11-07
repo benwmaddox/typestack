@@ -33,24 +33,29 @@ export class ContextEmitter {
                 var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
                 var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64], resultType);
                 functionReference.typeID = typeIndex;
-                var functionIndex = wasmStructure.addFunction(typeIndex);
-                functionReference.functionID = functionIndex;
-
-                if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
-                    var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex);
-                    functionReference.exportID = exportIndex;
-                }
                 if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
-                    var importIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, functionIndex);
-                    // functionReference.im = ImportIndex;
-                }
-                var code: Array<number> = expressions
-                    .slice(i, functionEndIndex)
-                    .filter(x => x.op != undefined)
-                    .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op);
+                    var functionIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, typeIndex);
+                    functionReference.functionID = functionIndex;
 
-                var declCount = 0;
-                var codeId = wasmStructure.addCode([declCount, ...code, Opcodes.end])
+                }
+                else {
+                    var functionIndex = wasmStructure.addFunction(typeIndex);
+                    functionReference.functionID = functionIndex;
+
+                    if (i > 0 && expressions[i - 1].desc == 'export') { // TODO: Better way to handle this?
+                        var exportIndex = wasmStructure.addExport(name, ExportKind.function, functionIndex);
+                        functionReference.exportID = exportIndex;
+                    }
+                    var code: Array<number> = expressions
+                        .slice(i, functionEndIndex)
+                        .filter(x => x.op != undefined)
+                        .map(x => typeof (x.op) == 'function' ? <number>x.op() : <number>x.op);
+
+                    var declCount = 0;
+
+                    var codeId = wasmStructure.addCode([declCount, ...code, Opcodes.end])
+
+                }
 
                 i = functionEndIndex;
 

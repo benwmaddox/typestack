@@ -316,18 +316,46 @@ export class WasmStructure {
     // }
 
     importId = 0;
-    addImportFunction(importModule: string, importField: string, internalName: string, functionId: number): number {
+    addImportFunction(importModule: string, importField: string, internalName: string, typeId: number): number {
 
-        console.log(`Adding import: ${importModule}, ${importField}, ${internalName}, ${functionId}`)
+        console.log(`Adding import: ${importModule}, ${importField}, ${internalName}, ${typeId}`)
         // var typeId = this.addFunctionType(parameters, result);
         // var functionId = this.addFunction(typeId);
         var declCount = 0;
 
         var data: Array<number> = [];
+        var importModuleUtf8 = this.stringToUTF8(importModule);
+        // length of subsequent string
+        data.push(importModuleUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importModuleUtf8.length; i++) {
+            data.push(importModuleUtf8[i]);
+        }
+
+        var importFieldUtf8 = this.stringToUTF8(importField);
+        // length of subsequent string
+        data.push(importFieldUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importFieldUtf8.length; i++) {
+            data.push(importFieldUtf8[i]);
+        }
+        // var importNameUtf8 = this.stringToUTF8(internalName);
+        // // length of subsequent string
+        // data.push(importNameUtf8.length);
+        // // string bytes from name
+        // for (var i = 0; i < importNameUtf8.length; i++) {
+        //     data.push(importNameUtf8[i]);
+        // }
+
+        data.push(0x00); // function type - could be something else
+        data.push(typeId);
+
+
         for (var i = 0; i < data.length; i++) {
             this.imports.push(data[i]);
         }
-        return this.importId++;
+        this.importId++;
+        return this.functionIndex++;
     }
 
     AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
@@ -372,8 +400,10 @@ export class WasmStructure {
     }
 
     functionIndex = 0;
+    functionCount = 0;
     addFunction(typeIndex: number): number {
         this.functions.push(typeIndex);
+        this.functionCount++;
         return this.functionIndex++;
     }
 
@@ -474,12 +504,12 @@ export class WasmStructure {
                 // TODO Custom
 
                 ...this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types),
-                ...this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports),
+                ...this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionCount, this.functions),
 
                 // TODO Table
                 // TODO Memory
                 // TODO Global
-                ...this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports),
 
                 ...this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports),
                 // TODO Start
