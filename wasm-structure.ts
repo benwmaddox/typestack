@@ -263,21 +263,21 @@ export function toUnsignedLEB128(value: number): Array<number> {
     var bytesLEB = [];
 
     var currentValue = value;
-    while (currentValue > 0) {
+    while (currentValue > 0 || bytesLEB.length === 0) {
         var tmp = (currentValue & 0x0000007F); // 7 bits at true
 
-        console.log('tmp');
-        console.log(tmp);
+        // console.log('tmp');
+        // console.log(tmp);
         currentValue = currentValue >> 7;
         if (currentValue > 0) {
             tmp = (tmp | 0x00000080);
         }
-        console.log('tmp');
-        console.log(tmp);
+        // console.log('tmp');
+        // console.log(tmp);
         bytesLEB.push(tmp);
     }
-    console.log('From ' + value);
-    console.log(bytesLEB);
+    // console.log('From ' + value);
+    // console.log(bytesLEB);
     return bytesLEB;
 }
 export class WasmStructure {
@@ -394,8 +394,8 @@ export class WasmStructure {
     exportId = 0;
     addExport(exportName: string, exportKind: ExportKind, index: number): number {
         var nameUtf8 = this.stringToUTF8(exportName);
-        console.log('Converting ' + exportName);
-        console.log(nameUtf8);
+        // console.log('Converting ' + exportName);
+        // console.log(nameUtf8);
         // console.log(nameUtf8.length);
         // console.log(index);
         // length of subsequent string
