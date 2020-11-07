@@ -22,6 +22,6 @@ export fn test int =
 
 fn 'addit' a:int int = 3 a + ;
 
-export fn blah int = 10101 emit ;
-export fn blah2 int = 10101 emit2 ;
+export fn blah int = 25 emit ;
+export fn blah2 int = 5 emit2 ;
 
