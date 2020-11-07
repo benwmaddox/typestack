@@ -7,7 +7,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WasmStructure = exports.ExportKind = exports.Opcodes = exports.WasmType = exports.WasmSection = void 0;
+exports.WasmStructure = exports.toUnsignedLEB128 = exports.ExportKind = exports.Opcodes = exports.WasmType = exports.WasmSection = void 0;
 var WasmSection = /** @class */ (function () {
     function WasmSection() {
     }
@@ -219,6 +219,35 @@ var ExportKind;
     ExportKind[ExportKind["memory"] = 2] = "memory";
     ExportKind[ExportKind["global"] = 3] = "global";
 })(ExportKind = exports.ExportKind || (exports.ExportKind = {}));
+function toBytesInt32(value) {
+    return [
+        (value & 0xff000000) >> 24,
+        (value & 0x00ff0000) >> 16,
+        (value & 0x0000ff00) >> 8,
+        (value & 0x000000ff)
+    ];
+}
+function toUnsignedLEB128(value) {
+    // var bytes8 = toBytesInt32(value);
+    var bytesLEB = [];
+    var currentValue = value;
+    while (currentValue > 0) {
+        var tmp = (currentValue & 0x0000007F); // 7 bits at true
+        console.log('tmp');
+        console.log(tmp);
+        currentValue = currentValue >> 7;
+        if (currentValue > 0) {
+            tmp = (tmp | 0x00000080);
+        }
+        console.log('tmp');
+        console.log(tmp);
+        bytesLEB.push(tmp);
+    }
+    console.log('From ' + value);
+    console.log(bytesLEB);
+    return bytesLEB;
+}
+exports.toUnsignedLEB128 = toUnsignedLEB128;
 var WasmStructure = /** @class */ (function () {
     function WasmStructure() {
         this.wasmHeader = [0x00, 0x61, 0x73, 0x6d];
@@ -327,6 +356,10 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.addExport = function (exportName, exportKind, index) {
         var nameUtf8 = this.stringToUTF8(exportName);
+        console.log('Converting ' + exportName);
+        console.log(nameUtf8);
+        // console.log(nameUtf8.length);
+        // console.log(index);
         // length of subsequent string
         this.exports.push(nameUtf8.length);
         // string bytes from name
@@ -367,34 +400,26 @@ var WasmStructure = /** @class */ (function () {
     //             count,
     //             ...bytes] : [];
     // }
-    WasmStructure.prototype.toBytesInt32 = function (value) {
-        // var result = new Uint8Array([
-        //     (value & 0xff000000) >> 24,
-        //     (value & 0x00ff0000) >> 16,
-        //     (value & 0x0000ff00) >> 8,
-        //     (value & 0x000000ff)
-        // ]);
-        // return result.buffer;
-        return [
-            (value & 0xff000000) >> 24,
-            (value & 0x00ff0000) >> 16,
-            (value & 0x0000ff00) >> 8,
-            (value & 0x000000ff)
-        ];
-    };
     WasmStructure.prototype.formatCodeSection = function () {
     };
     WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
-        var u32Length = bytes.length + 1; //this.toBytesInt32(bytes.length + 1)
-        // var u32Length = new Uint32Array([bytes.length + 1]);
-        // var u8Length = Uint8Array.from(u32Length);
-        // for (var i = 0; i < u32Length.byteLength; i++) {
-        //     // console.log(u32Length.buffer[i])
-        // }
-        // console.log(u32Length.buffer);
-        return bytes.length > 0 ? __spreadArrays([SectionID,
-            u32Length,
-            count], bytes) : [];
+        console.log('section ' + SectionID);
+        console.log('count ' + count);
+        var u32Length = bytes.length + 1;
+        console.log('u32 Length: ' + u32Length);
+        console.log(JSON.stringify(bytes));
+        // var initialConversion = Uint8Array.from([SectionID,
+        //     bytes.length + 1,
+        //     count,
+        //     ...bytes]);
+        // return initialConversion.byteLength;
+        // console.log(uint8ArrayBytes);
+        console.log(count + " to ");
+        console.log(toUnsignedLEB128(count));
+        var results = bytes.length > 0 ? __spreadArrays([SectionID], toUnsignedLEB128(bytes.length + 1), toUnsignedLEB128(count), bytes) : [];
+        // console.log(JSON.stringify(Uint8Array.from(results).length));
+        // console.log(JSON.stringify(results.length));
+        return results;
     };
     WasmStructure.prototype.getBytes = function () {
         var results = Uint8Array.from(__spreadArrays(this.wasmHeader, this.wasmVersion, this.formatSectionForWasmWithSizeAndCount(this.section.type, this.typeId, this.types), this.formatSectionForWasmWithSizeAndCount(this.section.function, this.functionIndex, this.functions), this.formatSectionForWasmWithSizeAndCount(this.section.import, this.importId, this.imports), this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports), this.formatSectionForWasmWithSizeAndCount(this.section.code, this.codeId, this.codeSections)));

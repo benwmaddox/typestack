@@ -245,6 +245,41 @@ export enum ExportKind {
     global = 0x03
 
 }
+
+
+function toBytesInt32(value: number) {
+
+
+    return [
+        (value & 0xff000000) >> 24,
+        (value & 0x00ff0000) >> 16,
+        (value & 0x0000ff00) >> 8,
+        (value & 0x000000ff)
+    ];
+}
+
+export function toUnsignedLEB128(value: number): Array<number> {
+    // var bytes8 = toBytesInt32(value);
+    var bytesLEB = [];
+
+    var currentValue = value;
+    while (currentValue > 0) {
+        var tmp = (currentValue & 0x0000007F); // 7 bits at true
+
+        console.log('tmp');
+        console.log(tmp);
+        currentValue = currentValue >> 7;
+        if (currentValue > 0) {
+            tmp = (tmp | 0x00000080);
+        }
+        console.log('tmp');
+        console.log(tmp);
+        bytesLEB.push(tmp);
+    }
+    console.log('From ' + value);
+    console.log(bytesLEB);
+    return bytesLEB;
+}
 export class WasmStructure {
 
     wasmHeader: Array<number> = [0x00, 0x61, 0x73, 0x6d];
@@ -359,7 +394,10 @@ export class WasmStructure {
     exportId = 0;
     addExport(exportName: string, exportKind: ExportKind, index: number): number {
         var nameUtf8 = this.stringToUTF8(exportName);
-
+        console.log('Converting ' + exportName);
+        console.log(nameUtf8);
+        // console.log(nameUtf8.length);
+        // console.log(index);
         // length of subsequent string
         this.exports.push(nameUtf8.length);
         // string bytes from name
@@ -416,40 +454,36 @@ export class WasmStructure {
     //             count,
     //             ...bytes] : [];
     // }
-    toBytesInt32(value: number) {
-        // var result = new Uint8Array([
-        //     (value & 0xff000000) >> 24,
-        //     (value & 0x00ff0000) >> 16,
-        //     (value & 0x0000ff00) >> 8,
-        //     (value & 0x000000ff)
-        // ]);
 
 
-        // return result.buffer;
-        return [
-            (value & 0xff000000) >> 24,
-            (value & 0x00ff0000) >> 16,
-            (value & 0x0000ff00) >> 8,
-            (value & 0x000000ff)
-        ];
-    }
     formatCodeSection() {
 
     }
     formatSectionForWasmWithSizeAndCount(SectionID: number, count: number, bytes: Array<number>): Array<number> {
+        console.log('section ' + SectionID);
+        console.log('count ' + count);
+        var u32Length = bytes.length + 1;
+        console.log('u32 Length: ' + u32Length);
+        console.log(JSON.stringify(bytes));
 
-        var u32Length = bytes.length + 1;//this.toBytesInt32(bytes.length + 1)
-        // var u32Length = new Uint32Array([bytes.length + 1]);
-        // var u8Length = Uint8Array.from(u32Length);
-        // for (var i = 0; i < u32Length.byteLength; i++) {
-        //     // console.log(u32Length.buffer[i])
-        // }
-        // console.log(u32Length.buffer);
-        return bytes.length > 0 ?
+        // var initialConversion = Uint8Array.from([SectionID,
+        //     bytes.length + 1,
+        //     count,
+        //     ...bytes]);
+        // return initialConversion.byteLength;
+
+
+        // console.log(uint8ArrayBytes);
+        console.log(count + " to ");
+        console.log(toUnsignedLEB128(count))
+        var results = bytes.length > 0 ?
             [SectionID,
-                u32Length,
-                count,
+                ...toUnsignedLEB128(bytes.length + 1),
+                ...toUnsignedLEB128(count),
                 ...bytes] : [];
+        // console.log(JSON.stringify(Uint8Array.from(results).length));
+        // console.log(JSON.stringify(results.length));
+        return results;
     }
     getBytes(): Uint8Array {
         var results = Uint8Array.from(

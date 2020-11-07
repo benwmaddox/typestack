@@ -32,10 +32,11 @@ export fn '{a:int} is greater than {b:int} ?' int = a b > ;
     '3 is less than 5 ?' 1 == 
     '5 is less than 5 ?' 0 == 
     2 double 4 ==          
-    5 3 subtract 2 ==              
+    500 300 subtract 200 ==              
     && && &&
     ;
 
 //   5 double 'add two' 12 == 
 
-// fn add a:int b:int int = a b + ;
+// fn 'addsss a' a:int b:int int = a b + ;
+   fn 'addit' a:int int = 3 a + ;
