@@ -265,20 +265,30 @@ export function toUnsignedLEB128(value: number): Array<number> {
     var currentValue = value;
     while (currentValue > 0 || bytesLEB.length === 0) {
         var tmp = (currentValue & 0x0000007F); // 7 bits at true
-
-        // console.log('tmp');
-        // console.log(tmp);
         currentValue = currentValue >> 7;
         if (currentValue > 0) {
             tmp = (tmp | 0x00000080);
         }
-        // console.log('tmp');
-        // console.log(tmp);
         bytesLEB.push(tmp);
     }
-    // console.log('From ' + value);
-    // console.log(bytesLEB);
     return bytesLEB;
+}
+export function toSignedLEB128(value: number): Array<number> {
+    //https://en.wikipedia.org/wiki/LEB128
+    value |= 0;
+    const result = [];
+    while (true) {
+        const byte = value & 0x7f;
+        value >>= 7;
+        if (
+            (value === 0 && (byte & 0x40) === 0) ||
+            (value === -1 && (byte & 0x40) !== 0)
+        ) {
+            result.push(byte);
+            return result;
+        }
+        result.push(byte | 0x80);
+    }
 }
 export class WasmStructure {
 

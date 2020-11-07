@@ -1,4 +1,4 @@
-import { Opcodes, WasmStructure, toUnsignedLEB128 } from './wasm-structure';
+import { Opcodes, WasmStructure, toUnsignedLEB128, toSignedLEB128 } from './wasm-structure';
 import { ASTFunction, ASTImport, ASTModule, FunctionParser, ModuleParser, ASTParameter } from './intermediate-structure';
 import { match } from 'assert';
 import { stringify } from 'querystring';
@@ -420,7 +420,10 @@ export class ContextParser {
                 if (!isNaN(parsedInt)) {
                     expressions.push({ op: Opcodes.i32Const, desc: "i32 const" });
 
-                    var i32Bytes = toUnsignedLEB128(parseInt(nextWord))
+                    var i32Bytes = toSignedLEB128(parseInt(nextWord))
+                    // for (var i = i32Bytes.length - 1; i >= 0; i--) {
+                    //     expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
+                    // }
                     for (var i = 0; i < i32Bytes.length; i++) {
                         expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
                     }

@@ -7,7 +7,7 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
     return r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WasmStructure = exports.toUnsignedLEB128 = exports.ExportKind = exports.Opcodes = exports.WasmType = exports.WasmSection = void 0;
+exports.WasmStructure = exports.toSignedLEB128 = exports.toUnsignedLEB128 = exports.ExportKind = exports.Opcodes = exports.WasmType = exports.WasmSection = void 0;
 var WasmSection = /** @class */ (function () {
     function WasmSection() {
     }
@@ -233,21 +233,31 @@ function toUnsignedLEB128(value) {
     var currentValue = value;
     while (currentValue > 0 || bytesLEB.length === 0) {
         var tmp = (currentValue & 0x0000007F); // 7 bits at true
-        // console.log('tmp');
-        // console.log(tmp);
         currentValue = currentValue >> 7;
         if (currentValue > 0) {
             tmp = (tmp | 0x00000080);
         }
-        // console.log('tmp');
-        // console.log(tmp);
         bytesLEB.push(tmp);
     }
-    // console.log('From ' + value);
-    // console.log(bytesLEB);
     return bytesLEB;
 }
 exports.toUnsignedLEB128 = toUnsignedLEB128;
+function toSignedLEB128(value) {
+    //https://en.wikipedia.org/wiki/LEB128
+    value |= 0;
+    var result = [];
+    while (true) {
+        var byte = value & 0x7f;
+        value >>= 7;
+        if ((value === 0 && (byte & 0x40) === 0) ||
+            (value === -1 && (byte & 0x40) !== 0)) {
+            result.push(byte);
+            return result;
+        }
+        result.push(byte | 0x80);
+    }
+}
+exports.toSignedLEB128 = toSignedLEB128;
 var WasmStructure = /** @class */ (function () {
     function WasmStructure() {
         this.wasmHeader = [0x00, 0x61, 0x73, 0x6d];

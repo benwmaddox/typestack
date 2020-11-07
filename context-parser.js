@@ -345,7 +345,10 @@ var ContextParser = /** @class */ (function () {
                 var parsedInt = parseInt(nextWord);
                 if (!isNaN(parsedInt)) {
                     expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
-                    var i32Bytes = wasm_structure_1.toUnsignedLEB128(parseInt(nextWord));
+                    var i32Bytes = wasm_structure_1.toSignedLEB128(parseInt(nextWord));
+                    // for (var i = i32Bytes.length - 1; i >= 0; i--) {
+                    //     expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
+                    // }
                     for (var i = 0; i < i32Bytes.length; i++) {
                         expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
                     }
