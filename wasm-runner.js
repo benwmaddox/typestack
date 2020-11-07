@@ -95,31 +95,6 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         console.log(item.instance.exports);
         console.log(item.instance.exports['test']());
     });
-    // runWasmWithCallback(bytes2, {
-    //     console: console,
-    //     function: {
-    //         log: console.log
-    //     }
-    // }, (item) => {
-    //     console.log((<any>item.instance.exports));
-    //     // console.log((<any>item.instance.exports)['test']());
-    // });
-    // runWasmWithCallback(bytes, {
-    //     console: console,
-    //     function: {
-    //         log: console.log
-    //     }
-    // }, (item) => {
-    //     console.log((<any>item.instance.exports));
-    //     // var result = (<any>item.instance.exports)['add two {i:int}'](1);
-    //     // console.log((<any>item.instance.exports)['add two'](3));
-    //     // console.log((<any>item.instance.exports)['double'](9));
-    //     console.log((<any>item.instance.exports)['test']());
-    //     // console.log((<any>item.instance.exports)['add one twice'](3));
-    //     // console.log((<any>item.instance.exports)['add'](91, 9));
-    //     // console.log((<any>item.instance.exports)['subtract'](10, 3));
-    //     // console.log((<any>item.instance.exports)['less than'](1, 3));
-    // });
 });
 function buildParameterList(input) {
     var index = 0;
@@ -184,10 +159,8 @@ function runIntoWasm(tokens) {
                     });
                 }
             }
-            // console.log(definition);
             var parameterOps = definition.parameters.map(function (x) { return x.type == "int" ? wasm_structure_1.WasmType.i32 : wasm_structure_1.WasmType.f64; });
             var bodyOps = bodyTokensToOps(definition);
-            // console.log(bodyOps);
             if (index > 0 && tokens[index - 1] == "export") {
                 var exportIds = wasmStructure.AddExportFunction(definition.name, parameterOps, wasm_structure_1.WasmType.i32, // TODO
                 bodyOps);
@@ -228,16 +201,12 @@ function findInterpolatedMatches(token) {
     var tokenSplit = token.substring(1, token.length - 1).split(" ");
     var interpolatedOptions = dictionary.filter(function (x) { return x.name.indexOf("{") != -1; });
     for (var i = 0; i < interpolatedOptions.length; i++) {
-        var wordWithoutQuotes = interpolatedOptions[i].name; //.substring(1, interpolatedOptions[i].name.length - 1);
+        var wordWithoutQuotes = interpolatedOptions[i].name;
         var wordSplit = wordWithoutQuotes.split(" ").filter(function (x) { return x[0] != "{"; });
-        // if (wordSplit.length < tokenSplit.length) continue;
-        // console.log(wordSplit);
-        // console.log(tokenSplit);
         var locationInToken = wordSplit.map(function (x) { return tokenSplit.indexOf(x); });
         if (locationInToken.every(function (x) { return x != -1; })
             && isInOrder(locationInToken)) {
             matchingFunctions.push(interpolatedOptions[i]);
-            // console.log("found interpolated ")
         }
     }
     return matchingFunctions;
@@ -252,13 +221,8 @@ function bodyTokensToOps(definition) {
         if (token[0] == "'") {
             matchingFunctions = dictionary.filter(function (x) { return "'" + x.name + "'" == token; });
             if (matchingFunctions.length == 0) {
-                // console.log('looking for ' + token);
                 matchingFunctions = findInterpolatedMatches(token);
                 // TODO : calculate parameters to use / Maybe recursion here?
-                // interpolated...
-                // var interpolatedMatchingFunction = token[0] == "'"
-                //     ? dictionary.filter(x => "'" + x.name + "'" == token)
-                //     : dictionary.filter(x => x.name == token);
             }
         }
         else {
