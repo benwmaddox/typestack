@@ -55,14 +55,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var _a = require('perf_hooks'), PerformanceObserver = _a.PerformanceObserver, performance = _a.performance;
 var lexer_1 = require("./lexer");
 var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
 var context_emitter_1 = require("./context-emitter");
 var module = 'sample3';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
+    var startTime = performance.now();
     var lexer = new lexer_1.Lexer();
     var tokenized = lexer.tokenize(data);
+    var tokenizedTime = performance.now();
+    console.log("Tokenize time: " + (tokenizedTime - startTime));
     // var parser = new Parser();    
     // var astModule = parser.parseModule(module, tokenized);
     // var emmitter = new Emitter();
@@ -71,10 +75,16 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var contextParser = new context_parser_1.ContextParser();
     var expressions = [];
     var context = Object.create(context_parser_1.BaseContext);
+    var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
+    var postParseTime = performance.now();
+    console.log("Parse time: " + (postParseTime - preParseTime));
     var contextEmitter = new context_emitter_1.ContextEmitter();
     // console.log(JSON.stringify(expressions, undefined, "  "));
+    var preEmitTime = performance.now();
     var contextBytes = contextEmitter.getBytes(expressions);
+    var postEmitTime = performance.now();
+    console.log("Emit time: " + (postEmitTime - preEmitTime));
     // console.log(JSON.stringify(contextBytes));
     // console.log(JSON.stringify(context["INTERPOLATION"], undefined, "  "));
     // console.log(expressions);
@@ -84,7 +94,10 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     // console.log(context);
     // console.log(Object.getPrototypeOf(context));
     // var bytes = runIntoWasm(tokenized);
+    var preFileTime = performance.now();
     fs.writeFileSync('output.wasm', contextBytes);
+    var postFileTime = performance.now();
+    console.log("File write time: " + (postFileTime - preFileTime));
     runWasmWithCallback(contextBytes, {
         console: console,
         function: {
@@ -95,8 +108,13 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         var exports = item.instance.exports;
         // Running each exported fn. No parameters in test
         for (var e in exports) {
+            var preFnRunTime = performance.now();
             console.log(e + ": " + (exports[e]()));
+            var postFnRunTime = performance.now();
+            console.log("{e} run time: " + (postFnRunTime - preFnRunTime));
         }
+        var finalTime = performance.now();
+        console.log("Full run time: " + (finalTime - startTime) + " ms");
     });
 });
 function runWasmWithCallback(bytes, importObject, callback) {

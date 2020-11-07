@@ -121,6 +121,8 @@ export var BaseContext: ContextDictionary = [
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             expressions.push({ desc: "import" });
 
+            // var fnIndex = words.indexOf("fn");
+
             return { context, words, expressions };
         }
     },
@@ -171,6 +173,7 @@ export var BaseContext: ContextDictionary = [
                             Array.prototype.concat.apply([],
                                 parameters.map((x, i) =>
                                     [Opcodes.get_local, i]))
+
                     }
                 ],
                 functionReference: {

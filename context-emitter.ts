@@ -13,6 +13,15 @@ export class ContextEmitter {
             if (expression.desc) {
                 // console.log(expression.desc);
             }
+            if (expression.desc == 'import') {
+
+                var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
+                var importType = expressions.slice(i, importEndIndex).map(x => x.desc).indexOf('fn') != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
+
+                var type = expression.function.types ? expression.function.types[0] : {};
+                var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
+
+            }
             if (expression.function) {
                 var functionEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
                 var functionReference = expression.function.functionReference;

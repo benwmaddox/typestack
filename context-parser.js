@@ -81,6 +81,7 @@ exports.BaseContext = [
         token: 'import',
         parse: function (context, words, expressions) {
             expressions.push({ desc: "import" });
+            // var fnIndex = words.indexOf("fn");
             return { context: context, words: words, expressions: expressions };
         }
     },
