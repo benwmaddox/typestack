@@ -28,7 +28,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    console.log(JSON.stringify(expressions, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, "  "));
 
     var contextEmitter = new ContextEmitter();
     var preEmitTime = performance.now();
@@ -37,17 +37,10 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     // console.log(JSON.stringify(contextBytes));
 
 
-    // console.log(JSON.stringify(context["INTERPOLATION"], undefined, "  "));
-
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    
-    // console.log(JSON.stringify(context, undefined, "  "));
-    // console.log(expressions);
-    // console.log(context);
-    // console.log(Object.getPrototypeOf(context));
 
 
-    // var bytes = runIntoWasm(tokenized);
 
     var preFileTime = performance.now();
     fs.writeFileSync('output.wasm', contextBytes);
@@ -55,10 +48,17 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 
 
     var preInitWasmTime = performance.now();
+    var memory = new WebAssembly.Memory({ initial: 10 });
     runWasmWithCallback(contextBytes, {
         console: console,
         function: {
-            log: console.log
+            log: console.log,
+            stringLog: function (startAddress: number, length: number) {
+                console.log
+            }
+        },
+        js: {
+            memory: memory
         }
     }, (item) => {
         var postInitWasmTime = performance.now();
@@ -66,6 +66,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         var exports = (<any>item.instance.exports);
         console.log(' ');
 
+        var i32 = new Uint32Array(memory.buffer);
 
         // Running each exported fn. No parameters in test
         for (var e in exports) {
@@ -94,6 +95,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 });
 
 async function runWasmWithCallback(bytes: Uint8Array, importObject: any, callback: (result: WebAssembly.WebAssemblyInstantiatedSource) => void) {
+
     const instance = await WebAssembly.instantiate(bytes, importObject).then(callback);
 }
 

@@ -243,8 +243,7 @@ function toUnsignedLEB128(value) {
 }
 exports.toUnsignedLEB128 = toUnsignedLEB128;
 function toSignedLEB128(value) {
-    // TODO:
-    //
+    // https://en.wikipedia.org/wiki/LEB128
     value |= 0;
     var result = [];
     while (true) {
@@ -388,7 +387,14 @@ var WasmStructure = /** @class */ (function () {
             results.push(text.charCodeAt(i));
         }
         return results;
-        // return new TextEncoder().encode(text);
+    };
+    WasmStructure.prototype.UTF8ToString = function (utf8) {
+        // TODO: fix accuracy and performance
+        var result = String.fromCharCode(utf8);
+        for (var i = 0; i < utf8.length; i++) {
+            result += String.fromCharCode(utf8[i]);
+        }
+        return result;
     };
     WasmStructure.prototype.addExport = function (exportName, exportKind, index) {
         var nameUtf8 = this.stringToUTF8(exportName);

@@ -1,5 +1,6 @@
 import 'console' 'log' fn emit i:int int = 1 ; 
 import 'function' 'log' fn emit2 i:int int = 1 ; 
+import 'function' 'stringLog' fn emit3 start:int length:int int = 1 ; 
 
 fn '{a:int} is less than {b:int} ?' int = a b < ;
 fn '{a:int} is greater than {b:int} ?' int = a b > ;

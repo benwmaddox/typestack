@@ -77,34 +77,36 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    console.log(JSON.stringify(expressions, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, "  "));
     var contextEmitter = new context_emitter_1.ContextEmitter();
     var preEmitTime = performance.now();
     var contextBytes = contextEmitter.getBytes(expressions);
     var postEmitTime = performance.now();
     // console.log(JSON.stringify(contextBytes));
-    // console.log(JSON.stringify(context["INTERPOLATION"], undefined, "  "));
     // console.log(expressions);
     // console.log(JSON.stringify(expressions, undefined, "  "));    
-    // console.log(JSON.stringify(context, undefined, "  "));
-    // console.log(expressions);
-    // console.log(context);
-    // console.log(Object.getPrototypeOf(context));
-    // var bytes = runIntoWasm(tokenized);
     var preFileTime = performance.now();
     fs.writeFileSync('output.wasm', contextBytes);
     var postFileTime = performance.now();
     var preInitWasmTime = performance.now();
+    var memory = new WebAssembly.Memory({ initial: 10 });
     runWasmWithCallback(contextBytes, {
         console: console,
         function: {
-            log: console.log
+            log: console.log,
+            stringLog: function (startAddress, length) {
+                console.log;
+            }
+        },
+        js: {
+            memory: memory
         }
     }, function (item) {
         var postInitWasmTime = performance.now();
         // console.log((<any>item.instance.exports));
         var exports = item.instance.exports;
         console.log(' ');
+        var i32 = new Uint32Array(memory.buffer);
         // Running each exported fn. No parameters in test
         for (var e in exports) {
             var preFnRunTime = performance.now();

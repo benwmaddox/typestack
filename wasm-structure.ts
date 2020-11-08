@@ -274,9 +274,7 @@ export function toUnsignedLEB128(value: number): Array<number> {
     return bytesLEB;
 }
 export function toSignedLEB128(value: number): Array<number> {
-
-    // TODO:
-    //
+    // https://en.wikipedia.org/wiki/LEB128
     value |= 0;
     const result = [];
     while (true) {
@@ -429,8 +427,16 @@ export class WasmStructure {
             results.push(text.charCodeAt(i));
         }
         return results;
-        // return new TextEncoder().encode(text);
     }
+    UTF8ToString(utf8: Array<number>): string {
+        // TODO: fix accuracy and performance
+        var result = String.fromCharCode(utf8);
+        for (var i = 0; i < utf8.length; i++) {
+            result += String.fromCharCode(utf8[i])
+        }
+        return result;
+    }
+
     exportId = 0;
     addExport(exportName: string, exportKind: ExportKind, index: number): number {
         var nameUtf8 = this.stringToUTF8(exportName);
