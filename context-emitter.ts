@@ -23,7 +23,9 @@ export class ContextEmitter {
 
             }
             if (expression.function) {
-                var functionEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
+                // TODO: It finally caught up to me. This opcode and a value conflicted...
+
+                var functionEndIndex = expressions.slice(i).findIndex(x => x.desc == "End function") + i;
                 var functionReference = expression.function.functionReference;
                 if (functionReference == null) {
                     throw Error("There should be a function reference here")

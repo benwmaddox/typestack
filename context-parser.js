@@ -195,7 +195,7 @@ exports.BaseContext = [
             // If context is a function
             expressions.push({
                 op: wasm_structure_1.Opcodes.end,
-                desc: 'End function ' //+ context.functionReference?.name
+                desc: 'End function' //+ context.functionReference?.name
             });
             // TODO: if context is.. a variable
             return { context: Object.getPrototypeOf(context), words: words, expressions: expressions };

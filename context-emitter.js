@@ -31,7 +31,8 @@ var ContextEmitter = /** @class */ (function () {
                 // var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
             }
             if (expression.function) {
-                var functionEndIndex = expressions.slice(i).findIndex(function (x) { return x.op == wasm_structure_1.Opcodes.end; }) + i;
+                // TODO: It finally caught up to me. This opcode and a value conflicted...
+                var functionEndIndex = expressions.slice(i).findIndex(function (x) { return x.desc == "End function"; }) + i;
                 var functionReference = expression.function.functionReference;
                 if (functionReference == null) {
                     throw Error("There should be a function reference here");

@@ -17,17 +17,18 @@ import 'function' 'stringLog' fn stringLog start:int length:int = ;
 // Trying to log "Hello world"
 // 72 101 108 108 111 32 119 111 114 108 100
 export fn 'Write to string log' int =
-   0 72 'Op i32Store'
-   1 101 'Op i32Store'
-   2 108 'Op i32Store'
+   0 11 'Op i32Store'
+   1 72 'Op i32Store'
+   2 101 'Op i32Store' 
    3 108 'Op i32Store'
-   4 111 'Op i32Store'
-   5 32 'Op i32Store'
-   6 119 'Op i32Store'
-   7 111 'Op i32Store'
-   8 114 'Op i32Store'
-   9 108 'Op i32Store'
-   10 100 'Op i32Store'  
+   4 108 'Op i32Store'
+   5 111 'Op i32Store'
+   6 32 'Op i32Store'
+   7 119 'Op i32Store'
+   8 111 'Op i32Store'
+   9 114 'Op i32Store'
+   10 108 'Op i32Store'
+   11 100 'Op i32Store'  
 
 
    2 0 stringLog 

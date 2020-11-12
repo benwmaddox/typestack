@@ -252,7 +252,7 @@ export var BaseContext: ContextDictionary = [
             // If context is a function
             expressions.push({
                 op: Opcodes.end,
-                desc: 'End function ' //+ context.functionReference?.name
+                desc: 'End function' //+ context.functionReference?.name
             })
 
             // TODO: if context is.. a variable
