@@ -427,6 +427,9 @@ export class WasmStructure {
             data.push(1);
             data.push(result);
         }
+        else {
+            data.push(0);
+        }
 
         var typeKey = JSON.stringify(data);
         var cacheMatch = this.typeCache[typeKey];
@@ -546,9 +549,9 @@ export class WasmStructure {
                 ...toUnsignedLEB128(count),
                 ...bytes] : [];
 
-        if (SectionID == 0x02) {
-            console.log(results.map(x => x.toString(16)));
-        }
+        // if (SectionID == 0x02) {
+        //     console.log(results.map(x => x.toString(16)));
+        // }
         return results;
     }
     getBytes(): Uint8Array {

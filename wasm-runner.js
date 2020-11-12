@@ -96,6 +96,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         function: {
             log: console.log,
             stringLog: function (startAddress, length) {
+                console.log({ startAddress: startAddress, length: length });
                 var bytes = new Uint8Array(memory.buffer, startAddress, length);
                 var string = new util_1.TextDecoder('utf8').decode(bytes);
                 console.log(string);

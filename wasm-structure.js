@@ -390,6 +390,9 @@ var WasmStructure = /** @class */ (function () {
             data.push(1);
             data.push(result);
         }
+        else {
+            data.push(0);
+        }
         var typeKey = JSON.stringify(data);
         var cacheMatch = this.typeCache[typeKey];
         if (cacheMatch != undefined) {
@@ -475,9 +478,9 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
         var results = bytes.length > 0 ? __spreadArrays([SectionID], toUnsignedLEB128(bytes.length + 1), toUnsignedLEB128(count), bytes) : [];
-        if (SectionID == 0x02) {
-            console.log(results.map(function (x) { return x.toString(16); }));
-        }
+        // if (SectionID == 0x02) {
+        //     console.log(results.map(x => x.toString(16)));
+        // }
         return results;
     };
     WasmStructure.prototype.getBytes = function () {

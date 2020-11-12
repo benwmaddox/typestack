@@ -38,8 +38,8 @@ var ContextEmitter = /** @class */ (function () {
                 }
                 var name = functionReference.name || "ERROR STATE";
                 var type = expression.function.types ? expression.function.types[0] : {};
-                var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || wasm_structure_1.WasmType.f64;
-                var typeIndex = wasmStructure.addFunctionType(((_b = type.input) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })) || [wasm_structure_1.WasmType.f64], resultType);
+                var resultType = ((_a = type.output) === null || _a === void 0 ? void 0 : _a.map(function (x) { return _this.mapTypeToWasmType(x); })[0]) || undefined;
+                var typeIndex = wasmStructure.addFunctionType(((_b = type.input) === null || _b === void 0 ? void 0 : _b.map(function (x) { return _this.mapTypeToWasmType(x); })) || [], resultType);
                 functionReference.typeID = typeIndex;
                 if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
                     var functionType = 0x00;

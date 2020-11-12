@@ -55,6 +55,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number, length: number) {
+                console.log({ startAddress, length });
                 var bytes = new Uint8Array(memory.buffer, startAddress, length);
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);

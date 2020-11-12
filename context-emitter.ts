@@ -30,8 +30,8 @@ export class ContextEmitter {
                 }
                 var name = functionReference.name || "ERROR STATE";
                 var type = expression.function.types ? expression.function.types[0] : {};
-                var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || WasmType.f64;
-                var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64], resultType);
+                var resultType = type.output?.map(x => this.mapTypeToWasmType(x))[0] || undefined;
+                var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [], resultType);
                 functionReference.typeID = typeIndex;
                 if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
                     var functionType = 0x00;

@@ -293,6 +293,14 @@ export var BaseContext: ContextDictionary = [
             //     desc: 'param 1'
             // })
             // expressions.push({
+            //     op: Opcodes.get_local,
+            //     desc: 'param 2'
+            // })
+            // expressions.push({
+            //     op: 1,
+            //     desc: 'param 2'
+            // })
+            // expressions.push({
             //     op: Opcodes.i32Store,
             //     desc: 'i32.Store '
             // })
@@ -313,7 +321,7 @@ export var BaseContext: ContextDictionary = [
             // TODO: if context is.. a variable
 
             return { context: context, words, expressions };
-        }, types: [{ input: ['int', 'int'], output: [] }]
+        }//, types: [{ input: ['int', 'int'], output: [] }    ]
     },
     { token: 'Op i32Store8', types: [{ input: ['int', 'int'], output: [], opCodes: [Opcodes.i32Store8] }] }
     // { token: 'load unsigned byte', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32Load8_u] }] },
@@ -428,7 +436,6 @@ export class ContextParser {
                         desc: "Function ID"
                     })
                 }
-
                 else if (match.types && match.functionReference == undefined) {
                     // TODO: find actual matching type                
                     var matchedType: ContextType = match.types![0];
