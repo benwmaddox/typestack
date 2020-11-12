@@ -17,6 +17,7 @@ import 'function' 'stringLog' fn stringLog start:int length:int = ;
 // Trying to log "hi"
 export fn 'Write to string log' int =
    0 72 'Op i32Store'
+   1 105 'Op i32Store'
    2 0 stringLog 
    // 'log from 0 to 1'
   ;
