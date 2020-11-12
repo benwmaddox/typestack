@@ -4,6 +4,7 @@ import { Lexer } from './lexer'
 import { ContextParser, BaseContext, ParsedExpression } from './context-parser'
 import * as fs from 'fs';
 import { ContextEmitter } from './context-emitter';
+import { TextDecoder } from 'util'
 
 var module = 'sample3';
 
@@ -54,7 +55,9 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number, length: number) {
-                console.log
+                var bytes = new Uint8Array(memory.buffer, startAddress, length);
+                var string = new TextDecoder('utf8').decode(bytes);
+                console.log(string);
             }
         },
         js: {
@@ -67,6 +70,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         console.log(' ');
 
         var i32 = new Uint32Array(memory.buffer);
+        i32[0] = 0x21;
 
         // Running each exported fn. No parameters in test
         for (var e in exports) {

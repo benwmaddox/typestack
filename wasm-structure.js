@@ -276,21 +276,6 @@ var WasmStructure = /** @class */ (function () {
             code: 0x0A,
             data: 0x0B
         };
-        // addEmitImport(): void {
-        //     // Not working :( )
-        //     var emitTest = [ // TODO
-        //         0x08,                                        // string length
-        //         0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
-        //         0x04,                                       // ; string length
-        //         0x65, 0x6d, 0x69, 0x74,                                //emit  ; import field name
-        //         0x00,                                       // ; import kind
-        //         0x00,                                       // ; import signature index
-        //         0x11                                       // ; FIXUP section size
-        //     ];
-        //     for (var i = 0; i < emitTest.length; i++) {
-        //         this.imports.push(emitTest[i]);
-        //     }
-        // }
         this.importId = 0;
         // Return ID
         this.typeId = 0;
@@ -306,10 +291,25 @@ var WasmStructure = /** @class */ (function () {
         this.codeSections = [];
         this.exports = [];
     }
-    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, typeId) {
-        console.log("Adding import: " + importModule + ", " + importField + ", " + internalName + ", " + typeId);
-        // var typeId = this.addFunctionType(parameters, result);
-        // var functionId = this.addFunction(typeId);
+    // addEmitImport(): void {
+    //     // Not working :( )
+    //     var emitTest = [ // TODO
+    //         0x08,                                        // string length
+    //         0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,                      //function  ; import module name
+    //         0x04,                                       // ; string length
+    //         0x65, 0x6d, 0x69, 0x74,                                //emit  ; import field name
+    //         0x00,                                       // ; import kind
+    //         0x00,                                       // ; import signature index
+    //         0x11                                       // ; FIXUP section size
+    //     ];
+    //     for (var i = 0; i < emitTest.length; i++) {
+    //         this.imports.push(emitTest[i]);
+    //     }
+    // }
+    WasmStructure.prototype.addMemoryImport = function (importModule, importField, pageCount) {
+        // this.im
+        // return this.importId++;
+        console.log("Adding memory import: " + importModule + ", " + importField + ", " + pageCount);
         var declCount = 0;
         var data = [];
         var importModuleUtf8 = this.stringToUTF8(importModule);
@@ -326,13 +326,42 @@ var WasmStructure = /** @class */ (function () {
         for (var i = 0; i < importFieldUtf8.length; i++) {
             data.push(importFieldUtf8[i]);
         }
-        // var importNameUtf8 = this.stringToUTF8(internalName);
-        // // length of subsequent string
-        // data.push(importNameUtf8.length);
-        // // string bytes from name
-        // for (var i = 0; i < importNameUtf8.length; i++) {
-        //     data.push(importNameUtf8[i]);
-        // }
+        data.push(0x02); // memory import kind
+        data.push(0x00); // limits: flags
+        data.push.apply(// limits: flags
+        data, toUnsignedLEB128(pageCount)); // initial size
+        // 0000012: 02; string length
+        // 0000013: 6a73                                     js; import module name
+        // 0000015: 06; string length
+        // 0000016: 6d65 6d6f 7279                           memory; import field name
+        // 000001c: 02; import kind
+        // 000001d: 00; limits: flags
+        // 000001e: 01; limits: initial
+        for (var i = 0; i < data.length; i++) {
+            this.imports.push(data[i]);
+        }
+        console.log(data.map(function (x) { return x.toString(16); }));
+        // this.importId++
+        return this.importId++;
+    };
+    WasmStructure.prototype.addImportFunction = function (importModule, importField, internalName, typeId) {
+        console.log("Adding import: " + importModule + ", " + importField + ", " + internalName + ", " + typeId);
+        var declCount = 0;
+        var data = [];
+        var importModuleUtf8 = this.stringToUTF8(importModule);
+        // length of subsequent string
+        data.push(importModuleUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importModuleUtf8.length; i++) {
+            data.push(importModuleUtf8[i]);
+        }
+        var importFieldUtf8 = this.stringToUTF8(importField);
+        // length of subsequent string
+        data.push(importFieldUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importFieldUtf8.length; i++) {
+            data.push(importFieldUtf8[i]);
+        }
         data.push(0x00); // function type - could be something else
         data.push(typeId);
         for (var i = 0; i < data.length; i++) {
@@ -357,7 +386,7 @@ var WasmStructure = /** @class */ (function () {
     WasmStructure.prototype.addFunctionType = function (parameters, result) {
         var data = __spreadArrays([0x60,
             parameters.length], parameters);
-        if (result != null) {
+        if (result !== undefined) {
             data.push(1);
             data.push(result);
         }
@@ -390,7 +419,7 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.UTF8ToString = function (utf8) {
         // TODO: fix accuracy and performance
-        var result = String.fromCharCode(utf8);
+        var result = ""; //String.fromCharCode(utf8);
         for (var i = 0; i < utf8.length; i++) {
             result += String.fromCharCode(utf8[i]);
         }
@@ -446,6 +475,9 @@ var WasmStructure = /** @class */ (function () {
     };
     WasmStructure.prototype.formatSectionForWasmWithSizeAndCount = function (SectionID, count, bytes) {
         var results = bytes.length > 0 ? __spreadArrays([SectionID], toUnsignedLEB128(bytes.length + 1), toUnsignedLEB128(count), bytes) : [];
+        if (SectionID == 0x02) {
+            console.log(results.map(function (x) { return x.toString(16); }));
+        }
         return results;
     };
     WasmStructure.prototype.getBytes = function () {

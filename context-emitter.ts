@@ -34,6 +34,7 @@ export class ContextEmitter {
                 var typeIndex = wasmStructure.addFunctionType(type.input?.map(x => this.mapTypeToWasmType(x)) || [WasmType.f64], resultType);
                 functionReference.typeID = typeIndex;
                 if (i > 2 && expressions[i - 3].desc == 'import') { // TODO: Better way to handle this?
+                    var functionType = 0x00;
                     var functionIndex = wasmStructure.addImportFunction(expressions[i - 2].desc || 'UNKNOWN', expressions[i - 1].desc || 'UNKNOWN', name, typeIndex);
                     functionReference.functionID = functionIndex;
 
@@ -74,6 +75,8 @@ export class ContextEmitter {
 
             i++;
         }
+        // wasmStructure.addImportFunction("js", "memory", "mem", 0x02, 10)
+        wasmStructure.addMemoryImport("js", "memory", 1);
         return wasmStructure.getBytes();
     }
     mapTypeToWasmType(input: string): WasmType {

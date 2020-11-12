@@ -324,13 +324,12 @@ export class WasmStructure {
     //         this.imports.push(emitTest[i]);
     //     }
     // }
+    addMemoryImport(importModule: string, importField: string, pageCount: number) {
 
-    importId = 0;
-    addImportFunction(importModule: string, importField: string, internalName: string, typeId: number): number {
+        // this.im
+        // return this.importId++;
 
-        console.log(`Adding import: ${importModule}, ${importField}, ${internalName}, ${typeId}`)
-        // var typeId = this.addFunctionType(parameters, result);
-        // var functionId = this.addFunction(typeId);
+        console.log(`Adding memory import: ${importModule}, ${importField}, ${pageCount}`)
         var declCount = 0;
 
         var data: Array<number> = [];
@@ -349,13 +348,48 @@ export class WasmStructure {
         for (var i = 0; i < importFieldUtf8.length; i++) {
             data.push(importFieldUtf8[i]);
         }
-        // var importNameUtf8 = this.stringToUTF8(internalName);
-        // // length of subsequent string
-        // data.push(importNameUtf8.length);
-        // // string bytes from name
-        // for (var i = 0; i < importNameUtf8.length; i++) {
-        //     data.push(importNameUtf8[i]);
-        // }
+
+        data.push(0x02); // memory import kind
+        data.push(0x00); // limits: flags
+        data.push(...toUnsignedLEB128(pageCount)); // initial size
+        // 0000012: 02; string length
+        // 0000013: 6a73                                     js; import module name
+        // 0000015: 06; string length
+        // 0000016: 6d65 6d6f 7279                           memory; import field name
+        // 000001c: 02; import kind
+        // 000001d: 00; limits: flags
+        // 000001e: 01; limits: initial
+
+        for (var i = 0; i < data.length; i++) {
+            this.imports.push(data[i]);
+        }
+        console.log(data.map(x => x.toString(16)));
+        // this.importId++
+        return this.importId++;
+    }
+
+    importId = 0;
+    addImportFunction(importModule: string, importField: string, internalName: string, typeId: number): number {
+
+        console.log(`Adding import: ${importModule}, ${importField}, ${internalName}, ${typeId}`)
+        var declCount = 0;
+
+        var data: Array<number> = [];
+        var importModuleUtf8 = this.stringToUTF8(importModule);
+        // length of subsequent string
+        data.push(importModuleUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importModuleUtf8.length; i++) {
+            data.push(importModuleUtf8[i]);
+        }
+
+        var importFieldUtf8 = this.stringToUTF8(importField);
+        // length of subsequent string
+        data.push(importFieldUtf8.length);
+        // string bytes from name
+        for (var i = 0; i < importFieldUtf8.length; i++) {
+            data.push(importFieldUtf8[i]);
+        }
 
         data.push(0x00); // function type - could be something else
         data.push(typeId);
@@ -368,7 +402,7 @@ export class WasmStructure {
         return this.functionIndex++;
     }
 
-    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): ExportFunctionIds {
+    AddExportFunction(exportName: string, parameters: Array<WasmType>, result: WasmType | undefined, functionBody: Array<number>): ExportFunctionIds {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction(typeId);
         var exportId = this.addExport(exportName, ExportKind.function, functionId);
@@ -384,12 +418,12 @@ export class WasmStructure {
     // Return ID
     typeId = 0;
     typeCache: any = {};
-    addFunctionType(parameters: Array<WasmType>, result: WasmType | null): number {
+    addFunctionType(parameters: Array<WasmType>, result: WasmType | undefined): number {
         var data: Array<number> = [0x60,
             parameters.length,
             ...parameters
         ];
-        if (result != null) {
+        if (result !== undefined) {
             data.push(1);
             data.push(result);
         }
@@ -430,7 +464,7 @@ export class WasmStructure {
     }
     UTF8ToString(utf8: Array<number>): string {
         // TODO: fix accuracy and performance
-        var result = String.fromCharCode(utf8);
+        var result = "";//String.fromCharCode(utf8);
         for (var i = 0; i < utf8.length; i++) {
             result += String.fromCharCode(utf8[i])
         }
@@ -466,7 +500,7 @@ export class WasmStructure {
         return this.codeId++;
     }
 
-    AddFunctionDetails(parameters: Array<WasmType>, result: WasmType | null, functionBody: Array<number>): FunctionIds {
+    AddFunctionDetails(parameters: Array<WasmType>, result: WasmType | undefined, functionBody: Array<number>): FunctionIds {
         var typeId = this.addFunctionType(parameters, result);
         var functionId = this.addFunction(typeId);
         var declCount = 0;
@@ -511,6 +545,10 @@ export class WasmStructure {
                 ...toUnsignedLEB128(bytes.length + 1),
                 ...toUnsignedLEB128(count),
                 ...bytes] : [];
+
+        if (SectionID == 0x02) {
+            console.log(results.map(x => x.toString(16)));
+        }
         return results;
     }
     getBytes(): Uint8Array {
@@ -527,6 +565,7 @@ export class WasmStructure {
 
                 // TODO Table
                 // TODO Memory
+                // ...this.formatSectionForWasmWithSizeAndCount(this.section.memory,),
                 // TODO Global
 
                 ...this.formatSectionForWasmWithSizeAndCount(this.section.export, this.exportId, this.exports),

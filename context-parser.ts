@@ -276,6 +276,47 @@ export var BaseContext: ContextDictionary = [
     { token: '==', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32eq] }] },
     { token: '==0', types: [{ input: ['int'], output: ['bool'], opCodes: [Opcodes.i32eqz] }] },
     { token: '&&', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32and] }] },
+    {
+        token: 'Store int {value:int} at {offset:int} / {alignment:int}', interpolationTokens: ["Store", "int", '{}', 'at', '{}', '/', '{}'],
+        types: [{ input: ['int', 'int', 'int'], output: [], opCodes: [Opcodes.i32Store] }]
+    },
+    // Should be followed by alignment of 2 then offset. But the values shouldn't be listed as const.
+    {
+        token: 'Op i32Store', parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
+
+            // expressions.push({
+            //     op: Opcodes.get_local,
+            //     desc: 'param 1'
+            // })
+            // expressions.push({
+            //     op: 0,
+            //     desc: 'param 1'
+            // })
+            // expressions.push({
+            //     op: Opcodes.i32Store,
+            //     desc: 'i32.Store '
+            // })
+            // If context is a function
+            expressions.push({
+                op: Opcodes.i32Store,
+                desc: 'i32.Store '
+            })
+            expressions.push({
+                op: 0x02,
+                desc: 'Alignment'
+            })
+            expressions.push({
+                op: 0x00,
+                desc: 'Offset'  // need to allow code to add this
+            })
+
+            // TODO: if context is.. a variable
+
+            return { context: context, words, expressions };
+        }, types: [{ input: ['int', 'int'], output: [] }]
+    },
+    { token: 'Op i32Store8', types: [{ input: ['int', 'int'], output: [], opCodes: [Opcodes.i32Store8] }] }
+    // { token: 'load unsigned byte', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32Load8_u] }] },
 ];
 
 export type ParsedExpression = {

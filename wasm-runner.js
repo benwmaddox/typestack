@@ -60,6 +60,7 @@ var lexer_1 = require("./lexer");
 var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
 var context_emitter_1 = require("./context-emitter");
+var util_1 = require("util");
 var module = 'sample3';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var startTime = performance.now();
@@ -95,7 +96,9 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         function: {
             log: console.log,
             stringLog: function (startAddress, length) {
-                console.log;
+                var bytes = new Uint8Array(memory.buffer, startAddress, length);
+                var string = new util_1.TextDecoder('utf8').decode(bytes);
+                console.log(string);
             }
         },
         js: {
@@ -107,6 +110,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         var exports = item.instance.exports;
         console.log(' ');
         var i32 = new Uint32Array(memory.buffer);
+        i32[0] = 0x21;
         // Running each exported fn. No parameters in test
         for (var e in exports) {
             var preFnRunTime = performance.now();

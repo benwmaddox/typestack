@@ -217,6 +217,46 @@ exports.BaseContext = [
     { token: '==', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
     { token: '==0', types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
     { token: '&&', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
+    {
+        token: 'Store int {value:int} at {offset:int} / {alignment:int}', interpolationTokens: ["Store", "int", '{}', 'at', '{}', '/', '{}'],
+        types: [{ input: ['int', 'int', 'int'], output: [], opCodes: [wasm_structure_1.Opcodes.i32Store] }]
+    },
+    // Should be followed by alignment of 2 then offset. But the values shouldn't be listed as const.
+    {
+        token: 'Op i32Store',
+        parse: function (context, words, expressions) {
+            // expressions.push({
+            //     op: Opcodes.get_local,
+            //     desc: 'param 1'
+            // })
+            // expressions.push({
+            //     op: 0,
+            //     desc: 'param 1'
+            // })
+            // expressions.push({
+            //     op: Opcodes.i32Store,
+            //     desc: 'i32.Store '
+            // })
+            // If context is a function
+            expressions.push({
+                op: wasm_structure_1.Opcodes.i32Store,
+                desc: 'i32.Store '
+            });
+            expressions.push({
+                op: 0x02,
+                desc: 'Alignment'
+            });
+            expressions.push({
+                op: 0x00,
+                desc: 'Offset' // need to allow code to add this
+            });
+            // TODO: if context is.. a variable
+            return { context: context, words: words, expressions: expressions };
+        },
+        types: [{ input: ['int', 'int'], output: [] }]
+    },
+    { token: 'Op i32Store8', types: [{ input: ['int', 'int'], output: [], opCodes: [wasm_structure_1.Opcodes.i32Store8] }] }
+    // { token: 'load unsigned byte', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [Opcodes.i32Load8_u] }] },
 ];
 var ContextParser = /** @class */ (function () {
     function ContextParser() {
