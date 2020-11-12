@@ -1,7 +1,7 @@
 // import 'console' 'log' fn emit i:int int = 1 ; 
 // import 'function' 'log' fn emit2 i:int int = 1 ; 
 import 'function' 'stringLog' fn stringLog start:int length:int = ; 
-// import 'function' 'stringLog' fn 'log from {start:int} to {length:int}' = length start  ; 
+// import 'function' 'stringLog' fn 'log from {start:int} to {length:int}' =   ; 
 
 // fn '{a:int} is less than {b:int} ?' int = a b < ;
 // fn '{a:int} is greater than {b:int} ?' int = a b > ;
@@ -16,8 +16,8 @@ import 'function' 'stringLog' fn stringLog start:int length:int = ;
  
 // Trying to log "hi"
 export fn 'Write to string log' int =
-   // 72 0 'Op i32Store'
-   1 0 stringLog 
+   0 72 'Op i32Store'
+   2 0 stringLog 
    // 'log from 0 to 1'
   ;
 
