@@ -233,7 +233,7 @@ export enum Opcodes {
 
 
 
-    end = 0x0b // expression end. function body
+    end = 0x0b // expression end. function body / block end
 
 };
 

@@ -61,7 +61,7 @@ var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
 var context_emitter_1 = require("./context-emitter");
 var util_1 = require("util");
-var module = 'sample3';
+var module = 'sample4';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var startTime = performance.now();
     var lexer = new lexer_1.Lexer();
@@ -98,6 +98,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
             stringLog: function (startAddress) {
                 console.log(arguments);
                 console.log({ startAddress: startAddress });
+                // TODO: support longer options
                 var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
                 var string = new util_1.TextDecoder('utf8').decode(bytes);
@@ -117,13 +118,13 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         // Running each exported fn. No parameters in test
         for (var e in exports) {
             var preFnRunTime = performance.now();
-            console.log(e + ": " + (exports[e]()));
+            var result = exports[e]();
             var postFnRunTime = performance.now();
-            console.log(e + " run time: " + (postFnRunTime - preFnRunTime).toFixed(2) + " ms");
+            console.log(e + ": " + result + " (" + (postFnRunTime - preFnRunTime).toFixed(4) + " ms)");
             // var pre2ndFnRunTime = performance.now();
             // console.log(e + ": " + (exports[e]()));
             // var post2ndFnRunTime = performance.now();
-            // console.log(`${e} 2nd run time: ${post2ndFnRunTime - pre2ndFnRunTime}`)
+            // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
         }
         var finalTime = performance.now();
         console.log(' ');

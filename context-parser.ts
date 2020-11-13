@@ -173,6 +173,95 @@ export var BaseContext: ContextDictionary = [
         }
     },
     {
+        token: 'assert',
+        parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
+
+            var functionName = context[context.length - 1].token;
+
+            // if success: emit .
+            // if failure: emit Fail {functionName}
+
+
+
+            expressions.push(
+                {
+                    op: Opcodes.blockIf,
+                    desc: "If"
+                }
+            )
+
+            // 0x7F
+
+            expressions.push(
+                {
+                    op: 0x7F,
+                    desc: "i32 Block type"
+                }
+            )
+            // expressions.push(
+            //     {
+            //         op: Opcodes.blockType,
+            //         desc: "Block type"
+            //     }
+            // )
+
+            // expressions.push(
+            //     {
+            //         op: Opcodes.get_local,
+            //         desc: "eqz"
+            //     }
+            // )
+            // expressions.push(
+            //     {
+            //         op: 0,
+            //         desc: "eqz"
+            //     }
+            // )
+
+            // expressions.push(
+            //     {
+            //         op: Opcodes.i32eqz,
+            //         desc: "eqz"
+            //     }
+            // )
+
+            // todo: instructions
+
+            expressions.push({ op: Opcodes.i32Const, desc: "i32 const" });
+
+            var i32Bytes = toSignedLEB128(1)
+            for (var i = 0; i < i32Bytes.length; i++) {
+                expressions.push({ op: i32Bytes[i], desc: '1' + ' part ' + (i + 1) });
+            }
+
+            expressions.push(
+                {
+                    op: Opcodes.else,
+                    desc: "Else"
+                }
+            )
+
+            expressions.push({ op: Opcodes.i32Const, desc: "i32 const" });
+
+            var i32Bytes = toSignedLEB128(0)
+            for (var i = 0; i < i32Bytes.length; i++) {
+                expressions.push({ op: i32Bytes[i], desc: '0' + ' part ' + (i + 1) });
+            }
+
+            // todo: instructions
+
+            expressions.push(
+                {
+                    op: Opcodes.end,
+                    desc: "End If"
+                }
+            )
+
+            return { context: context, words: words, expressions };
+
+        }
+    },
+    {
         token: 'fn',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             var parameters = extractParameters(words);
@@ -230,7 +319,7 @@ export var BaseContext: ContextDictionary = [
 
 
             expressions.push({
-                desc: "Adding function: " + functionName,
+                desc: "Function " + functionName,
                 function: contextItem
 
             })
@@ -469,9 +558,6 @@ export class ContextParser {
                     expressions.push({ op: Opcodes.i32Const, desc: "i32 const" });
 
                     var i32Bytes = toSignedLEB128(parseInt(nextWord))
-                    // for (var i = i32Bytes.length - 1; i >= 0; i--) {
-                    //     expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
-                    // }
                     for (var i = 0; i < i32Bytes.length; i++) {
                         expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
                     }

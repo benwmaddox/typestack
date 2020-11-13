@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import { ContextEmitter } from './context-emitter';
 import { TextDecoder } from 'util'
 
-var module = 'sample3';
+var module = 'sample4';
 
 fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 
@@ -57,6 +57,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
             stringLog: function (startAddress: number) {
                 console.log(arguments);
                 console.log({ startAddress });
+                // TODO: support longer options
                 var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
 
@@ -80,14 +81,14 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         for (var e in exports) {
 
             var preFnRunTime = performance.now();
-            console.log(e + ": " + (exports[e]()));
+            var result = exports[e]();
             var postFnRunTime = performance.now();
-            console.log(`${e} run time: ${(postFnRunTime - preFnRunTime).toFixed(2)} ms`)
+            console.log(`${e}: ${result} (${(postFnRunTime - preFnRunTime).toFixed(4)} ms)`)
 
             // var pre2ndFnRunTime = performance.now();
             // console.log(e + ": " + (exports[e]()));
             // var post2ndFnRunTime = performance.now();
-            // console.log(`${e} 2nd run time: ${post2ndFnRunTime - pre2ndFnRunTime}`)
+            // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
         }
 
         var finalTime = performance.now();

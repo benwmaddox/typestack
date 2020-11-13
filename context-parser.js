@@ -125,6 +125,68 @@ exports.BaseContext = [
         }
     },
     {
+        token: 'assert',
+        parse: function (context, words, expressions) {
+            var functionName = context[context.length - 1].token;
+            // if success: emit .
+            // if failure: emit Fail {functionName}
+            expressions.push({
+                op: wasm_structure_1.Opcodes.blockIf,
+                desc: "If"
+            });
+            // 0x7F
+            expressions.push({
+                op: 0x7F,
+                desc: "i32 Block type"
+            });
+            // expressions.push(
+            //     {
+            //         op: Opcodes.blockType,
+            //         desc: "Block type"
+            //     }
+            // )
+            // expressions.push(
+            //     {
+            //         op: Opcodes.get_local,
+            //         desc: "eqz"
+            //     }
+            // )
+            // expressions.push(
+            //     {
+            //         op: 0,
+            //         desc: "eqz"
+            //     }
+            // )
+            // expressions.push(
+            //     {
+            //         op: Opcodes.i32eqz,
+            //         desc: "eqz"
+            //     }
+            // )
+            // todo: instructions
+            expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
+            var i32Bytes = wasm_structure_1.toSignedLEB128(1);
+            for (var i = 0; i < i32Bytes.length; i++) {
+                expressions.push({ op: i32Bytes[i], desc: '1' + ' part ' + (i + 1) });
+            }
+            expressions.push({
+                op: wasm_structure_1.Opcodes.else,
+                desc: "Else"
+            });
+            expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
+            var i32Bytes = wasm_structure_1.toSignedLEB128(0);
+            for (var i = 0; i < i32Bytes.length; i++) {
+                expressions.push({ op: i32Bytes[i], desc: '0' + ' part ' + (i + 1) });
+            }
+            // todo: instructions
+            expressions.push({
+                op: wasm_structure_1.Opcodes.end,
+                desc: "End If"
+            });
+            return { context: context, words: words, expressions: expressions };
+        }
+    },
+    {
         token: 'fn',
         parse: function (context, words, expressions) {
             var parameters = extractParameters(words);
@@ -175,7 +237,7 @@ exports.BaseContext = [
             var functionEndIndex = words.indexOf(";");
             var functionEqualIndex = words.slice(0, functionEndIndex).indexOf("=");
             expressions.push({
-                desc: "Adding function: " + functionName,
+                desc: "Function " + functionName,
                 function: contextItem
             });
             return { context: newContext, words: words.slice(functionEqualIndex || functionEndIndex), expressions: expressions };
@@ -393,9 +455,6 @@ var ContextParser = /** @class */ (function () {
                 if (!isNaN(parsedInt)) {
                     expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
                     var i32Bytes = wasm_structure_1.toSignedLEB128(parseInt(nextWord));
-                    // for (var i = i32Bytes.length - 1; i >= 0; i--) {
-                    //     expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
-                    // }
                     for (var i = 0; i < i32Bytes.length; i++) {
                         expressions.push({ op: i32Bytes[i], desc: nextWord + ' part ' + (i + 1) });
                     }

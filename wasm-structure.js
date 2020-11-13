@@ -208,7 +208,7 @@ var Opcodes;
     Opcodes[Opcodes["i64extend32_s"] = 196] = "i64extend32_s";
     // saturation truncation - 1 byte prefix
     Opcodes[Opcodes["i32tunc_sat"] = 252] = "i32tunc_sat";
-    Opcodes[Opcodes["end"] = 11] = "end"; // expression end. function body
+    Opcodes[Opcodes["end"] = 11] = "end"; // expression end. function body / block end
 })(Opcodes = exports.Opcodes || (exports.Opcodes = {}));
 ;
 // export kind (0x00 = functionIndex, 0x01 = tableIndex, 0x02 = memory index, 0x03 = global index)
