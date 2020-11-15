@@ -151,13 +151,10 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
             stringLog: function (startAddress) {
                 // console.log("start address " + startAddress);
                 // var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
-                console.log("stringLog startAddress: " + startAddress);
+                // console.log("stringLog startAddress: " + startAddress)
                 var i32Wasm = new Uint32Array(memory.buffer);
                 var length = i32Wasm[startAddress];
-                console.log("stringLog Length: " + length);
-                // console.log("string length " + length);
-                // var bytes = new Uint8Array(memory.buffer, startAddress + 4, length); // TODO: specify length
-                var bytes = new Uint8Array(memory.buffer, startAddress, length); // TODO: specify length
+                var bytes = new Uint8Array(memory.buffer, startAddress, length).slice(16);
                 var string = new util_1.TextDecoder('utf8').decode(bytes);
                 console.log(string);
                 return 1;
