@@ -340,6 +340,7 @@ op 'Op end' = 0x0b ; // expression end. function body / block end
 op i32.Store = 0x36 0x02 0x00 ;
 
 import 'function' 'stringLog' fn stringLog start:int length:int = ; 
+import 'function' 'readFile' fn readFile start:int int = ; 
 
 export fn test int = 
      0 11   i32.Store // 11 bytes for string
@@ -371,6 +372,29 @@ export fn test2 int =
     10 'Character l' i32.Store 
     11 'Character d' i32.Store 
     0 stringLog 1 ; 
+
+
+// export fn test3 int = 
+//     0 11 i32.Store
+//     1 "Hello world"
+//     0 stringLog 1 ;
+
+
+
+export fn test3 int =
+    0 readFile 
+    // get byte length
+
+    // loop over bytes and lex into array
+
+    // take each word in lex array and parsing into expression array
+
+    // take each expression and emit into the WASM format
+
+    // save file
+    0 stringLog
+    ;
+
 
  // 'Is 5 between 0 and 255 ? ' ;
 

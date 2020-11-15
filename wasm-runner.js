@@ -62,6 +62,7 @@ var fs = __importStar(require("fs"));
 var context_emitter_1 = require("./context-emitter");
 var util_1 = require("util");
 var module = 'bootstrap';
+var contextBytes;
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var startTime = performance.now();
     var lexer = new lexer_1.Lexer();
@@ -83,7 +84,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     // console.log(JSON.stringify(expressions, undefined, " "));
     var contextEmitter = new context_emitter_1.ContextEmitter();
     var preEmitTime = performance.now();
-    var contextBytes = contextEmitter.getBytes(expressions);
+    contextBytes = contextEmitter.getBytes(expressions);
     var postEmitTime = performance.now();
     // console.log(JSON.stringify(contextBytes));
     // console.log(expressions);
@@ -103,6 +104,8 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
                 var string = new util_1.TextDecoder('utf8').decode(bytes);
                 console.log(string);
+            },
+            readFile: function () {
             }
         },
         js: {
@@ -134,6 +137,52 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         console.log("Emit time: " + (postEmitTime - preEmitTime).toFixed(2) + " ms");
         console.log("Wasm init time: " + (postInitWasmTime - preInitWasmTime).toFixed(2) + " ms");
         console.log("Full run time: " + (finalTime - startTime).toFixed(2) + " ms");
+    });
+    console.log('Starting bootstrap');
+    var preInitWasmTime = performance.now();
+    var memory = new WebAssembly.Memory({ initial: 10 });
+    runWasmWithCallback(contextBytes, {
+        console: console,
+        function: {
+            log: console.log,
+            stringLog: function (startAddress) {
+                // TODO: support longer options
+                var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
+                var bytes = new Uint8Array(memory.buffer, startAddress + 1, undefined); // TODO: specify length
+                var string = new util_1.TextDecoder('utf8').decode(bytes);
+                console.log(string);
+            },
+            readFile: function (TODOFilePathFromMemory) {
+                var buffer = fs.readFileSync(__dirname + ("/" + module + ".t"));
+                var startingIndex = 1;
+                var i8File = new Uint8Array(buffer);
+                var i8Wasm = new Uint8Array(memory.buffer);
+                // File length + this value. TODO: figure out multibyte
+                i8Wasm[startingIndex] = 255; //buffer.byteLength + 1;
+                var dataStartIndex = 1;
+                for (var i = 0; i < i8File.byteLength; i++) {
+                    i8Wasm[i + dataStartIndex] = i8File[i];
+                }
+                // console.log(buffer);
+                // TODO: return memory offset
+                return 0;
+            }
+        },
+        js: {
+            memory: memory
+        }
+    }, function (item) {
+        var exports = item.instance.exports;
+        console.log(' ');
+        var i32 = new Uint32Array(memory.buffer);
+        i32[0] = 0x21;
+        // Running each exported fn. No parameters in test
+        for (var e in exports) {
+            var preFnRunTime = performance.now();
+            var result = exports[e]();
+            var postFnRunTime = performance.now();
+            console.log(e + ": " + result + " (" + (postFnRunTime - preFnRunTime).toFixed(4) + " ms)");
+        }
     });
 });
 function runWasmWithCallback(bytes, importObject, callback) {

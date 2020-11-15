@@ -374,6 +374,8 @@ var ContextParser = /** @class */ (function () {
         var nextWord = words[0];
         if (nextWord.startsWith("\"")) {
             // TODO string variable...
+            var closingQuoteIndex = words.slice(1).indexOf("\"");
+            // var string = new TextEncoder('utf8') TextDecoder().decode(bytes);
         }
         else {
             // Lookup through context
