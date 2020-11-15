@@ -24,7 +24,7 @@ op 'Op get_global' = 0x23 ;
 op 'Op set_global' = 0x24 ;
 
 // memory
-op 'Op i32Load' = 0x28 ;
+op 'Op i32Load' = 0x28 0x02 0x00 ;
 op 'Op i64Load' = 0x29 ;
 op 'Op f32Load' = 0x2A ;
 op 'Op f64Load' = 0x2B ;
@@ -38,7 +38,7 @@ op 'Op i64Load16_s' = 0x32 ;
 op 'Op i64Load16_u' = 0x33 ;
 op 'Op i64Load32_s' = 0x34 ;
 op 'Op i64Load32_u' = 0x35 ;
-op 'Op i32Store' = 0x36 ;
+op 'Op i32Store' = 0x36 0x02 0x00;
 op 'Op i64Store' = 0x37 ;
 op 'Op f32Store' = 0x38 ;
 op 'Op f64Store' = 0x39 ;
@@ -47,8 +47,8 @@ op 'Op i32Store16' = 0x3B ;
 op 'Op i64Store8' = 0x3C ;
 op 'Op i64Store16' = 0x3D ;
 op 'Op i64Store32' = 0x3E ;
-op 'Op memorySize' = 0x3F ;
-op 'Op memoryGrow' = 0x40 ;
+op 'Op memorySize' = 0x3F 0x00 ;
+op 'Op memoryGrow' = 0x40  ;
 
 // numeric - immediate value following
 op 'Op i32Const' = 0x41 ;
@@ -329,64 +329,23 @@ op 'Op i32tunc_sat' = 0xFC ;
 //    7 = 64_f64_u    
 op 'Op end' = 0x0b ; // expression end. function body / block end    
 
-
-
-
-
-// fn error message:string = message log ;
-
 // Ok, cannot use the same value twice for now
 // fn 'Is {target:int} between {start:int} and {end:int} ?' = target end >= target start < && ;
-op i32.Store = 0x36 0x02 0x00 ;
-op i32.Load = 0x28 0x02 0x00 ;
+// op i32.Store = 0x36 0x02 0x00 ;
+// op i32.Load = 0x28 0x02 0x00 ;
 
 import 'function' 'stringLog' fn stringLog start:int length:int = ; 
 import 'function' 'readFile' fn readFile start:int int = ; 
+// fn error message:string = message log ;
 
-// export fn test int = 
-//      0 11   i32.Store // 11 bytes for string
-//      1 72   i32.Store // H
-//      2 101  i32.Store // e
-//      3 108  i32.Store // l
-//      4 108  i32.Store // l
-//      5 111  i32.Store // o
-//      6 32   i32.Store // 
-//      7 119  i32.Store // w
-//      8 111  i32.Store // o
-//      9 114  i32.Store // r
-//     10 108  i32.Store // l
-//     11 100  i32.Store // d
-//      0      stringLog 1 ; 
-
-     
-// export fn test2 int = 
-//     0 11 i32.Store
-//     1 'Character H' i32.Store 
-//     2 'Character e' i32.Store 
-//     3 'Character l' i32.Store 
-//     4 'Character l' i32.Store 
-//     5 'Character o' i32.Store 
-//     6 'Character Space' i32.Store 
-//     7 'Character w' i32.Store 
-//     8 'Character o' i32.Store 
-//     9 'Character r' i32.Store 
-//     10 'Character l' i32.Store 
-//     11 'Character d' i32.Store 
-//     0 stringLog 1 ; 
-
-
-// export fn test3 int = 
-//     0 11 i32.Store
-//     1 "Hello world"
-//     0 stringLog 1 ;
-
+export fn 'Current page size' int = 'Op memorySize' ;
 
 // Eventually a multi-file approach would be nice
 export fn compile int =
     // load file into memory
     0 readFile 
     // get byte length
-    i32.Load
+    'Op i32Load'
     // loop over bytes and lex into array
 
     // take each word in lexed array and parsing into expression array
@@ -396,11 +355,9 @@ export fn compile int =
     // take each expression and emit into the WASM format
 
     // save file
-     // 0 stringLog
+    // 0 stringLog
     ;
 
-
-// export fn 'Op i32.Store' offset:int int = i32.Store 0x02:byte 0x00:byte ;
 
 // All parsing functions should likely have the signature
 // [name] offset:int int
