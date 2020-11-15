@@ -186,134 +186,134 @@ op 'Op i64extend8_s' = 0xC2 ;
 op 'Op i64extend16_s' = 0xC3 ;
 op 'Op i64extend32_s' = 0xC4 ;
 
-op 'Character Null' = 0x00 ;
-op 'Character Start of Heading' = 0x01 ;
-op 'Character Start of Text' = 0x02 ;
-op 'Character End of Text' = 0x03 ;
-op 'Character End of Transmission' = 0x04 ;
-op 'Character Enquiry' = 0x05 ;
-op 'Character Acknowledgement' = 0x06 ;
-op 'Character Bell' = 0x07 ;
-op 'Character Backspace' = 0x08 ;
-op 'Character Horizontal Tab' = 0x09 ;
-op 'Character Line Feed' = 0x0A ;
-op 'Character Vertical Tab' = 0x0B ;
-op 'Character Form Feed' = 0x0C ;
-op 'Character Carriage Return' = 0x0D ;
-op 'Character Shift Out' = 0x0E ;
-op 'Character Shift In' = 0x0F ;
-op 'Character Data Link Escape' = 0x10 ;
-op 'Character Device Control 1' = 0x11 ;
-op 'Character Device Control 2' = 0x12 ;
-op 'Character Device Control 3' = 0x13 ;
-op 'Character Device Control 4' = 0x14 ;
-op 'Character Negative Acknowledgement' = 0x15 ;
-op 'Character Synchronous Idle' = 0x16 ;
-op 'Character End of Transmission Block' = 0x17 ;
-op 'Character Cancel' = 0x18 ;
-op 'Character End of Medium' = 0x19 ;
-op 'Character Substitute' = 0x1A ;
-op 'Character Escape' = 0x1B ;
-op 'Character File Separator' = 0x1C ;
-op 'Character Group Separator' = 0x1D ;
-op 'Character Record Separator' = 0x1E ;
-op 'Character Unit Separator' = 0x1F ;
-op 'Character Space' = 0x20 ;
-op 'Character !' = 0x21 ;
-op 'Character ' = 0x22 ; // fix double quote
-op 'Character #' = 0x23 ;
-op 'Character $' = 0x24 ;
-op 'Character %' = 0x25 ;
-op 'Character &' = 0x26 ;
-op 'Character  ????????  ' = 0x27 ; // fix single quote
-op 'Character (' = 0x28 ;
-op 'Character )' = 0x29 ;
-op 'Character *' = 0x2A ;
-op 'Character +' = 0x2B ;
-op 'Character ,' = 0x2c ;
-op 'Character -' = 0x2D ;
-op 'Character .' = 0x2E ;
-op 'Character /' = 0x2F ;
-op 'Character 0' = 0x30 ;
-op 'Character 1' = 0x31 ;
-op 'Character 2' = 0x32 ;
-op 'Character 3' = 0x33 ;
-op 'Character 4' = 0x34 ;
-op 'Character 5' = 0x35 ;
-op 'Character 6' = 0x36 ;
-op 'Character 7' = 0x37 ;
-op 'Character 7' = 0x37 ;
-op 'Character 9' = 0x39 ;
-op 'Character :' = 0x3A ;
-op 'Character ;' = 0x3B ;
-op 'Character <' = 0x3C ;
-op 'Character =' = 0x3D ;
-op 'Character >' = 0x3E ;
-op 'Character ?' = 0x3F ;
-op 'Character @' = 0x40 ;
-op 'Character A' = 0x41 ;
-op 'Character B' = 0x42 ;
-op 'Character C' = 0x43 ;
-op 'Character D' = 0x44 ;
-op 'Character E' = 0x45 ;
-op 'Character F' = 0x46 ;
-op 'Character G' = 0x47 ;
-op 'Character H' = 0x48 ;
-op 'Character I' = 0x49 ;
-op 'Character J' = 0x4A ;
-op 'Character K' = 0x4B ;
-op 'Character L' = 0x4C ;
-op 'Character M' = 0x4D ;
-op 'Character N' = 0x4E ;
-op 'Character O' = 0x4F ;
-op 'Character P' = 0x50 ;
-op 'Character Q' = 0x51 ;
-op 'Character R' = 0x52 ;
-op 'Character S' = 0x53 ;
-op 'Character T' = 0x54 ;
-op 'Character U' = 0x55 ;
-op 'Character V' = 0x56 ;
-op 'Character W' = 0x57 ;
-op 'Character X' = 0x58 ;
-op 'Character Y' = 0x59 ;
-op 'Character Z' = 0x5A ;
-op 'Character [' = 0x5B ;
-op 'Character   aasdf' = 0x5C ; // fix backslash parsing
-op 'Character ]' = 0x5D ;
-op 'Character ^' = 0x5E ;
-op 'Character _' = 0x5F ;
-op 'Character `' = 0x60 ;
-op 'Character a' = 0x61 ;
-op 'Character b' = 0x62 ;
-op 'Character c' = 0x63 ;
-op 'Character d' = 0x64 ;
-op 'Character e' = 0x65 ;
-op 'Character f' = 0x66 ;
-op 'Character g' = 0x67 ;
-op 'Character h' = 0x68 ;
-op 'Character i' = 0x69 ;
-op 'Character j' = 0x6A ;
-op 'Character k' = 0x6B ;
-op 'Character l' = 0x6C ;
-op 'Character m' = 0x6D ;
-op 'Character n' = 0x6E ;
-op 'Character o' = 0x6F ;
-op 'Character p' = 0x70 ;
-op 'Character q' = 0x71 ;
-op 'Character r' = 0x72 ;
-op 'Character s' = 0x73 ;
-op 'Character t' = 0x74 ;
-op 'Character u' = 0x75 ;
-op 'Character v' = 0x76 ;
-op 'Character w' = 0x77 ;
-op 'Character x' = 0x78 ;
-op 'Character y' = 0x70 ;
-op 'Character z' = 0x7B ;
-op 'Character {' = 0x7B ;
-op 'Character |' = 0x7C ;
-op 'Character }' = 0x7D ;
-op 'Character ~' = 0x7E ;
-op 'Character Delete' = 0x7F ;
+op 'Character Null' = 0x41 0x00 ;
+op 'Character Start of Heading' = 0x41 0x01 ;
+op 'Character Start of Text' = 0x41 0x02 ;
+op 'Character End of Text' = 0x41 0x03 ;
+op 'Character End of Transmission' = 0x41 0x04 ;
+op 'Character Enquiry' = 0x41 0x05 ;
+op 'Character Acknowledgement' = 0x41 0x06 ;
+op 'Character Bell' = 0x41 0x07 ;
+op 'Character Backspace' = 0x41 0x08 ;
+op 'Character Horizontal Tab' = 0x41 0x09 ;
+op 'Character Line Feed' = 0x41 0x0A ;
+op 'Character Vertical Tab' = 0x41 0x0B ;
+op 'Character Form Feed' = 0x41 0x0C ;
+op 'Character Carriage Return' = 0x41 0x0D ;
+op 'Character Shift Out' = 0x41 0x0E ;
+op 'Character Shift In' = 0x41 0x0F ;
+op 'Character Data Link Escape' = 0x41 0x10 ;
+op 'Character Device Control 1' = 0x41 0x11 ;
+op 'Character Device Control 2' = 0x41 0x12 ;
+op 'Character Device Control 3' = 0x41 0x13 ;
+op 'Character Device Control 4' = 0x41 0x14 ;
+op 'Character Negative Acknowledgement' = 0x41 0x15 ;
+op 'Character Synchronous Idle' = 0x41 0x16 ;
+op 'Character End of Transmission Block' = 0x41 0x17 ;
+op 'Character Cancel' = 0x41 0x18 ;
+op 'Character End of Medium' = 0x41 0x19 ;
+op 'Character Substitute' = 0x41 0x1A ;
+op 'Character Escape' = 0x41 0x1B ;
+op 'Character File Separator' = 0x41 0x1C ;
+op 'Character Group Separator' = 0x41 0x1D ;
+op 'Character Record Separator' = 0x41 0x1E ;
+op 'Character Unit Separator' = 0x41 0x1F ;
+op 'Character Space' = 0x41 0x20 ;
+op 'Character !' = 0x41 0x21 ;
+op 'Character ' = 0x41 0x22 ; // fix double quote
+op 'Character #' = 0x41 0x23 ;
+op 'Character $' = 0x41 0x24 ;
+op 'Character %' = 0x41 0x25 ;
+op 'Character &' = 0x41 0x26 ;
+op 'Character  ????????  ' = 0x41 0x27 ; // fix single quote
+op 'Character (' = 0x41 0x28 ;
+op 'Character )' = 0x41 0x29 ;
+op 'Character *' = 0x41 0x2A ;
+op 'Character +' = 0x41 0x2B ;
+op 'Character ,' = 0x41 0x2c ;
+op 'Character -' = 0x41 0x2D ;
+op 'Character .' = 0x41 0x2E ;
+op 'Character /' = 0x41 0x2F ;
+op 'Character 0' = 0x41 0x30 ;
+op 'Character 1' = 0x41 0x31 ;
+op 'Character 2' = 0x41 0x32 ;
+op 'Character 3' = 0x41 0x33 ;
+op 'Character 4' = 0x41 0x34 ;
+op 'Character 5' = 0x41 0x35 ;
+op 'Character 6' = 0x41 0x36 ;
+op 'Character 7' = 0x41 0x37 ;
+op 'Character 7' = 0x41 0x37 ;
+op 'Character 9' = 0x41 0x39 ;
+op 'Character :' = 0x41 0x3A ;
+op 'Character ;' = 0x41 0x3B ;
+op 'Character <' = 0x41 0x3C ;
+op 'Character =' = 0x41 0x3D ;
+op 'Character >' = 0x41 0x3E ;
+op 'Character ?' = 0x41 0x3F ;
+op 'Character @' = 0x41 192 0 ;
+op 'Character A' = 0x41 193 0 ;
+op 'Character B' = 0x41 194 0 ;
+op 'Character C' = 0x41 195 0 ;
+op 'Character D' = 0x41 196 0 ;
+op 'Character E' = 0x41 197 0 ;
+op 'Character F' = 0x41 198 0 ;
+op 'Character G' = 0x41 199 0 ;
+op 'Character H' = 0x41 200 0 ;
+op 'Character I' = 0x41 201 0 ;
+op 'Character J' = 0x41 202 0 ;
+op 'Character K' = 0x41 203 0 ;
+op 'Character L' = 0x41 204 0 ;
+op 'Character M' = 0x41 205 0 ;
+op 'Character N' = 0x41 206 0 ;
+op 'Character O' = 0x41 207 0 ;
+op 'Character P' = 0x41 208 0 ;
+op 'Character Q' = 0x41 209 0 ;
+op 'Character R' = 0x41 210 0 ;
+op 'Character S' = 0x41 211 0 ;
+op 'Character T' = 0x41 212 0 ;
+op 'Character U' = 0x41 213 0 ;
+op 'Character V' = 0x41 214 0 ;
+op 'Character W' = 0x41 215 0 ;
+op 'Character X' = 0x41 216 0 ;
+op 'Character Y' = 0x41 217 0 ;
+op 'Character Z' = 0x41 218 0 ;
+op 'Character [' = 0x41 219 0 ;
+op 'Character aasdf' = 0x41 220 0 ;
+op 'Character ]' = 0x41 221 0 ;
+op 'Character ^' = 0x41 222 0 ;
+op 'Character _' = 0x41 223 0 ;
+op 'Character `' = 0x41 224 0 ;
+op 'Character a' = 0x41 225 0 ;
+op 'Character b' = 0x41 226 0 ;
+op 'Character c' = 0x41 227 0 ;
+op 'Character d' = 0x41 228 0 ;
+op 'Character e' = 0x41 229 0 ;
+op 'Character f' = 0x41 230 0 ;
+op 'Character g' = 0x41 231 0 ;
+op 'Character h' = 0x41 232 0 ;
+op 'Character i' = 0x41 233 0 ;
+op 'Character j' = 0x41 234 0 ;
+op 'Character k' = 0x41 235 0 ;
+op 'Character l' = 0x41 236 0 ;
+op 'Character m' = 0x41 237 0 ;
+op 'Character n' = 0x41 238 0 ;
+op 'Character o' = 0x41 239 0 ;
+op 'Character p' = 0x41 240 0 ;
+op 'Character q' = 0x41 241 0 ;
+op 'Character r' = 0x41 242 0 ;
+op 'Character s' = 0x41 243 0 ;
+op 'Character t' = 0x41 244 0 ;
+op 'Character u' = 0x41 245 0 ;
+op 'Character v' = 0x41 246 0 ;
+op 'Character w' = 0x41 247 0 ;
+op 'Character x' = 0x41 248 0 ;
+op 'Character y' = 0x41 240 0 ;
+op 'Character z' = 0x41 251 0 ;
+op 'Character {' = 0x41 251 0 ;
+op 'Character |' = 0x41 252 0 ;
+op 'Character }' = 0x41 253 0 ;
+op 'Character ~' = 0x41 254 0 ;
+op 'Character Delete' = 0x41 255 0 ;
 
 
 
@@ -360,16 +360,16 @@ export fn test int =
 export fn test2 int = 
     0 11 i32.Store
     1 'Character H' i32.Store 
-//    2 'Character e' i32.Store 
-//   3 'Character l' i32.Store 
-//   4 'Character l' i32.Store 
-//   5 'Character o' i32.Store 
-//   6 'Character Space' i32.Store 
-//   7 'Character w' i32.Store 
-//   8 'Character o' i32.Store 
-//   9 'Character r' i32.Store 
-//   10 'Character l' i32.Store 
-//   11 'Character d' i32.Store 
+    2 'Character e' i32.Store 
+   3 'Character l' i32.Store 
+   4 'Character l' i32.Store 
+   5 'Character o' i32.Store 
+   6 'Character Space' i32.Store 
+   7 'Character w' i32.Store 
+   8 'Character o' i32.Store 
+   9 'Character r' i32.Store 
+   10 'Character l' i32.Store 
+   11 'Character d' i32.Store 
     0 stringLog 1 ; 
 
  // 'Is 5 between 0 and 255 ? ' ;
