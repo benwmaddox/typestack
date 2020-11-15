@@ -393,7 +393,7 @@ export fn compile int =
     // take each expression and emit into the WASM format
 
     // save file
-    // 0 stringLog
+    0 stringLog
     ;
 
 

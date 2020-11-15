@@ -139,15 +139,14 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
                 // File length + this value. TODO: figure out multibyte
 
 
-                var dataStartIndex = 4;
+                var dataStartIndex = 1;
                 for (var i = 0; i < i8File.byteLength; i++) {
                     i8Wasm[i + dataStartIndex] = i8File[i];
                 }
 
                 // console.log(buffer);
 
-                // TODO: return memory offset
-                return 0;
+                return dataStartIndex + i8File.length;
             }
         },
         js: {
