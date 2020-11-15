@@ -142,7 +142,7 @@ exports.BaseContext = [
         }
     },
     {
-        token: 'parse',
+        token: 'op',
         parse: function (context, words, expressions) {
             var opName = words[1];
             if (opName[0] == "'") {

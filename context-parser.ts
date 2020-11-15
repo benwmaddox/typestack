@@ -207,7 +207,7 @@ export var BaseContext: ContextDictionary = [
         }
     },
     {
-        token: 'parse',
+        token: 'op',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
             var opName = words[1];
             if (opName[0] == "'") {
