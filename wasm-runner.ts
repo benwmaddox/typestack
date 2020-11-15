@@ -29,8 +29,8 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    // console.log(JSON.stringify(expressions, undefined, "  "));
-    console.log(JSON.stringify(context, undefined, "  "));
+    console.log(JSON.stringify(expressions, undefined, "  "));
+    // console.log(JSON.stringify(context, undefined, "  "));
     // console.log(JSON.stringify(expressions, undefined, " "));
 
     var contextEmitter = new ContextEmitter();

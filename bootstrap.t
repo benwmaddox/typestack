@@ -199,7 +199,7 @@ parse 'Op i32tunc_sat' = 0xFC ;
 parse 'Op end' = 0x0b ; // expression end. function body / block end    
 
 
-export fn compile int = 0 ;
+// export fn compile int = 1 ;
 
 
 
@@ -209,15 +209,29 @@ export fn compile int = 0 ;
 
 
 // fn 'Is {target:int} between {start:int} and {end:int} ?' = target end >= target start < && ;
+parse i32.Store = 0x36 0x02 0x00 ;
 
-export fn test int = 5 3 > ;
+import 'function' 'stringLog' fn stringLog start:int length:int = ; 
+export fn test int = 
+    0 11 i32.Store // 11 bytes for string
+    1 72 i32.Store  // H
+    2 101 i32.Store // e
+    3 108 i32.Store // l
+    4 108 i32.Store // l
+    5 111 i32.Store // o
+    6 32 i32.Store // 
+    7 119 i32.Store // w
+    8 111 i32.Store // o
+    9 114 i32.Store // r
+    10 108 i32.Store // l
+    11 100 i32.Store // d
+    0 0 stringLog ; 
  // 'Is 5 between 0 and 255 ? ' ;
 
 // parse byte i:int =  
 //     i 0 > i 255 < && ? 
 // i ;
 
-// op i32.Store = 0x36:byte 0x02:byte 0x00:byte ;
 
 // export fn 'Op i32.Store' offset:int int = i32.Store 0x02:byte 0x00:byte ;
 

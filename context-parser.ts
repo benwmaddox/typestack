@@ -209,8 +209,10 @@ export var BaseContext: ContextDictionary = [
     {
         token: 'parse',
         parse: (context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression>): { context: ContextDictionary, words: Array<string>, expressions: Array<ParsedExpression> } => {
-
-            var opName = words[1].substring(1, words[1].length - 1);
+            var opName = words[1];
+            if (opName[0] == "'") {
+                opName = opName.substring(1, opName.length - 1)
+            }
             var equalIndex = words.indexOf("=");
             var endIndex = words.indexOf(";");
             var contextItem: ContextItem = {
