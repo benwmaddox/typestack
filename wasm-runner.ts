@@ -58,14 +58,16 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                // TODO: support longer options
-                var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
+                var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
+                console.log(length);
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
             },
             readFile: function () {
-
+                var startingIndex = 0;
+                var i32Wasm = new Uint32Array(memory.buffer);
+                i32Wasm[startingIndex] = 1;
             }
         },
         js: {
@@ -81,18 +83,18 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         i32[0] = 0x21;
 
         // Running each exported fn. No parameters in test
-        for (var e in exports) {
+        // for (var e in exports) {
 
-            var preFnRunTime = performance.now();
-            var result = exports[e]();
-            var postFnRunTime = performance.now();
-            console.log(`${e}: ${result} (${(postFnRunTime - preFnRunTime).toFixed(4)} ms)`)
+        //     var preFnRunTime = performance.now();
+        //     var result = exports[e]();
+        //     var postFnRunTime = performance.now();
+        //     console.log(`${e}: ${result} (${(postFnRunTime - preFnRunTime).toFixed(4)} ms)`)
 
-            // var pre2ndFnRunTime = performance.now();
-            // console.log(e + ": " + (exports[e]()));
-            // var post2ndFnRunTime = performance.now();
-            // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
-        }
+        //     // var pre2ndFnRunTime = performance.now();
+        //     // console.log(e + ": " + (exports[e]()));
+        //     // var post2ndFnRunTime = performance.now();
+        //     // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
+        // }
 
         var finalTime = performance.now();
         console.log(' ');
@@ -118,23 +120,26 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                // TODO: support longer options
                 var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
-                var bytes = new Uint8Array(memory.buffer, startAddress + 1, undefined); // TODO: specify length
+                console.log(length);
+                var bytes = new Uint8Array(memory.buffer, startAddress + 1, length); // TODO: specify length
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
             },
             readFile: function (TODOFilePathFromMemory: number): number {
                 var buffer = fs.readFileSync(__dirname + `/${module}.t`);
-                var startingIndex = 1
+                var startingIndex = 0
                 var i8File = new Uint8Array(buffer);
 
+                var i32Wasm = new Uint8Array(memory.buffer);
+                i32Wasm[startingIndex] = buffer.byteLength + 1;
+                console.log("length: " + i32Wasm[startingIndex])
 
                 var i8Wasm = new Uint8Array(memory.buffer);
                 // File length + this value. TODO: figure out multibyte
-                i8Wasm[startingIndex] = 255;//buffer.byteLength + 1;
 
-                var dataStartIndex = 1;
+
+                var dataStartIndex = 4;
                 for (var i = 0; i < i8File.byteLength; i++) {
                     i8Wasm[i + dataStartIndex] = i8File[i];
                 }
@@ -153,7 +158,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         console.log(' ');
 
         var i32 = new Uint32Array(memory.buffer);
-        i32[0] = 0x21;
+        i32[0] = 0x01;
 
         // Running each exported fn. No parameters in test
         for (var e in exports) {

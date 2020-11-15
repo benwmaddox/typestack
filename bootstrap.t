@@ -338,6 +338,7 @@ op 'Op end' = 0x0b ; // expression end. function body / block end
 // Ok, cannot use the same value twice for now
 // fn 'Is {target:int} between {start:int} and {end:int} ?' = target end >= target start < && ;
 op i32.Store = 0x36 0x02 0x00 ;
+op i32.Load = 0x28 0x02 0x00 ;
 
 import 'function' 'stringLog' fn stringLog start:int length:int = ; 
 import 'function' 'readFile' fn readFile start:int int = ; 
@@ -380,11 +381,11 @@ export fn test2 int =
 //     0 stringLog 1 ;
 
 
-
-export fn test3 int =
+export fn compile int =
+    // load file into memory
     0 readFile 
     // get byte length
-
+    i32.Load
     // loop over bytes and lex into array
 
     // take each word in lex array and parsing into expression array
@@ -392,15 +393,8 @@ export fn test3 int =
     // take each expression and emit into the WASM format
 
     // save file
-    0 stringLog
+    // 0 stringLog
     ;
-
-
- // 'Is 5 between 0 and 255 ? ' ;
-
-// parse byte i:int =  
-//     i 0 > i 255 < && ? 
-// i ;
 
 
 // export fn 'Op i32.Store' offset:int int = i32.Store 0x02:byte 0x00:byte ;
