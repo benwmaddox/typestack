@@ -60,7 +60,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
             stringLog: function (startAddress: number) {
                 var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
                 console.log(length);
-                var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
+                var bytes = new Uint8Array(memory.buffer, startAddress + 4, length);
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
             },
@@ -83,18 +83,18 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         i32[0] = 0x21;
 
         // Running each exported fn. No parameters in test
-        // for (var e in exports) {
+        for (var e in exports) {
 
-        //     var preFnRunTime = performance.now();
-        //     var result = exports[e]();
-        //     var postFnRunTime = performance.now();
-        //     console.log(`${e}: ${result} (${(postFnRunTime - preFnRunTime).toFixed(4)} ms)`)
+            // var preFnRunTime = performance.now();
+            // var result = exports[e]();
+            // var postFnRunTime = performance.now();
+            // console.log(`${e}: ${result} (${(postFnRunTime - preFnRunTime).toFixed(4)} ms)`)
 
-        //     // var pre2ndFnRunTime = performance.now();
-        //     // console.log(e + ": " + (exports[e]()));
-        //     // var post2ndFnRunTime = performance.now();
-        //     // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
-        // }
+            // // var pre2ndFnRunTime = performance.now();
+            // // console.log(e + ": " + (exports[e]()));
+            // // var post2ndFnRunTime = performance.now();
+            // // console.log(`${e} 2nd run time: ${(post2ndFnRunTime - pre2ndFnRunTime).toFixed(2)} ms`)
+        }
 
         var finalTime = performance.now();
         console.log(' ');
@@ -120,26 +120,27 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
+                var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
                 console.log(length);
-                var bytes = new Uint8Array(memory.buffer, startAddress + 1, length); // TODO: specify length
+                var bytes = new Uint8Array(memory.buffer, startAddress + 4, length); // TODO: specify length
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
+                return 1;
             },
             readFile: function (TODOFilePathFromMemory: number): number {
                 var buffer = fs.readFileSync(__dirname + `/${module}.t`);
                 var startingIndex = 0
-                var i8File = new Uint8Array(buffer);
 
-                var i32Wasm = new Uint8Array(memory.buffer);
+                var i32Wasm = new Uint32Array(memory.buffer);
+                console.log("length: " + (buffer.byteLength + 1))
                 i32Wasm[startingIndex] = buffer.byteLength + 1;
+                // console.log("buffer: " + buffer)
+                console.log("length: " + (buffer.byteLength + 1))
                 console.log("length: " + i32Wasm[startingIndex])
 
                 var i8Wasm = new Uint8Array(memory.buffer);
-                // File length + this value. TODO: figure out multibyte
-
-
-                var dataStartIndex = 1;
+                var i8File = new Uint8Array(buffer);
+                var dataStartIndex = startingIndex + 4;
                 for (var i = 0; i < i8File.byteLength; i++) {
                     i8Wasm[i + dataStartIndex] = i8File[i];
                 }
