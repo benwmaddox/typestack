@@ -29,7 +29,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    console.log(JSON.stringify(expressions, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, "  "));
     // console.log(JSON.stringify(context, undefined, "  "));
     // console.log(JSON.stringify(expressions, undefined, " "));
 
@@ -57,12 +57,9 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                console.log(arguments);
-                console.log({ startAddress });
                 // TODO: support longer options
                 var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);
-
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
             }

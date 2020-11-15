@@ -78,7 +78,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var preParseTime = performance.now();
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
-    console.log(JSON.stringify(expressions, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, "  "));
     // console.log(JSON.stringify(context, undefined, "  "));
     // console.log(JSON.stringify(expressions, undefined, " "));
     var contextEmitter = new context_emitter_1.ContextEmitter();
@@ -98,8 +98,6 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         function: {
             log: console.log,
             stringLog: function (startAddress) {
-                console.log(arguments);
-                console.log({ startAddress: startAddress });
                 // TODO: support longer options
                 var length = new Uint8Array(memory.buffer, startAddress, 1)[0];
                 var bytes = new Uint8Array(memory.buffer, startAddress + 1, length);

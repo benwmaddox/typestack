@@ -278,7 +278,7 @@ op 'Character X' = 0x41 216 0 ;
 op 'Character Y' = 0x41 217 0 ;
 op 'Character Z' = 0x41 218 0 ;
 op 'Character [' = 0x41 219 0 ;
-op 'Character aasdf' = 0x41 220 0 ;
+op 'Character aasdf' = 0x41 220 0 ; // TODO: fix
 op 'Character ]' = 0x41 221 0 ;
 op 'Character ^' = 0x41 222 0 ;
 op 'Character _' = 0x41 223 0 ;
@@ -361,15 +361,15 @@ export fn test2 int =
     0 11 i32.Store
     1 'Character H' i32.Store 
     2 'Character e' i32.Store 
-   3 'Character l' i32.Store 
-   4 'Character l' i32.Store 
-   5 'Character o' i32.Store 
-   6 'Character Space' i32.Store 
-   7 'Character w' i32.Store 
-   8 'Character o' i32.Store 
-   9 'Character r' i32.Store 
-   10 'Character l' i32.Store 
-   11 'Character d' i32.Store 
+    3 'Character l' i32.Store 
+    4 'Character l' i32.Store 
+    5 'Character o' i32.Store 
+    6 'Character Space' i32.Store 
+    7 'Character w' i32.Store 
+    8 'Character o' i32.Store 
+    9 'Character r' i32.Store 
+    10 'Character l' i32.Store 
+    11 'Character d' i32.Store 
     0 stringLog 1 ; 
 
  // 'Is 5 between 0 and 255 ? ' ;
