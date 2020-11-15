@@ -120,34 +120,42 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
-                console.log(length);
-                var bytes = new Uint8Array(memory.buffer, startAddress + 4, length); // TODO: specify length
+                // console.log("start address " + startAddress);
+                // var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
+
+                console.log("stringLog startAddress: " + startAddress)
+                var i32Wasm = new Uint32Array(memory.buffer);
+                var length = i32Wasm[startAddress];
+                console.log("stringLog Length: " + length)
+                // console.log("string length " + length);
+                // var bytes = new Uint8Array(memory.buffer, startAddress + 4, length); // TODO: specify length
+                var bytes = new Uint8Array(memory.buffer, startAddress, length); // TODO: specify length
                 var string = new TextDecoder('utf8').decode(bytes);
                 console.log(string);
                 return 1;
             },
             readFile: function (TODOFilePathFromMemory: number): number {
                 var buffer = fs.readFileSync(__dirname + `/${module}.t`);
-                var startingIndex = 0
+                var startingIndex = 4
 
                 var i32Wasm = new Uint32Array(memory.buffer);
-                console.log("length: " + (buffer.byteLength + 1))
+                // console.log("length: " + (buffer.byteLength + 1))
                 i32Wasm[startingIndex] = buffer.byteLength + 1;
+                console.log("readFile Length: " + i32Wasm[startingIndex])
                 // console.log("buffer: " + buffer)
-                console.log("length: " + (buffer.byteLength + 1))
-                console.log("length: " + i32Wasm[startingIndex])
+                // console.log("length: " + (buffer.byteLength + 1))
+                // console.log("length: " + i32Wasm[startingIndex])
 
                 var i8Wasm = new Uint8Array(memory.buffer);
                 var i8File = new Uint8Array(buffer);
-                var dataStartIndex = startingIndex + 4;
+                var dataStartIndex = startingIndex + 16;
                 for (var i = 0; i < i8File.byteLength; i++) {
                     i8Wasm[i + dataStartIndex] = i8File[i];
                 }
 
                 // console.log(buffer);
 
-                return dataStartIndex + i8File.length;
+                return dataStartIndex;
             }
         },
         js: {

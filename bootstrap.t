@@ -338,27 +338,30 @@ export fn 'Current page size' int = 'Op memorySize' ;
 
 op 'top of stack index' = 0x00 ;
 
-fn 'Load file into memory' int = 
-    // load file into memory
+fn 'Load file into memory' int =     
     4 readFile 
     // get byte length
-    'Op i32Load'     
-    ;
-fn 'loop over bytes and lex into array' fileIndex:int int = 0 ;    
+    'Op i32Load'
+    
+     ;
 
-fn 'take each word in lexed array and parsing into expression array' lexArrayIndex:int int = 0 ;
-
+fn 'loop over bytes and lex into array of words' fileIndex:int int = 0 ;    
+fn 'take each word in lexed array and parse into expression array' lexArrayIndex:int int = 0 ;
 fn 'take each expression and emit into the WASM format' expressionIndex:int int = 0 ;
+fn 'transform expressions' expressionIndex:int int = 0 ;
+fn 'save file' emitInstructionIndex:int int = 
+    4 stringLog
+    0 ;
 
 // Eventually a multi-file approach would be nice
 export fn compile int =
     'Load file into memory'    
-    'loop over bytes and lex into array'
-    'take each word in lexed array and parsing into expression array'    
-    // TODO: transform expressions as needed
-    'take each expression and emit into the WASM format'    
-    // TODO: save file
-    // 0 stringLog
+    // 'loop over bytes and lex into array of words'
+    // 'take each word in lexed array and parse into expression array'    
+    // 'transform expressions'
+    // 'take each expression and emit into the WASM format'        
+     'Op drop'
+    4 'save file'
     ;
 
 
