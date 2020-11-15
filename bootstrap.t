@@ -315,8 +315,6 @@ op 'Character }' = 0x41 253 0 ;
 op 'Character ~' = 0x41 254 0 ;
 op 'Character Delete' = 0x41 255 0 ;
 
-
-
 // saturation truncation - 1 byte prefix
 op 'Op i32tunc_sat' = 0xFC ;
 //    0 = i32_f32_s
@@ -331,8 +329,6 @@ op 'Op end' = 0x0b ; // expression end. function body / block end
 
 // Ok, cannot use the same value twice for now
 // fn 'Is {target:int} between {start:int} and {end:int} ?' = target end >= target start < && ;
-// op i32.Store = 0x36 0x02 0x00 ;
-// op i32.Load = 0x28 0x02 0x00 ;
 
 import 'function' 'stringLog' fn stringLog start:int length:int = ; 
 import 'function' 'readFile' fn readFile start:int int = ; 
@@ -340,21 +336,28 @@ import 'function' 'readFile' fn readFile start:int int = ;
 
 export fn 'Current page size' int = 'Op memorySize' ;
 
+op 'top of stack index' = 0x00 ;
+
+fn 'Load file into memory' int = 
+    // load file into memory
+    4 readFile 
+    // get byte length
+    'Op i32Load'     
+    ;
+fn 'loop over bytes and lex into array' fileIndex:int int = 0 ;    
+
+fn 'take each word in lexed array and parsing into expression array' lexArrayIndex:int int = 0 ;
+
+fn 'take each expression and emit into the WASM format' expressionIndex:int int = 0 ;
+
 // Eventually a multi-file approach would be nice
 export fn compile int =
-    // load file into memory
-    0 readFile 
-    // get byte length
-    'Op i32Load'
-    // loop over bytes and lex into array
-
-    // take each word in lexed array and parsing into expression array
-
-    // transform expressions as needed
-
-    // take each expression and emit into the WASM format
-
-    // save file
+    'Load file into memory'    
+    'loop over bytes and lex into array'
+    'take each word in lexed array and parsing into expression array'    
+    // TODO: transform expressions as needed
+    'take each expression and emit into the WASM format'    
+    // TODO: save file
     // 0 stringLog
     ;
 

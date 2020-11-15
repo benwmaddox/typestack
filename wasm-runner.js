@@ -182,7 +182,7 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
         var exports = item.instance.exports;
         console.log(' ');
         var i32 = new Uint32Array(memory.buffer);
-        i32[0] = 0x01;
+        i32[4] = 0x01;
         // Running each exported fn. No parameters in test
         for (var e in exports) {
             var preFnRunTime = performance.now();
