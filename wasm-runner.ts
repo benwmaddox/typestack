@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import { ContextEmitter } from './context-emitter';
 import { TextDecoder } from 'util'
 
-var module = 'sample4';
+var module = 'bootstrap';
 
 fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
 
@@ -30,6 +30,8 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
     // console.log(JSON.stringify(expressions, undefined, "  "));
+    console.log(JSON.stringify(context, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, " "));
 
     var contextEmitter = new ContextEmitter();
     var preEmitTime = performance.now();

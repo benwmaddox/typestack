@@ -83,34 +83,6 @@ exports.BaseContext = [
             // TODO
             var functionEndIndex = words.indexOf(";");
             var fnIndex = words.slice(0, functionEndIndex).indexOf("fn");
-            // // var importEndIndex = expressions.slice(i).findIndex(x => x.op == Opcodes.end) + i;
-            // var importType = fnIndex != -1 ? "fn" : 'NOT IMPLEMENTED IMPORT';
-            // var functionName = words[fnIndex + 1];
-            // if (functionName[0] == "'") {
-            //     functionName = functionName.substring(1, functionName.length - 1)
-            // }
-            // var contextItem: ContextItem = {
-            //     token: functionName,
-            //     interpolationTokens: functionName.indexOf('{') == -1 ? undefined : functionName.replace(/{(.+?)}/g, '{}').split(' '),
-            //     types: [
-            //         {
-            //             input: parameters.map(x => x.type),
-            //             parameters: parameters.map(x => x.name),
-            //             output: extractResults(words),
-            //             opCodes:
-            //                 // flatten opcodes
-            //                 Array.prototype.concat.apply([],
-            //                     parameters.map((x, i) =>
-            //                         [Opcodes.get_local, i]))
-            //         }
-            //     ],
-            //     functionReference: {
-            //         name: functionName,
-            //         typeID: undefined,
-            //         functionID: undefined,
-            //         exportID: undefined
-            //     }
-            // };
             expressions.push({ desc: "import" });
             expressions.push({ desc: words[1].substring(1, words[1].length - 1) });
             expressions.push({ desc: words[2].substring(1, words[2].length - 1) });
@@ -134,36 +106,11 @@ exports.BaseContext = [
                 op: wasm_structure_1.Opcodes.blockIf,
                 desc: "If"
             });
-            // 0x7F
             expressions.push({
                 op: 0x7F,
                 desc: "i32 Block type"
             });
-            // expressions.push(
-            //     {
-            //         op: Opcodes.blockType,
-            //         desc: "Block type"
-            //     }
-            // )
-            // expressions.push(
-            //     {
-            //         op: Opcodes.get_local,
-            //         desc: "eqz"
-            //     }
-            // )
-            // expressions.push(
-            //     {
-            //         op: 0,
-            //         desc: "eqz"
-            //     }
-            // )
-            // expressions.push(
-            //     {
-            //         op: Opcodes.i32eqz,
-            //         desc: "eqz"
-            //     }
-            // )
-            // todo: instructions
+            // todo: push . to log instructions
             expressions.push({ op: wasm_structure_1.Opcodes.i32Const, desc: "i32 const" });
             var i32Bytes = wasm_structure_1.toSignedLEB128(1);
             for (var i = 0; i < i32Bytes.length; i++) {
@@ -178,12 +125,38 @@ exports.BaseContext = [
             for (var i = 0; i < i32Bytes.length; i++) {
                 expressions.push({ op: i32Bytes[i], desc: '0' + ' part ' + (i + 1) });
             }
-            // todo: instructions
+            // todo: push error message to log instructions
+            // expressions.push({
+            //     op: Opcodes.call,
+            //     desc: 'call log'
+            // })
+            // expressions.push({
+            //     op: ,
+            //     desc: 'call log'
+            // })
             expressions.push({
                 op: wasm_structure_1.Opcodes.end,
                 desc: "End If"
             });
             return { context: context, words: words, expressions: expressions };
+        }
+    },
+    {
+        token: 'parse',
+        parse: function (context, words, expressions) {
+            var opName = words[1].substring(1, words[1].length - 1);
+            var equalIndex = words.indexOf("=");
+            var endIndex = words.indexOf(";");
+            var contextItem = {
+                token: opName,
+                types: [
+                    {
+                        opCodes: words.slice(equalIndex + 1, endIndex).map(function (x) { return parseInt(x); }).filter(function (x) { return x !== null; })
+                    }
+                ],
+            };
+            context.push(contextItem);
+            return { context: context, words: words.slice(endIndex), expressions: expressions };
         }
     },
     {
@@ -255,11 +228,19 @@ exports.BaseContext = [
         popContext: true,
         parse: function (context, words, expressions) {
             // If context is a function
+            // var lastContext = context[context.length - 1];
+            // if (lastContext.functionReference !== undefined) {
             expressions.push({
                 op: wasm_structure_1.Opcodes.end,
                 desc: 'End function' //+ context.functionReference?.name
             });
-            // TODO: if context is.. a variable
+            // }
+            // else { // if (lastContext.token == "?" || lastContext.token == "if") {
+            //     expressions.push({
+            //         op: Opcodes.end,
+            //         desc: 'End ' + lastContext.token
+            //     })
+            // }
             return { context: Object.getPrototypeOf(context), words: words, expressions: expressions };
         }
     },
@@ -276,9 +257,14 @@ exports.BaseContext = [
     { token: '-', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32sub] }] },
     { token: '<', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32lt_s] }] },
     { token: '>', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32gt_s] }] },
+    { token: '>=', types: [{ input: ['int', 'int'], output: ['int'], opCodes: [wasm_structure_1.Opcodes.i32ge_s] }] },
     { token: '==', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eq] }] },
     { token: '==0', types: [{ input: ['int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32eqz] }] },
     { token: '&&', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.i32and] }] },
+    { token: 'if', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.blockIf, 0x7F] }], newContext: true },
+    { token: '?', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.blockIf, 0x7F] }], newContext: true },
+    { token: 'else', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.else] }] },
+    { token: ':', types: [{ input: ['int', 'int'], output: ['bool'], opCodes: [wasm_structure_1.Opcodes.else] }] },
     {
         token: 'Store int {value:int} at {offset:int} / {alignment:int}', interpolationTokens: ["Store", "int", '{}', 'at', '{}', '/', '{}'],
         types: [{ input: ['int', 'int', 'int'], output: [], opCodes: [wasm_structure_1.Opcodes.i32Store] }]
@@ -410,6 +396,9 @@ var ContextParser = /** @class */ (function () {
                 if (match.newContext === true) {
                     expressions.push({ desc: "New context level " });
                     context = Object.create(context);
+                    // context.push({
+                    //     token: match.token
+                    // });
                 }
                 if (match.functionReference !== undefined) {
                     var reference = match.functionReference;

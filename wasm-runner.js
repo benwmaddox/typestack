@@ -61,7 +61,7 @@ var context_parser_1 = require("./context-parser");
 var fs = __importStar(require("fs"));
 var context_emitter_1 = require("./context-emitter");
 var util_1 = require("util");
-var module = 'sample4';
+var module = 'bootstrap';
 fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var startTime = performance.now();
     var lexer = new lexer_1.Lexer();
@@ -79,6 +79,8 @@ fs.readFile(__dirname + ("/" + module + ".t"), 'utf8', function (err, data) {
     var remainingWords = contextParser.parse(context, tokenized, expressions);
     var postParseTime = performance.now();
     // console.log(JSON.stringify(expressions, undefined, "  "));
+    console.log(JSON.stringify(context, undefined, "  "));
+    // console.log(JSON.stringify(expressions, undefined, " "));
     var contextEmitter = new context_emitter_1.ContextEmitter();
     var preEmitTime = performance.now();
     var contextBytes = contextEmitter.getBytes(expressions);

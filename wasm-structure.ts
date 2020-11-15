@@ -231,8 +231,6 @@ export enum Opcodes {
     7 = 64_f64_u    
     */
 
-
-
     end = 0x0b // expression end. function body / block end
 
 };
