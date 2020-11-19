@@ -1,3 +1,7 @@
+import 'function' 'stringLog' fn stringLog start:int int = 0 ; 
+import 'function' 'readFile' fn readFile start:int int = ; 
+
+
 op 'Op blockType' = 0x40 ;
 op 'Op unreachable' = 0x00 ;
 op 'Op nop' = 0x01 ;
@@ -330,8 +334,6 @@ op 'Op end' = 0x0b ; // expression end. function body / block end
 // Ok, cannot use the same value twice for now
 // fn 'Is {target:int} between {start:int} and {end:int} ?' = target end >= target start < && ;
 
-import 'function' 'stringLog' fn stringLog start:int length:int = ; 
-import 'function' 'readFile' fn readFile start:int int = ; 
 // fn error message:string = message log ;
 
 export fn 'Current page size' int = 'Op memorySize' ;
@@ -345,13 +347,13 @@ fn 'Load file into memory' int =
     
      ;
 
-fn 'loop over bytes and lex into array of words' fileIndex:int int = 0 ;    
-fn 'take each word in lexed array and parse into expression array' lexArrayIndex:int int = 0 ;
-fn 'take each expression and emit into the WASM format' expressionIndex:int int = 0 ;
-fn 'transform expressions' expressionIndex:int int = 0 ;
-fn 'save file' emitInstructionIndex:int int = 
+fn 'loop over bytes and lex into array of words' fileOFfset:int int = 0 ;    
+fn 'take each word in lexed array and parse into expression array' lexArrayOFfset:int int = 0 ;
+fn 'take each expression and emit into the WASM format' expressionOFfset:int int = 0 ;
+fn 'transform expressions' expressionOFfset:int int = 0 ;
+fn 'save file' emitInstructionOFfset:int int = 
     4 stringLog
-    0 ;
+     ;
 
 // Eventually a multi-file approach would be nice
 export fn compile int =
@@ -359,9 +361,10 @@ export fn compile int =
     // 'loop over bytes and lex into array of words'
     // 'take each word in lexed array and parse into expression array'    
     // 'transform expressions'
-    // 'take each expression and emit into the WASM format'        
+    // 'take each expression and emit into the WASM format'       
+    
      'Op drop'
-    4 'save file'
+     4 'save file'
     ;
 
 

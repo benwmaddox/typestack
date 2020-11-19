@@ -138,7 +138,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
                 var i32Wasm = new Uint32Array(memory.buffer);
                 // console.log("length: " + (buffer.byteLength + 1))
                 i32Wasm[startingIndex] = buffer.byteLength + 1;
-                console.log("readFile Length: " + i32Wasm[startingIndex])
+                // console.log("readFile Length: " + i32Wasm[startingIndex])
                 // console.log("buffer: " + buffer)
                 // console.log("length: " + (buffer.byteLength + 1))
                 // console.log("length: " + i32Wasm[startingIndex])
@@ -151,6 +151,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
                 }
 
                 // console.log(buffer);
+                console.log(dataStartIndex);
 
                 return dataStartIndex;
             }
