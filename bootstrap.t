@@ -338,16 +338,21 @@ op 'Op end' = 0x0b ; // expression end. function body / block end
 
 export fn 'Current page size' int = 'Op memorySize' ;
 
-op 'top of stack index' = 0x00 ;
+op 'top of stack index' = 0x41 0x00 ;
 
+// For now, 4 is the memory address for reading in the file
 fn 'Load file into memory' int =     
     4 readFile 
-    // get byte length
-    // 'Op i32Load'
-    
+    // get byte length? Not now
+    'top of stack index' 1 + 'Op i32Load' 'Op i32Store'
+    4
+    // TODO: get length, update top of stack so I do not overwrite this data
      ;
 
-fn 'loop over bytes and lex into array of words' fileOffset:int int = 0 ;    
+fn 'loop over bytes and lex into array of words' fileOffset:int int = 
+    // Will create a new section of memory. After the existing memory
+
+    fileOffset ;    
 fn 'take each word in lexed array and parse into expression array' lexArrayOFfset:int int = 0 ;
 fn 'take each expression and emit into the WASM format' expressionOFfset:int int = 0 ;
 fn 'transform expressions' expressionOffset:int int = 0 ;
@@ -358,7 +363,7 @@ fn 'save file' emitInstructionOffset:int int =
 // Eventually a multi-file approach would be nice
 export fn compile int =
     'Load file into memory'    
-    // 'loop over bytes and lex into array of words'
+    'loop over bytes and lex into array of words'
     // 'take each word in lexed array and parse into expression array'    
     // 'transform expressions'
     // 'take each expression and emit into the WASM format'       
