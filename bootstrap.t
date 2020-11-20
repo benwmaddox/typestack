@@ -343,16 +343,16 @@ op 'top of stack index' = 0x00 ;
 fn 'Load file into memory' int =     
     4 readFile 
     // get byte length
-    'Op i32Load'
+    // 'Op i32Load'
     
      ;
 
-fn 'loop over bytes and lex into array of words' fileOFfset:int int = 0 ;    
+fn 'loop over bytes and lex into array of words' fileOffset:int int = 0 ;    
 fn 'take each word in lexed array and parse into expression array' lexArrayOFfset:int int = 0 ;
 fn 'take each expression and emit into the WASM format' expressionOFfset:int int = 0 ;
-fn 'transform expressions' expressionOFfset:int int = 0 ;
-fn 'save file' emitInstructionOFfset:int int = 
-    4 stringLog
+fn 'transform expressions' expressionOffset:int int = 0 ;
+fn 'save file' emitInstructionOffset:int int = 
+    emitInstructionOffset stringLog
      ;
 
 // Eventually a multi-file approach would be nice
@@ -363,8 +363,8 @@ export fn compile int =
     // 'transform expressions'
     // 'take each expression and emit into the WASM format'       
     
-     'Op drop'
-     4 'save file'
+    // 'Op drop'
+    'save file'
     ;
 
 

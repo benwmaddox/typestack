@@ -120,7 +120,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
         function: {
             log: console.log,
             stringLog: function (startAddress: number) {
-                // console.log("start address " + startAddress);
+                console.log("start address " + startAddress);
                 // var length = new Uint32Array(memory.buffer, startAddress, 1)[0];
 
                 // console.log("stringLog startAddress: " + startAddress)
@@ -128,6 +128,7 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
                 var length = i32Wasm[startAddress];
                 var bytes = new Uint8Array(memory.buffer, startAddress, length).slice(16)
                 var string = new TextDecoder('utf8').decode(bytes);
+                console.log(startAddress)
                 console.log(string);
                 return 1;
             },
@@ -143,17 +144,21 @@ fs.readFile(__dirname + `/${module}.t`, 'utf8', function (err, data: string) {
                 // console.log("length: " + (buffer.byteLength + 1))
                 // console.log("length: " + i32Wasm[startingIndex])
 
-                var i8Wasm = new Uint8Array(memory.buffer);
+                // var i8Wasm = new Uint8Array(memory.buffer);
                 var i8File = new Uint8Array(buffer);
-                var dataStartIndex = startingIndex + 16;
+                // var dataStartIndex = startingIndex + 16;
+                // for (var i = 0; i < i8File.byteLength; i++) {
+                //     i8Wasm[i + dataStartIndex] = i8File[i];
+                // }
+
                 for (var i = 0; i < i8File.byteLength; i++) {
-                    i8Wasm[i + dataStartIndex] = i8File[i];
+                    i32Wasm[i + 1 + startingIndex] = i8File[i];
                 }
 
-                // console.log(buffer);
-                console.log(dataStartIndex);
+                console.log(buffer);
+                console.log(startingIndex);
 
-                return dataStartIndex;
+                return startingIndex;
             }
         },
         js: {
